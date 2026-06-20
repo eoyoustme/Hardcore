@@ -1,0 +1,96 @@
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Mode make by thanhphok (Og Hunger(new)", true)
+
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Hardcore Reginited Recreate has Activated (alpha)", true)
+wait(2)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("credit to Nhankgnew And Me:D", true)
+
+pcall(function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/HC%20Entity"))()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/stamina"))()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/rebouna/refs/heads/main/INtro"))()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/rebouna/refs/heads/main/guiding%20light"))()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Crucifix"))()
+end)
+
+local entityList = {
+	{
+		name = "Ripper",
+		url = "https://raw.githubusercontent.com/eoyoustme/Extremely/refs/heads/main/Ripper",
+		chance = 10
+	},
+	{
+		name = "A60",
+		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/A60",
+		chance = math.random(1, 4)
+	},
+	{
+		name = "Deer God",
+		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Deer%20God",
+		chance = math.random(1,3)
+	},
+	{
+		name = "Shocker",
+		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Shocker",
+		chance = 25
+	}
+}
+
+local function rollChance(percent)
+	return math.random(1, 100) <= percent
+end
+
+local function spawnEntity(entityData)
+	pcall(function()
+		loadstring(game:HttpGet(entityData.url))()
+	end)
+end
+
+local function IsSeekActive()
+	local currentRooms = game.Workspace:FindFirstChild("CurrentRooms")
+	if not currentRooms then
+		return false
+	end
+
+	local namesToCheck = {
+		"Seek",
+		"SeekMoving",
+		"SeekMovingNewClone",
+		"SeekEntity",
+		"SeekDoor"
+	}
+
+	for _, name in ipairs(namesToCheck) do
+		if game.Workspace:FindFirstChild(name, true) then
+			return true
+		end
+		if currentRooms:FindFirstChild(name, true) then
+			return true
+		end
+	end
+
+	-- Dò thêm theo tên chứa "seek"
+	for _, inst in ipairs(game.Workspace:GetDescendants()) do
+		local n = string.lower(inst.Name)
+		if string.find(n, "seek") then
+			return true
+		end
+	end
+
+	return false
+end
+
+math.randomseed(os.clock() * 1e6)
+
+while true do
+	task.wait(10)
+
+	if not IsSeekActive() then
+		for _, entityData in ipairs(entityList) do
+			if rollChance(entityData.chance) then
+				spawnEntity(entityData)
+			end
+		end
+	end
+end
