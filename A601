@@ -144,7 +144,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 	end
 	task.spawn(function()
 		local lighting = game.Lighting
-		lighting.MainColorCorrection.TintColor = Color3.fromRGB(0, 166, 255)
+		lighting.MainColorCorrection.TintColor = Color3.fromRGB(255, 0, 0)
 		lighting.MainColorCorrection.Contrast = 1
 		TweenService:Create(lighting.MainColorCorrection, TweenInfo.new(2.5), {Contrast = 0}):Play()
 		TweenService:Create(lighting.MainColorCorrection, TweenInfo.new(20), {TintColor = Color3.fromRGB(255, 255, 255)}):Play()
@@ -256,7 +256,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 		local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
 		local tween = TweenService:Create(img, tweenInfo, {
 			ImageTransparency = 0,                    -- hiện lên
-			Rotation = 20,                             -- xoay nhẹ sang phải
+			Rotation = math.random(-20, 20),                           -- xoay nhẹ sang phải
 			Size = UDim2.fromScale(0.95, 0.95)         -- phóng to chút
 		})
 
