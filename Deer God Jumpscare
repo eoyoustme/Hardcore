@@ -1,0 +1,147 @@
+		local player = game.Players.LocalPlayer
+		local playerGui = player:WaitForChild("PlayerGui")
+		local character = player.Character or player.CharacterAdded:Wait()
+		local humanoid = character:WaitForChild("Humanoid")
+		local camera = workspace.CurrentCamera
+		
+		local screenGui = Instance.new("ScreenGui")
+		screenGui.Parent = playerGui
+		screenGui.Name = "ScreenGui"
+		screenGui.IgnoreGuiInset = true
+
+		local stopEffects = false
+		local doneFading = false
+
+		-- Âm thanh jumpscare
+		local killSound = Instance.new("Sound")
+		killSound.Parent = workspace
+		killSound.PlaybackSpeed = 1
+		killSound.SoundId = "rbxassetid://18459521002"
+		killSound.Name = "Dear god death sound chat"
+		killSound.Volume = 10
+		killSound.Looped = true
+
+		-- Hiệu ứng âm thanh
+		Instance.new("FlangeSoundEffect", killSound).Rate = 0.2
+		Instance.new("TremoloSoundEffect", killSound).Frequency = 1
+		Instance.new("PitchShiftSoundEffect", killSound).Octave = 1
+		Instance.new("DistortionSoundEffect", killSound).Level = 0.2
+
+		-- UI
+		local background = Instance.new("ImageLabel", screenGui)
+		background.Size = UDim2.new(1, 0, 1, 0)
+		background.Image = "rbxassetid://1712510813"
+		background.ImageTransparency = 0.5
+		background.BackgroundColor3 = Color3.new(0, 0, 0)
+		background.BackgroundTransparency = 0
+
+		local face = Instance.new("ImageLabel", screenGui)
+		face.AnchorPoint = Vector2.new(0.5, 0.5)
+		face.Position = UDim2.new(0.5, 0, 0.5, 0)
+		face.Size = UDim2.new(0, 620, 0, 620)
+		face.Image = "rbxassetid://11395249132"
+		face.BackgroundTransparency = 1
+
+		local text = Instance.new("ImageLabel", screenGui)
+		text.AnchorPoint = Vector2.new(0.5, 0.5)
+		text.Position = UDim2.new(0.5, 0, 0.5, 0)
+		text.Size = UDim2.new(0, 150, 0, 150)
+		text.Image = "rbxassetid://99132041298170"
+		text.BackgroundTransparency = 1
+
+		killSound:Play()
+
+		-- Camera zoom
+		local startFov = camera.FieldOfView
+		local zoomFov = 60
+		local zoomDuration = 1.2
+
+		camera.CameraType = Enum.CameraType.Scriptable
+		game:GetService("TweenService"):Create(camera, TweenInfo.new(zoomDuration), {FieldOfView = zoomFov}):Play()
+
+		game:GetService("TweenService"):Create(face, TweenInfo.new(zoomDuration), {
+			Size = UDim2.new(0, 620, 0, 620),
+			Position = UDim2.new(0.5, 0, 0.5, 0)
+		}):Play()
+
+		-- Jumpscare Effects
+		task.spawn(function()
+			while not stopEffects do
+				background.ImageTransparency = 0.3
+				background.BackgroundTransparency = 0
+				task.wait(0.1)
+				background.ImageTransparency = 0
+				background.BackgroundTransparency = 0.3
+				task.wait(0.1)
+			end
+		end)
+
+		task.spawn(function()
+			while not stopEffects do
+				background.Image = "rbxassetid://131073231978514"
+				task.wait(0.0589)
+				background.Image = "rbxassetid://105841646930424"
+				task.wait(0.0589)
+			end
+		end)
+
+		task.spawn(function()
+			while not stopEffects do
+				face.Rotation = 5
+				face.Image = "rbxassetid://14168687301"
+				task.wait(0)
+				face.Image = "rbxassetid://13327625958"
+				face.Rotation = -5
+				task.wait(-1)
+				face.Image = "rbxassetid://14168695005"
+				task.wait(-1)
+			end
+		end)
+
+		task.spawn(function()
+			while not stopEffects do
+				text.Image = "rbxassetid://88490592395124"
+				task.wait(0.0589)
+				text.Image = "rbxassetid://99132041298170"
+				task.wait(0.0589)
+			end
+		end)
+
+		task.spawn(function()
+			while not stopEffects do
+				text.Position = UDim2.new(math.random(), 0, math.random(), 0)
+				task.wait(0.05)
+			end
+		end)
+
+		task.spawn(function()
+			while not stopEffects do
+				text.ImageTransparency = 0
+				task.wait(0.1)
+				text.ImageTransparency = 1
+				task.wait(0.1)
+			end
+		end)
+
+		-- Đợi và fade out
+		task.wait(zoomDuration)
+		stopEffects = true
+		killSound:Stop()
+
+		task.spawn(function()
+			while not doneFading do
+				face.ImageTransparency = math.min(face.ImageTransparency + 0.1, 1)
+				text.ImageTransparency = math.min(text.ImageTransparency + 0.1, 1)
+				background.ImageTransparency = math.min(background.ImageTransparency + 0.1, 1)
+				background.BackgroundTransparency = math.min(background.BackgroundTransparency + 0.1, 1)
+				if face.ImageTransparency >= 1 then
+					doneFading = true
+				end
+				task.wait(0.05)
+			end
+			screenGui:Destroy()
+		end)
+
+		task.wait(1.2)
+		camera.CameraType = Enum.CameraType.Custom
+		camera.FieldOfView = startFov
