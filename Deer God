@@ -49,7 +49,7 @@ end
 local entity = spawner.Create({
 	Entity = {
 		Name = "Deer god",
-		Asset = "rbxassetid://117530470323606",
+		Asset = "https://github.com/eoyoustme/Hardcore/blob/main/Deer%20God.rbxm?raw=true",
 		HeightOffset = 0
 	},
 	Lights = {
@@ -247,6 +247,21 @@ end
 
 entity:SetCallback("OnSpawned", function()
 	print("Thực thể đã xuất hiện (spawn)")
+	local function GetGitSound(GithubSnd, SoundName)
+		local url = GithubSnd
+		if not isfile(SoundName .. ".mp3") then
+			writefile(SoundName .. ".mp3", game:HttpGet(url))
+		end
+		local sound = Instance.new("Sound")
+		sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+		return sound
+	end
+	local Lord = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Your_Consenting_Mind.mp3?raw=true","Your")
+	Lord.Parent = workspace
+	Lord.Volume = 3
+	Lord.PlaybackSpeed = 1
+	Lord:Play()
+	
 	entityModel = entity.Model
 	entityModel.Parent = workspace
 
@@ -312,12 +327,13 @@ entity:SetCallback("OnSpawned", function()
 
 	-- >>> PHẦN TỰ HỦY SAU 13-15 GIÂY ĐƯỢC ĐẶT LẠI VÀO ĐÂY <<<
 	if destroyTimer then task.cancel(destroyTimer) end
-	destroyTimer = task.delay(math.random(30, 31), function()
+	destroyTimer = task.delay(math.random(35, 36), function()
+		Lord:Destroy()
 		print("Deer God self-destruct timer activated. Despawning regardless of proximity.")
-		MoveActive = false -- Dừng di chuyển trước khi biến mất
-		task.wait(0.5) -- Đợi một chút để tạo hiệu ứng dừng
+		MoveActive = true -- Dừng di chuyển trước khi biến mất
+		task.wait(0.1) -- Đợi một chút để tạo hiệu ứng dừng
 		if entityModel and entityModel.PrimaryPart then
-			entityModel:SetPrimaryPartCFrame(entityModel.PrimaryPart.CFrame * CFrame.new(0, -100, 0)) -- Di chuyển xuống dưới đất
+			entityModel:SetPrimaryPartCFrame(entityModel.PrimaryPart.CFrame * CFrame.new(0, -300, 0)) -- Di chuyển xuống dưới đất
 		end
 		task.wait(0) -- Đợi một frame để CFrame cập nhật
 		entity:Despawn() -- Hủy thực thể
@@ -329,6 +345,7 @@ entity:SetCallback("OnSpawned", function()
 			local h = hit.Parent and hit.Parent:FindFirstChild("Humanoid")
 			if h and hit:IsDescendantOf(Character) then
 				h:TakeDamage(100)
+				loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Deer%20God%20Jumpscare"))()
 				local stats = game:GetService("ReplicatedStorage").GameStats
 				if stats:FindFirstChild("Player_"..LocalPlayer.Name) then
 					stats["Player_"..LocalPlayer.Name].Total.DeathCause.Value = "Deer God"
@@ -400,10 +417,10 @@ entity:SetCallback("OnDespawned", function()
 
 	---====== Display achievement ======---
 	achievementGiver({
-		Title = "Last Chance Too Look Away",
-		Desc = "Why are you running?",
-		Reason = "Survive the rare Entity called Deer God",
-		Image = "rbxassetid://114825307168774"
+		Title = "Last Chance Too Run Away",
+		Desc = "JORUN US RUN NOW!",
+		Reason = "Survive a God...",
+		Image = "rbxassetid://91924400987994"
 	})
 end)
 
