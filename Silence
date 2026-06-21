@@ -18,6 +18,7 @@ local FOV_NORMAL = 90
 local FOV_ATTACK = 120
 
 local MOVE_TIME = 1
+local PAUSE_TIME = 1
 local EFFECT_TIME = 0.5
 local HITBOX_SIZE = Vector3.new(40, 40, 40)
 
@@ -63,12 +64,12 @@ LatestRoom.Changed:Connect(function()
 	end
 end)
 
-local function getTargetCFrame(room, useExit)
+local function getTargetCFrame(room)
 	if not room then
 		return nil
 	end
 
-	if useExit and room:FindFirstChild("RoomExit") then
+	if room:FindFirstChild("RoomExit") and room.RoomExit:IsA("BasePart") then
 		return room.RoomExit.CFrame
 	end
 
@@ -193,23 +194,25 @@ local function playAttackEffect()
 	end)
 
 	task.spawn(flashStatic)
-	pulseFOV()
+	task.spawn(pulseFOV)
 end
 
--- LOAD MODEL SILENCE ĐÚNG CÁCH
+-- LOAD MODEL SILENCE
 local silenceModel = game:GetObjects(SILENCE_MODEL_ID)[1]
+silenceModel.Name = "Silence"
 silenceModel.Parent = Workspace
 
 local entityFolder = Workspace:WaitForChild("Silence")
 local entity = entityFolder:WaitForChild("RushNew")
 
-if entity:IsA("BasePart") then
-	entity.Anchored = true
-	entity.CanCollide = false
-	entity.CanTouch = false
-else
-	warn("RushNew không phải BasePart, cần chỉnh lại phần tween/move.")
+if not entity:IsA("BasePart") then
+	warn("RushNew không phải BasePart. Script này đang tween trực tiếp Part.")
+	return
 end
+
+entity.Anchored = true
+entity.CanCollide = false
+entity.CanTouch = false
 
 local hitbox = Instance.new("Part")
 hitbox.Name = "SilenceHitbox"
@@ -280,33 +283,25 @@ task.spawn(function()
 	local route = getCurrentRoute()
 
 	local firstRoom = route[1]
-	local startCFrame = getTargetCFrame(firstRoom, true)
+	local startCFrame = getTargetCFrame(firstRoom)
 
 	if startCFrame then
 		entity.CFrame = startCFrame * CFrame.new(0, 3, -100)
 		hitbox.CFrame = entity.CFrame
 	end
 
-	for i, room in ipairs(route) do
-		if not room then
-			continue
+	for _, room in ipairs(route) do
+		if room then
+			playAttackEffect()
+
+			local target = getTargetCFrame(room)
+			if target then
+				moveEntity(target)
+				hitbox.CFrame = target
+			end
+
+			task.wait(PAUSE_TIME)
 		end
-
-		playAttackEffect()
-
-		local target
-		if i < #route then
-			local nextRoom = route[i + 1]
-			target = getTargetCFrame(room, true) or getTargetCFrame(nextRoom, false)
-		else
-			target = getTargetCFrame(room, true) or getTargetCFrame(room, false)
-		end
-
-		if target then
-			moveEntity(target)
-		end
-
-		task.wait(1)
 	end
 
 	if silenceModel then
