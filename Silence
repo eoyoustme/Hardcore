@@ -1,0 +1,329 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+
+local Rooms = Workspace:WaitForChild("CurrentRooms")
+local GameData = ReplicatedStorage:WaitForChild("GameData")
+local LatestRoom = GameData:WaitForChild("LatestRoom")
+
+local STATIC_IMAGE = "rbxassetid://520992856"
+local SOUND_ID = "rbxassetid://7861818231"
+local SILENCE_MODEL_ID = "rbxassetid://11535812658"
+
+local FOV_NORMAL = 90
+local FOV_ATTACK = 120
+
+local MOVE_TIME = 1
+local EFFECT_TIME = 0.5
+local HITBOX_SIZE = Vector3.new(40, 40, 40)
+
+local function getRoom(roomNumber)
+	return Rooms:FindFirstChild(tostring(roomNumber))
+end
+
+local function waitForRoom(roomNumber)
+	local room = getRoom(roomNumber)
+	while not room do
+		task.wait(0.1)
+		room = getRoom(roomNumber)
+	end
+	return room
+end
+
+local function cloneNodesForRoom(room)
+	if not room then
+		return
+	end
+
+	local oldNodes = room:FindFirstChild("Nodes")
+	if oldNodes then
+		oldNodes:Destroy()
+	end
+
+	local pathfindNodes = room:FindFirstChild("PathfindNodes")
+	if pathfindNodes then
+		local nodes = pathfindNodes:Clone()
+		nodes.Name = "Nodes"
+		nodes.Parent = room
+	end
+end
+
+for _, room in ipairs(Rooms:GetChildren()) do
+	cloneNodesForRoom(room)
+end
+
+LatestRoom.Changed:Connect(function()
+	local room = getRoom(LatestRoom.Value)
+	if room then
+		cloneNodesForRoom(room)
+	end
+end)
+
+local function getTargetCFrame(room, useExit)
+	if not room then
+		return nil
+	end
+
+	if useExit and room:FindFirstChild("RoomExit") then
+		return room.RoomExit.CFrame
+	end
+
+	local nodes = room:FindFirstChild("Nodes")
+	if nodes then
+		local children = nodes:GetChildren()
+		if #children > 0 then
+			local index = math.max(1, math.floor(#children / 2))
+			local node = children[index]
+			if node:IsA("BasePart") then
+				return node.CFrame
+			end
+		end
+	end
+
+	if room:FindFirstChild("Base") and room.Base:IsA("BasePart") then
+		return room.Base.CFrame
+	end
+
+	return nil
+end
+
+local function createStaticGui()
+	local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "StaticEffectGui"
+	gui.ResetOnSpawn = false
+	gui.IgnoreGuiInset = true
+	gui.DisplayOrder = 999999
+	gui.Parent = playerGui
+
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.fromScale(1, 1)
+	frame.BackgroundColor3 = Color3.fromRGB(170, 0, 255)
+	frame.BackgroundTransparency = 1
+	frame.BorderSizePixel = 0
+	frame.Parent = gui
+
+	local image = Instance.new("ImageLabel")
+	image.Name = "Static"
+	image.BackgroundTransparency = 1
+	image.Size = UDim2.fromScale(1, 1)
+	image.Position = UDim2.fromScale(0, 0)
+	image.Image = STATIC_IMAGE
+	image.ImageTransparency = 1
+	image.ImageColor3 = Color3.fromRGB(170, 0, 255)
+	image.ScaleType = Enum.ScaleType.Stretch
+	image.Parent = frame
+
+	return gui, frame, image
+end
+
+local StaticGui, StaticFrame, StaticImage = createStaticGui()
+
+local Sound = Instance.new("Sound")
+Sound.Name = "SilenceSound"
+Sound.SoundId = SOUND_ID
+Sound.Volume = 10
+Sound.Looped = false
+Sound.Parent = Workspace
+
+local function pulseFOV()
+	Camera.FieldOfView = FOV_NORMAL
+
+	local upTween = TweenService:Create(
+		Camera,
+		TweenInfo.new(EFFECT_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{ FieldOfView = FOV_ATTACK }
+	)
+
+	local downTween = TweenService:Create(
+		Camera,
+		TweenInfo.new(EFFECT_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{ FieldOfView = FOV_NORMAL }
+	)
+
+	upTween:Play()
+	upTween.Completed:Wait()
+
+	downTween:Play()
+	downTween.Completed:Wait()
+end
+
+local function flashStatic()
+	local frameIn = TweenService:Create(
+		StaticFrame,
+		TweenInfo.new(EFFECT_TIME, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ BackgroundTransparency = 0.35 }
+	)
+
+	local imageIn = TweenService:Create(
+		StaticImage,
+		TweenInfo.new(EFFECT_TIME, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ ImageTransparency = 0.15 }
+	)
+
+	local frameOut = TweenService:Create(
+		StaticFrame,
+		TweenInfo.new(EFFECT_TIME, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ BackgroundTransparency = 1 }
+	)
+
+	local imageOut = TweenService:Create(
+		StaticImage,
+		TweenInfo.new(EFFECT_TIME, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ ImageTransparency = 1 }
+	)
+
+	frameIn:Play()
+	imageIn:Play()
+	frameIn.Completed:Wait()
+
+	frameOut:Play()
+	imageOut:Play()
+	frameOut.Completed:Wait()
+end
+
+local function playAttackEffect()
+	task.spawn(function()
+		Sound:Play()
+	end)
+
+	task.spawn(flashStatic)
+	pulseFOV()
+end
+
+-- LOAD MODEL SILENCE ĐÚNG CÁCH
+local silenceModel = game:GetObjects(SILENCE_MODEL_ID)[1]
+silenceModel.Parent = Workspace
+
+local entityFolder = Workspace:WaitForChild("Silence")
+local entity = entityFolder:WaitForChild("RushNew")
+
+if entity:IsA("BasePart") then
+	entity.Anchored = true
+	entity.CanCollide = false
+	entity.CanTouch = false
+else
+	warn("RushNew không phải BasePart, cần chỉnh lại phần tween/move.")
+end
+
+local hitbox = Instance.new("Part")
+hitbox.Name = "SilenceHitbox"
+hitbox.Size = HITBOX_SIZE
+hitbox.Transparency = 1
+hitbox.CanCollide = false
+hitbox.CanQuery = false
+hitbox.CanTouch = true
+hitbox.Anchored = true
+hitbox.Parent = Workspace
+
+local touchedDebounce = {}
+
+hitbox.Touched:Connect(function(part)
+	local character = part:FindFirstAncestorOfClass("Model")
+	if not character then
+		return
+	end
+
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not humanoid or humanoid.Health <= 0 then
+		return
+	end
+
+	if character:GetAttribute("Hiding") == true then
+		return
+	end
+
+	if touchedDebounce[character] then
+		return
+	end
+	touchedDebounce[character] = true
+
+	humanoid.Health = 0
+end)
+
+local function moveEntity(targetCFrame)
+	if not targetCFrame then
+		return
+	end
+
+	local moveInfo = TweenInfo.new(MOVE_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+	local entityTween = TweenService:Create(entity, moveInfo, { CFrame = targetCFrame })
+	local hitboxTween = TweenService:Create(hitbox, moveInfo, { CFrame = targetCFrame })
+
+	entityTween:Play()
+	hitboxTween:Play()
+
+	entityTween.Completed:Wait()
+	hitboxTween.Completed:Wait()
+end
+
+local function getCurrentRoute()
+	local current = LatestRoom.Value
+
+	return {
+		waitForRoom(current - 5),
+		waitForRoom(current - 4),
+		waitForRoom(current - 3),
+		waitForRoom(current - 2),
+		waitForRoom(current - 1),
+		waitForRoom(current),
+	}
+end
+
+task.spawn(function()
+	local route = getCurrentRoute()
+
+	local firstRoom = route[1]
+	local startCFrame = getTargetCFrame(firstRoom, true)
+
+	if startCFrame then
+		entity.CFrame = startCFrame * CFrame.new(0, 3, -100)
+		hitbox.CFrame = entity.CFrame
+	end
+
+	for i, room in ipairs(route) do
+		if not room then
+			continue
+		end
+
+		playAttackEffect()
+
+		local target
+		if i < #route then
+			local nextRoom = route[i + 1]
+			target = getTargetCFrame(room, true) or getTargetCFrame(nextRoom, false)
+		else
+			target = getTargetCFrame(room, true) or getTargetCFrame(room, false)
+		end
+
+		if target then
+			moveEntity(target)
+		end
+
+		task.wait(1)
+	end
+
+	if silenceModel then
+		silenceModel:Destroy()
+	end
+
+	if hitbox then
+		hitbox:Destroy()
+	end
+
+	if StaticGui then
+		StaticGui:Destroy()
+	end
+
+	if Sound then
+		Sound:Destroy()
+	end
+
+	Camera.FieldOfView = FOV_NORMAL
+end)
