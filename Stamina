@@ -9,36 +9,15 @@ local sprintBarBackground = Instance.new("Frame")
 sprintBarBackground.Size = UDim2.new(0.212, 0,0.041, 0) -- nhỏ hơn
 sprintBarBackground.Position = UDim2.new(0.787, 0,0.484, 0)
 sprintBarBackground.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-sprintBarBackground.BorderSizePixel = 0
-sprintBarBackground.BackgroundTransparency = 1
+sprintBarBackground.BorderSizePixel = 5
 sprintBarBackground.Parent = screenGui
 
 -- Bar
 local sprintBar = Instance.new("Frame")
 sprintBar.Size = UDim2.new(1, 0, 1, 0)
-sprintBar.BackgroundColor3 = Color3.fromRGB(53, 105, 158)
-sprintBar.BorderSizePixel = 1
+sprintBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+sprintBar.BorderSizePixel = 5
 sprintBar.Parent = sprintBarBackground
-
-local uicorner = Instance.new("UICorner")
-uicorner.CornerRadius = UDim.new(0.25, 0)
-uicorner.Parent = sprintBar
-
-local UiPadge = Instance.new("UIPadding")
-UiPage.PaddingLeft = UDim.new(0, 4)
-UiPage.PaddingRight = UDim.new(0 ,4)
-UiPage.PaddingTop = UDim.new(0, 4)
-UiPage.PaddingBottom = UDim.new(0, 4)
-UiPage.Parent = sprintBar
-
-local uistroke = Instance.new("UIStroke")
-uistroke.Color = Color3.fromRGB(255, 222, 189)
-uistroke.Thickness = 4
-uistroke.LineJoinMode = Enum.LineJoinMode.Round
-uistroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-uistroke.Transparency = 0
-uistroke.Parent = sprintBar
-
 --------------------------------------------------------
 -- DARK SCREEN EFFECT WHEN LOW STAMINA
 --------------------------------------------------------
@@ -66,17 +45,17 @@ local walkSpeed = 15
 local humanoid = player.Character:WaitForChild("Humanoid")
 
 local function updateSprintBar()
-	sprintBar.Size = UDim2.new(currentStamina / maxStamina, 0, 1, 0)
+    sprintBar.Size = UDim2.new(currentStamina / maxStamina, 0, 1, 0)
 end
 
 local function updateDarkScreen()
-	if currentStamina < 100 then
-		-- Tối dần khi stamina thấp
-		local percent = math.clamp(1 - (currentStamina / 70), 0, 1)
-		darkScreen.BackgroundTransparency = 1 - (percent * 0.4)
-	else
-		darkScreen.BackgroundTransparency = 1
-	end
+    if currentStamina < 100 then
+        -- Tối dần khi stamina thấp
+        local percent = math.clamp(1 - (currentStamina / 70), 0, 1)
+        darkScreen.BackgroundTransparency = 1 - (percent * 0.4)
+    else
+        darkScreen.BackgroundTransparency = 1
+    end
 end
 
 --------------------------------------------------------
@@ -96,15 +75,15 @@ sprintButton.Parent = screenGui
 --------------------------------------------------------
 
 sprintButton.MouseButton1Click:Connect(function()
-	if canSprint and currentStamina > 0 then
-		sprinting = not sprinting
+    if canSprint and currentStamina > 0 then
+        sprinting = not sprinting
 
-		if sprinting then
-			humanoid.WalkSpeed = sprintSpeed
-		else
-			humanoid.WalkSpeed = walkSpeed
-		end
-	end
+        if sprinting then
+            humanoid.WalkSpeed = sprintSpeed
+        else
+            humanoid.WalkSpeed = walkSpeed
+        end
+    end
 end)
 
 --------------------------------------------------------
@@ -114,29 +93,29 @@ end)
 local runService = game:GetService("RunService")
 
 runService.Heartbeat:Connect(function(dt)
-	if sprinting then
-		if currentStamina > 0 then
-			currentStamina -= staminaDrainRate * dt
-		else
-			sprinting = false
-			canSprint = false  -- không cho sprint nữa
-			humanoid.WalkSpeed = walkSpeed
+    if sprinting then
+        if currentStamina > 0 then
+            currentStamina -= staminaDrainRate * dt
+        else
+            sprinting = false
+            canSprint = false  -- không cho sprint nữa
+            humanoid.WalkSpeed = walkSpeed
 
-			require(player.PlayerGui.MainUI.Initiator.Main_Game).caption("You're Exhausted", true)
-		end
-	else
-		if currentStamina < maxStamina then
-			currentStamina += staminaRegenRate * dt
-		end
-	end
+            require(player.PlayerGui.MainUI.Initiator.Main_Game).caption("You're exhausted", true)
+        end
+    else
+        if currentStamina < maxStamina then
+            currentStamina += staminaRegenRate * dt
+        end
+    end
 
-	-- Khi hồi full → được sprint lại
-	if currentStamina >= maxStamina then
-		canSprint = true
-	end
+    -- Khi hồi full → được sprint lại
+    if currentStamina >= maxStamina then
+        canSprint = true
+    end
 
-	currentStamina = math.clamp(currentStamina, 0, maxStamina)
+    currentStamina = math.clamp(currentStamina, 0, maxStamina)
 
-	updateSprintBar()
-	updateDarkScreen()
+    updateSprintBar()
+    updateDarkScreen()
 end)
