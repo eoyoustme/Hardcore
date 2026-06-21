@@ -247,6 +247,9 @@ end
 
 entity:SetCallback("OnSpawned", function()
 	print("Thực thể đã xuất hiện (spawn)")
+	local Players = game:GetService("Players")
+	local player = Players.LocalPlayer
+	
 	local function GetGitSound(GithubSnd, SoundName)
 		local url = GithubSnd
 		if not isfile(SoundName .. ".mp3") then
@@ -351,6 +354,44 @@ entity:SetCallback("OnSpawned", function()
 					stats["Player_"..LocalPlayer.Name].Total.DeathCause.Value = "Deer God"
 				end
 			end
+			local screenGui = Instance.new("ScreenGui")
+			screenGui.Name = "JumpscareOverlay"
+			screenGui.IgnoreGuiInset = true
+			screenGui.DisplayOrder = 999999
+			screenGui.Parent = player:WaitForChild("PlayerGui")
+
+			local imageLabel = Instance.new("ImageLabel")
+			imageLabel.BackgroundTransparency = 1
+			imageLabel.BorderSizePixel = 0
+			imageLabel.Position = UDim2.new(0, 0, 0, 0)
+			imageLabel.Size = UDim2.new(1, 0, 1, 0)
+			imageLabel.ScaleType = Enum.ScaleType.Stretch
+			imageLabel.ImageTransparency = 1
+			imageLabel.Visible = true
+			imageLabel.Parent = screenGui
+
+			local jumpscareImage1 = "rbxassetid://134346506410955"		
+			local jumpscareImage2 = "rbxassetid://7578853379"
+			local jumpscareImage3 = "rbxassetid://103846711769666"
+			local jumpscareImage4 = "rbxassetid://78199392475572"
+
+
+			local flashDuration = 35
+			local start = tick()
+
+			while tick() - start < flashDuration do
+				imageLabel.Image = jumpscareImage1
+				task.wait()
+				imageLabel.Image = jumpscareImage2
+				task.wait()
+				imageLabel.Image = jumpscareImage3
+				task.wait()
+				imageLabel.Image = jumpscareImage4
+				task.wait()
+			end
+			
+			imageLabel:Destroy()
+
 		end)
 	else
 		warn("Spawned Deer God model does not contain 'RushNew' for Touched event!")
