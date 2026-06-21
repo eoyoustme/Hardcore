@@ -112,6 +112,16 @@ entity:SetCallback("OnSpawned", function()
 	end)
 
 	entity:SetCallback("OnDespawning", function()
+		local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
+
+		---====== Display achievement ======---
+		achievementGiver({
+			Title = "The Multi-Faces",
+			Desc = "That is luck not skill LOSER...",
+			Reason = "Survive A-60 (Multimonster)",
+			Image = "rbxassetid://100946605902758"
+		})
+
 		running = false
 
 		local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
@@ -263,6 +273,16 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 		game.ReplicatedStorage.GameStats["Player_".. game.Players.LocalPlayer.Name].Total.DeathCause.Value = "Multi Monster"
 		wait(2)
 		gui:Destroy()
+		
+		local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
+
+		---====== Display achievement ======---
+		achievementGiver({
+			Title = "Death By Multi-Png",
+			Desc = "That's obvious.",
+			Reason = "Death by A-60",
+			Image = "rbxassetid://132714224363069"
+		})
 	end)
 end)
 
