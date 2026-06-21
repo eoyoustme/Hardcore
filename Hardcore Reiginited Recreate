@@ -34,6 +34,21 @@ local entityList = {
 		name = "Shocker",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Shocker",
 		chance = 25
+	},
+	{
+		name = "Cease",
+		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Cease",
+		chance = math.random(13,19)
+	},
+	{
+		name = "Rebound",
+		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Rebound",
+		chance = 7
+	},
+	{
+		name = "A-90",
+		url = "https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/A-90",
+		chance = 0.3
 	}
 }
 
