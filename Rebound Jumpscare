@@ -1,0 +1,160 @@
+		
+		local Players = game:GetService("Players")
+		local TweenService = game:GetService("TweenService")
+
+		local player = Players.LocalPlayer
+		local playerGui = player:WaitForChild("PlayerGui")
+		local rng = Random.new()
+
+		-- Tạo Sound
+		local jumpscareSound = Instance.new("Sound")
+		jumpscareSound.Name = "Jumpscare"
+		jumpscareSound.SoundId = "rbxassetid://109582246349306"
+		jumpscareSound.Volume = 10
+		jumpscareSound.Looped = true
+		jumpscareSound.PlaybackSpeed = 1
+		jumpscareSound.PlaybackRegionsEnabled = true
+		jumpscareSound.Parent = workspace
+		jumpscareSound.PlaybackRegion = NumberRange.new(0.3,0.6)
+		jumpscareSound:Play()
+
+		-- Tạo ScreenGui
+		local screenGui = Instance.new("ScreenGui")
+		screenGui.Name = "JumpscareGui"
+		screenGui.ResetOnSpawn = false
+		screenGui.IgnoreGuiInset = true
+		screenGui.DisplayOrder = 999999
+		screenGui.Parent = playerGui
+
+		-- Tạo background
+		local background = Instance.new("ImageLabel")
+		background.Name = "Background"
+		background.Size = UDim2.fromScale(1, 1)
+		background.Image = "rbxassetid://2446898370"
+		background.Position = UDim2.fromScale(0, 0)
+		background.BackgroundTransparency = 0
+		background.ImageTransparency = 1
+		background.BackgroundColor3 = Color3.new(0.333333, 0.666667, 1)
+		background.BackgroundColor3 = Color3.new(0, 0, 0)
+		background.BorderSizePixel = 0
+		background.Parent = screenGui
+
+		-- Tạo ImageLabel
+		local imageLabel = Instance.new("ImageLabel")
+		imageLabel.Name = "ImageLabel"
+		imageLabel.BackgroundTransparency = 1
+		imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+		imageLabel.Position = UDim2.fromScale(0.5, 0.5)
+		imageLabel.Size = UDim2.new(0, 340, 0, 340)
+		imageLabel.Image = "rbxassetid://136737940723651"
+		imageLabel.Parent = background
+
+		local fullTween = TweenService:Create(
+			imageLabel,
+			TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+			{
+				Size = UDim2.new(0, 350, 0, 350)
+			}
+		)
+
+		fullTween:Play()
+
+		for i = 1, 60 do
+			local mode = rng:NextInteger(1, 6)
+
+			if mode == 1 then
+				jumpscareSound.PlaybackSpeed = 0.9
+
+				background.Image = "rbxassetid://2446898370"
+				background.BackgroundColor3 = Color3.new(0.333333, 0, 1)
+				imageLabel.ImageColor3 = Color3.new(1, 0, 0)
+				imageLabel.Size = UDim2.new(0.1, 0, 0, 0)
+				imageLabel.Position = UDim2.new(rng:NextNumber(0.2, 0.8), 0, rng:NextNumber(0.2, 0.8), 0)
+			elseif mode == 2 then
+				imageLabel.Size = UDim2.new(0, 0, 0, 0)
+				jumpscareSound.PlaybackSpeed = 0.999
+				background.Image = "rbxassetid://2446898370"
+				background.BackgroundColor3 = Color3.new(0.333333, 0.666667, 1)
+				imageLabel.ImageColor3 = Color3.new(0.333333, 1, 1)
+				imageLabel.Position = UDim2.new(rng:NextNumber(0.2, 0.8), 0, rng:NextNumber(0.2, 0.8), 0)
+			elseif mode == 3 then
+				imageLabel.Size = UDim2.new(0, 0, 0.1, 0)
+				jumpscareSound.PlaybackSpeed = 1
+				background.Image = "rbxassetid://2446898370"
+				background.BackgroundColor3 = Color3.new(1, 1, 1)
+				imageLabel.ImageColor3 = Color3.new(1, 1, 1)
+				imageLabel.Position = UDim2.new(rng:NextNumber(0.2, 0.8), 0, rng:NextNumber(0.2, 0.8), 0)
+			elseif mode == 4 then
+				imageLabel.Size = UDim2.new(0, 0, 0.1, 0)
+				jumpscareSound.PlaybackSpeed = 0.86
+				background.Image = "rbxassetid://2446898370"
+				background.BackgroundColor3 = Color3.new(0.333333, 0, 0)
+				imageLabel.ImageColor3 = Color3.new(0.333333, 0, 0)
+				imageLabel.Position = UDim2.new(rng:NextNumber(0.2, 0.8), 0, rng:NextNumber(0.2, 0.8), 0)
+			elseif mode == 5 then
+				imageLabel.Size = UDim2.new(0, 0, 0.1, 0)
+				jumpscareSound.PlaybackSpeed = 0.76
+				background.Image = "rbxassetid://2446898370"
+				background.BackgroundColor3 = Color3.new(0.666667, 1, 1)
+				imageLabel.ImageColor3 = Color3.new(1, 1, 0)
+				imageLabel.Position = UDim2.new(rng:NextNumber(0.2, 0.8), 0, rng:NextNumber(0.2, 0.8), 0)
+			else
+				imageLabel.Size = UDim2.new(0, 0, 0.1, 0)
+				jumpscareSound.PlaybackSpeed = 0.899
+				background.Image = "rbxassetid://2446898370"
+				background.BackgroundColor3 = Color3.new(0.666667, 0, 0)
+				imageLabel.ImageColor3 = Color3.new(1, 1, 1)
+				imageLabel.Position = UDim2.new(rng:NextNumber(0.2, 0.8), 0, rng:NextNumber(0.2, 0.8), 0)
+			end
+
+			imageLabel.Rotation = rng:NextInteger(-90, 90)
+			task.wait(0.025)
+		end
+
+
+
+		local tween = TweenService:Create(
+			imageLabel,
+			TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out),
+			{
+				Size = UDim2.new(0, 2000, 0, 2000)
+			}
+		)
+
+		local tween2 = TweenService:Create(
+			imageLabel,
+			TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out),
+			{
+				Rotation = rng:NextInteger(-0, 20)
+			}
+		)
+
+
+		local tween3 = TweenService:Create(
+			imageLabel,
+			TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out),
+			{
+				Position = UDim2.fromScale(0.5, 0.5)
+			}
+		)
+
+		tween3:Play()
+		tween2:Play()
+		tween:Play()
+
+		local jumpscareSound2 = Instance.new("Sound")
+		jumpscareSound2.Name = "Jumpscare2"
+		jumpscareSound2.SoundId = "rbxassetid://109582246349306"
+		jumpscareSound2.Volume = 10
+		jumpscareSound2.PlaybackSpeed = 1
+		jumpscareSound2.Parent = workspace
+
+		jumpscareSound2:Play()
+
+		jumpscareSound:Stop()
+
+		wait(1)
+
+		screenGui:Destroy()
+		imageLabel:Destroy()
+		background:Destroy()
