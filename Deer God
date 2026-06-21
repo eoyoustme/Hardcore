@@ -369,7 +369,7 @@ entity:SetCallback("OnSpawned", function()
 		imageLabel.Position = UDim2.new(0, 0, 0, 0)
 		imageLabel.Size = UDim2.new(1, 0, 1, 0)
 		imageLabel.ScaleType = Enum.ScaleType.Stretch
-		imageLabel.ImageTransparency = 1
+		imageLabel.ImageTransparency = 0.7
 		imageLabel.Visible = true
 		imageLabel.Parent = screenGui
 
