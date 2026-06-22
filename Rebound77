@@ -1,0 +1,213 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+math.randomseed(tick())
+
+-- GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "AutoEffectGui"
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 999999
+screenGui.Parent = playerGui
+
+-- Background
+local bg = Instance.new("Frame")
+bg.Name = "Background"
+bg.Parent = screenGui
+bg.Size = UDim2.new(1, 0, 1, 0)
+bg.Position = UDim2.new(0, 0, 0, 0)
+bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+bg.BackgroundTransparency = 0
+bg.BorderSizePixel = 0
+bg.BorderSizePixel = 0
+
+-- Jumpscare cũ
+local oldImage = Instance.new("ImageLabel")
+oldImage.Name = "OldImage"
+oldImage.Parent = screenGui
+oldImage.BackgroundTransparency = 1
+oldImage.Visible = true
+oldImage.Image = "rbxassetid://13272951808"
+oldImage.Size = UDim2.new(0, 250, 0, 250)
+oldImage.Position = UDim2.new(0.5, -125, 0.5, -125)
+oldImage.AnchorPoint = Vector2.new(0.5, 0.5)
+oldImage.Rotation = 0
+oldImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
+oldImage.ScaleType = Enum.ScaleType.Fit
+oldImage.ZIndex = 2
+
+-- Jumpscare mới
+local newImage = Instance.new("ImageLabel")
+newImage.Name = "NewImage"
+newImage.Parent = screenGui
+newImage.BackgroundTransparency = 1
+newImage.Visible = false
+newImage.Image = "rbxassetid://13272951808"
+newImage.Size = UDim2.new(0, 0, 0, 0)
+newImage.Position = UDim2.new(0.5, 0, 0.5, 0)
+newImage.AnchorPoint = Vector2.new(0.5, 0.5)
+newImage.Rotation = 0
+newImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
+newImage.ScaleType = Enum.ScaleType.Stretch
+newImage.ZIndex = 3
+
+-- Sound cũ
+local oldSound = Instance.new("Sound")
+oldSound.Name = "OldSound"
+oldSound.Parent = screenGui
+oldSound.SoundId = "rbxassetid://92668515191945"
+oldSound.Volume = 1
+oldSound.PlaybackSpeed = 1
+oldSound:Play()
+oldSound.Looped = false
+
+-- Sound mới
+local newSound = Instance.new("Sound")
+newSound.Name = "NewSound"
+newSound.Parent = screenGui
+newSound.SoundId = "rbxassetid://92668515191945"
+newSound.Volume = 10
+newSound.PlaybackSpeed = 0.7
+newSound.Looped = false
+newSound:Play()
+
+local colors = {
+	Color3.fromRGB(160, 206, 255),
+	Color3.fromRGB(0, 123, 255),
+	Color3.fromRGB(0, 208, 255),
+	Color3.fromRGB(120, 174, 255),
+	Color3.fromRGB(255, 255, 255),
+	Color3.fromRGB(37, 84, 255),
+	Color3.fromRGB(133, 255, 237)
+}
+
+local oldActive = true
+local transitioning = false
+
+local function playSoundSafe(soundObj, timePos, speed, volume)
+	if not soundObj or not soundObj.Parent then
+		return
+	end
+
+	soundObj:Stop()
+	soundObj.TimePosition = timePos or 0
+	soundObj.PlaybackSpeed = speed or 1
+	soundObj.Volume = volume or 1
+	soundObj:Play()
+end
+
+-- Hiệu ứng jumpscare cũ
+task.spawn(function()
+	while oldActive and screenGui.Parent do
+		task.wait(0.0667)
+
+		local Rotation = oldImage.Rotation
+		local v2
+
+		if math.random(1, 2) == 1 then
+			v2 = -Rotation
+		else
+			v2 = Rotation + math.random(-360, 360)
+		end
+
+		local v3 = v2 + math.random(-360, 360)
+
+		if v3 > 180 then
+			v3 = 180
+		end
+
+		if v3 < -180 then
+			v3 = -180
+		end
+
+		-- đổi background liên tục trong lúc jumpscare cũ còn chạy
+		bg.BackgroundColor3 = colors[math.random(1, #colors)]
+
+		TweenService:Create(oldImage, TweenInfo.new(0.18333333333333335), {
+			Size = UDim2.new(0, math.random(150, 450), 0, math.random(75, 150))
+		}):Play()
+
+		task.delay(0.03333333333333333, function()
+			if oldImage and oldImage.Parent and oldActive then
+				TweenService:Create(oldImage, TweenInfo.new(0.05333333333333333), {
+					Size = UDim2.new(0, math.random(225, 250), 0, math.random(150, 450))
+				}):Play()
+			end
+		end)
+
+		task.delay(math.random(300, 600) / 600, function()
+			if oldSound and oldSound.Parent and oldActive then
+				playSoundSafe(oldSound, 0.25 + math.random() / 10, math.random(50, 125) / 100, 1)
+			end
+		end)
+
+		TweenService:Create(oldImage, TweenInfo.new(0.05333333333333333, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Position = UDim2.new(math.random(150, 800) / 1000, 0, math.random(150, 800) / 1000, 0),
+			Rotation = -v3
+		}):Play()
+	end
+end)
+
+-- Chuyển sang jumpscare mới sau 2-3 giây
+task.delay(math.random(2, 3), function()
+	if not screenGui.Parent or transitioning then
+		return
+	end
+
+	transitioning = true
+	oldActive = false
+
+	-- tween jumpscare cũ về giữa màn hình trước khi tắt
+	local oldBackTween = TweenService:Create(oldImage, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		Size = UDim2.new(0, 250, 0, 250),
+		Rotation = 0
+	})
+	oldBackTween:Play()
+
+	-- dừng âm thanh cũ để không chồng
+	if oldSound then
+		oldSound:Stop()
+	end
+
+	oldBackTween.Completed:Wait()
+
+	-- tắt jumpscare cũ
+	oldImage.Visible = false
+
+	-- jumpscare mới
+	newImage.Visible = true
+	newImage.Position = UDim2.new(0.5, 0, 0.5, 0)
+	newImage.AnchorPoint = Vector2.new(0.5, 0.5)
+	newImage.Size = UDim2.new(0, 0, 0, 0)
+	newImage.Rotation = math.random(0, 1) == 1 and -20 or 0
+	newImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
+
+	-- âm thanh mới
+	playSoundSafe(newSound, 0, 0.7, 10)
+
+	-- ảnh phóng to full màn hình trong 1 giây
+	local tween = TweenService:Create(newImage, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Size = UDim2.new(1, 0, 1, 0),
+		Position = UDim2.new(0.5, 0, 0.5, 0)
+	})
+	tween:Play()
+
+	-- xoay nhẹ trong lúc lên full màn hình
+	TweenService:Create(newImage, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Rotation = math.random(0, 1) == 1 and -20 or 0
+	}):Play()
+
+	tween.Completed:Wait()
+
+	-- để jumpscare mới tồn tại thêm 1 giây rồi xoá GUI
+	task.wait(1)
+
+	if screenGui and screenGui.Parent then
+		screenGui:Destroy()
+	end
+end)
