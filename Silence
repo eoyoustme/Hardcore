@@ -7,8 +7,8 @@ local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/Regul
 local entity = Spawner:Create({
 	Entity = {
 		Name = "Silence",
-		Asset = "rbxassetid://11535812658",
-		HeightOffset = 0
+		Asset = "https://github.com/eoyoustme/Hardcore/blob/main/Silence.rbxm?raw=true",
+		HeightOffset = 1
 	},
 	Lights = {
 		Flicker = {
