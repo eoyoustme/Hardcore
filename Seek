@@ -1,0 +1,24 @@
+local function GetGitSound(GithubSnd, SoundName)
+	local url = GithubSnd
+
+	if not isfile(SoundName .. ".mp3") then
+		writefile(SoundName .. ".mp3", game:HttpGet(url))
+	end
+
+	local sound = Instance.new("Sound")
+	sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+	return sound
+end
+
+local SeekMusic = game.SoundService:FindFirstChild("SeekMusic")
+if SeekMusic then
+	local s = GetGitSound(
+		"https://github.com/eoyoustme/Hardcore/blob/main/Your_Consenting_Mind.mp3?raw=true",
+		"Your_Consenting_Mind"
+	)
+
+	SeekMusic.SoundId = s.SoundId
+	SeekMusic.Volume = 3
+	SeekMusic.PlaybackSpeed = 1
+	SeekMusic:Play()
+end
