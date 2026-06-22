@@ -214,15 +214,15 @@ entity:SetCallback("OnDamagePlayer", function(newHealth: number)
 			if mode == 1 then
 				background.BackgroundColor3 = Color3.new(0.772549, 0.513725, 0)
 				imageLabel.ImageColor3 = Color3.new(1, 1, 1)
-				imageLabel.Position = UDim2.new(rng:NextNumber(0.4, 0.6), 0, rng:NextNumber(0.4, 0.55), 0)
+				imageLabel.Position = UDim2.new(rng:NextNumber(0.4, 0.6), 0, rng:NextNumber(0.4, 0.6), 0)
 			elseif mode == 2 then
 				background.BackgroundColor3 = Color3.new(1, 0.666667, 0)
 				imageLabel.ImageColor3 = Color3.new(1, 1, 1)
-				imageLabel.Position = UDim2.new(rng:NextNumber(0.4, 0.6), 0, rng:NextNumber(0.4, 0.55), 0)
+				imageLabel.Position = UDim2.new(rng:NextNumber(0.4, 0.6), 0, rng:NextNumber(0.4, 0.6), 0)
 			else
 				background.BackgroundColor3 = Color3.new(0, 0, 0)
 				imageLabel.ImageColor3 = Color3.new(1, 1, 1)
-				imageLabel.Position = UDim2.new(rng:NextNumber(0.4, 0.6), 0, rng:NextNumber(0.4, 0.55), 0)
+				imageLabel.Position = UDim2.new(rng:NextNumber(0.4, 0.6), 0, rng:NextNumber(0.4, 0.6), 0)
 			end
 
 			imageLabel.Rotation = rng:NextInteger(-10, 10)
