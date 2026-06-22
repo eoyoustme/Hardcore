@@ -1,4 +1,22 @@
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+function light(tim,color0,color1)
+	local tweenservice = game:GetService("TweenService")
+	local info = TweenInfo.new(tim,Enum.EasingStyle.Linear)
+	for _ , light in pairs(game.Workspace.CurrentRooms:GetDescendants()) do
+		if light:IsA("Light") or light:IsA("SurfaceLight") or light:IsA("SpotLight") then
+			local target = {Color = color1}
+			local anim = tweenservice:Create(light,info,target)
+			anim:Play()
+		end
+		if light:IsA("MeshPart") and light.Material == Enum.Material.Neon  and light.Name ~= "Skybox" then
+			local target1 = {Color = color0}
+			local anim2 = tweenservice:Create(light,info,target1)
+			anim2:Play()
+		end
+	end
+end
+
 ---====== Load spawner ======---
 local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
 
@@ -47,17 +65,7 @@ local entity = spawner.Create({
 entity:SetCallback("OnSpawned", function()
 	print("Cease đã xuất hiện")
 
-	local TweenService = game:GetService("TweenService")
-	local Tweeninfo = TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-	local spawnColor = {Color = Color3.new(0, 0, 255)}
-
-	for _, v in pairs(workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]:GetDescendants()) do
-		if v:IsA("Light") then
-			TweenService:Create(v, Tweeninfo, spawnColor):Play()
-		elseif v.Parent and v.Parent.Name == "LightFixture" then
-			TweenService:Create(v.Parent, Tweeninfo, spawnColor):Play()
-		end
-	end
+	light(2,Color3.fromRGB(127, 249, 255),Color3.fromRGB(0, 45, 185))
 
 	-- === BẮT ĐẦU KIỂM TRA DI CHUYỂN CHUẨN XÁC === --
 	local Players = game:GetService("Players")
@@ -104,7 +112,7 @@ entity:SetCallback("OnSpawned", function()
 						sound.PlaybackRegionsEnabled = true
 						sound.PlaybackRegions = NumberRange.new(1.2, 6000)
 						sound:Play()
-						
+
 						print(player.Name .. " bị Cease giết vì di chuyển!")
 
 						-- đánh dấu nguyên nhân chết
@@ -122,24 +130,14 @@ entity:SetCallback("OnSpawned", function()
 	end)
 
 	---====== On Despawn ======---
-	entity:SetCallback("OnDespawned", function()
+	entity:SetCallback("OnDespawning", function()
 		print("Cease đã biến mất")
 
 		if raycastLoop then
 			raycastLoop:Disconnect()
 		end
-
-		-- Hiệu ứng ánh sáng khi biến mất
-		local Tweeninfo2 = TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-		local despawnColor = {Color = Color3.new(1, 0, 1)}
-
-		for _, v in pairs(workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]:GetDescendants()) do
-			if v:IsA("Light") then
-				TweenService:Create(v, Tweeninfo2, despawnColor):Play()
-			elseif v.Parent and v.Parent.Name == "LightFixture" then
-				TweenService:Create(v.Parent, Tweeninfo2, despawnColor):Play()
-			end
-		end
+		
+		light(2,Color3.fromRGB(10, 45, 185),Color3.fromRGB(255, 0, 255))
 
 		---====== Load achievement giver ======---
 		local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
