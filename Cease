@@ -39,7 +39,7 @@ local entity = spawner.Create({
 		Values = {3, 3, 2, 2}
 	},
 	Movement = {
-		Speed = 60,
+		Speed = 40,
 		Delay = 0,
 		Reversed = false
 	},
@@ -137,7 +137,7 @@ entity:SetCallback("OnSpawned", function()
 			raycastLoop:Disconnect()
 		end
 		
-		light(2,Color3.fromRGB(10, 45, 185),Color3.fromRGB(255, 0, 255))
+		light(2,Color3.fromRGB(55, 0, 55),Color3.fromRGB(255, 0, 255))
 
 		---====== Load achievement giver ======---
 		local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
