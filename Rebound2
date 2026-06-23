@@ -1,35 +1,10 @@
-	local TweenService = game:GetService("TweenService")
-	
-	local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
+local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
 	local camara = game.Workspace.CurrentCamera
 	local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
 		camara.CFrame = camara.CFrame * shakeCf
 	end)
 	camShake:Start()
-	camShake:ShakeOnce(25,7.5,0.1,0.1,2,0.1)
-	
-	local Players = game:GetService("Players")
-	local player = Players.LocalPlayer
-
-	local screenGui = Instance.new("ScreenGui")
-	screenGui.Name = "JumpscareOverlay"
-	screenGui.IgnoreGuiInset = true
-	screenGui.DisplayOrder = 999999
-	screenGui.Parent = player:WaitForChild("PlayerGui")
-	
-	local imageLabel = Instance.new("ImageLabel")
-	imageLabel.BackgroundTransparency = 1
-	imageLabel.BorderSizePixel = 0
-	imageLabel.Position = UDim2.new(0, 0, 0, 0)
-	imageLabel.Size = UDim2.new(1.5, 0, 1.5, 0)
-	imageLabel.ScaleType = Enum.ScaleType.Stretch
-	imageLabel.Image = "rbxassetid://445484188"
-	imageLabel.ImageTransparency = 0
-	imageLabel.Visible = true
-	imageLabel.Parent = screenGui
-
-	local tweenIn = TweenInfo.new(0.4, Enum.EasingStyle.Linear)
-	TweenService:Create(imageLabel, tweenIn, {ImageTransparency = 1}):Play()
+	camShake:ShakeOnce(25,7.5,0.1,2,2,0.1)
 
 function GetGitSound(GithubSnd,SoundName)
 	local url=GithubSnd
