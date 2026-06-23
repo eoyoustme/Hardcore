@@ -16,12 +16,12 @@ function light(tim,color0,color1)
 end
 
 local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
-	local camara = game.Workspace.CurrentCamera
-	local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-		camara.CFrame = camara.CFrame * shakeCf
-	end)
-	camShake:Start()
-	camShake:ShakeOnce(25,7.5,0.1,2,2,0.1)
+local camara = game.Workspace.CurrentCamera
+local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+	camara.CFrame = camara.CFrame * shakeCf
+end)
+camShake:Start()
+camShake:ShakeOnce(25,7.5,0.1,2,2,0.1)
 
 function GetGitSound(GithubSnd,SoundName)
 	local url=GithubSnd
@@ -43,7 +43,7 @@ local entity = Spawner:Create({
 	Entity = {
 		Name = "Rebound1",
 		Asset = "https://github.com/eoyoustme/Hardcore/blob/main/Rebound1.rbxm?raw=true",
-		HeightOffset = 0
+		HeightOffset = 1
 	},
 	Lights = {
 		Flicker = {
@@ -63,7 +63,7 @@ local entity = Spawner:Create({
 	},
 	Movement = {
 		Speed = 180,
-		Delay = 3,
+		Delay = 9,
 		Reversed = false
 	},
 	Rebounding = {
@@ -96,9 +96,9 @@ local entity = Spawner:Create({
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
 	light(2,Color3.fromRGB(127, 249, 255),Color3.fromRGB(65, 138, 255))
-	local bruh = workspace.Rebound1.Rebound
+	local bruh = workspace.Rebound1.RushNew
 	local TweenService = game:GetService("TweenService")
-	wait(1.5)
+	wait(6.5)
 	local cue2 = Instance.new("Sound")
 	cue2.Parent = game.Workspace
 	cue2.Name = "Spawn"
@@ -114,7 +114,7 @@ entity:SetCallback("OnSpawned", function()
 	move.Looped = true
 	local vroom = TweenService:Create(move, TweenInfo.new(2),{Volume = 0.2})
 	local distort = Instance.new("DistortionSoundEffect")
-	distort.Level = 0.75
+	distort.Level = 0.55
 	distort.Parent = move
 	move.RollOffMaxDistance = 200
 	move.RollOffMinDistance = 100
@@ -135,8 +135,8 @@ end)
 
 entity:SetCallback("OnStartMoving", function()
 	print("Entity has started moving")
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Rebound2"))()
+	game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Rebound2"))()
 end)
 
 entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
@@ -175,7 +175,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth: number)
 	if newHealth <= 0 then
 		print("Entity has killed the player")
 		replicatesignal(game.Players.LocalPlayer.Kill)
-loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Rebound%20Jumpscare"))()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Rebound%20Jumpscare"))()
 	else
 		print("Entity has damaged the player")
 	end
