@@ -102,7 +102,7 @@ local entity = Spawner:Create({
 	},
 	Movement = {
 		Speed = 180,
-		Delay = 3,
+		Delay = 9,
 		Reversed = true
 	},
 	Rebounding = {
@@ -135,9 +135,9 @@ local entity = Spawner:Create({
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
 	light(2,Color3.fromRGB(127, 249, 255),Color3.fromRGB(65, 138, 255))
-	local bruh = workspace.Rebound.Rebound
+	local bruh = workspace.Rebound.RushNew
 	local TweenService = game:GetService("TweenService")
-	wait(1.5)
+	wait(6)
 	local cue2 = Instance.new("Sound")
 	cue2.Parent = game.Workspace
 	cue2.Name = "Spawn"
@@ -153,7 +153,7 @@ entity:SetCallback("OnSpawned", function()
 	move.Looped = true
 	local vroom = TweenService:Create(move, TweenInfo.new(2),{Volume = 0.2})
 	local distort = Instance.new("DistortionSoundEffect")
-	distort.Level = 0.75
+	distort.Level = 0.55
 	distort.Parent = move
 	move.RollOffMaxDistance = 200
 	move.RollOffMinDistance = 100
