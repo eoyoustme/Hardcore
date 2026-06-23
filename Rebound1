@@ -1,3 +1,11 @@
+local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
+	local camara = game.Workspace.CurrentCamera
+	local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+		camara.CFrame = camara.CFrame * shakeCf
+	end)
+	camShake:Start()
+	camShake:ShakeOnce(25,7.5,0.1,2,2,0.1)
+
 function GetGitSound(GithubSnd,SoundName)
 	local url=GithubSnd
 	if not isfile(SoundName..".mp3") then
