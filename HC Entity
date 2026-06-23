@@ -16,8 +16,8 @@ coroutine.wrap(function()
 			game.Workspace.RushMoving.RushNew.Attachment.ParticleEmitter.Rate = 55
 			game.Workspace.RushMoving.RushNew.Attachment.ParticleEmitter.Brightness = 1
 			game.Workspace.RushMoving.RushNew.Attachment.ParticleEmitter.Color = ColorSequence.new(Color3.fromRGB(97, 97, 97))
-			game.Workspace.RushMoving.RushNew.PlaySound.PlaybackSpeed = 0.1
-			game.Workspace.RushMoving.RushNew.PlaySound.Footsteps = 0.26
+			game.Workspace.RushMoving.RushNew.PlaySound.PlaybackSpeed = 0.19
+			game.Workspace.RushMoving.RushNew.PlaySound.Footsteps = 0.35
 
 		end
 	end)
