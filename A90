@@ -1,4 +1,4 @@
-local MainUI = game:GetObjects("rbxassetid://72621580650125")[1]
+local MainUI = game:GetObjects("https://github.com/eoyoustme/Hardcore/blob/main/A90.rbxm?raw=true")[1]
 MainUI.Parent = game.Players.LocalPlayer.PlayerGui
 
 	local plr = game.Players.LocalPlayer
