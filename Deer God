@@ -357,27 +357,6 @@ entity:SetCallback("OnSpawned", function()
 
 		end)
 		
-
-		local nooop = game.Workspace["Deer God"].RushNew
-
-		local soundIds = {6250812725, 6250815445, 6250816544, 6250814572, 6250812725, 6250812725}
-		local sounds = {}
-		for i=1,#soundIds do
-			local s = Instance.new("Sound")
-			s.SoundId = "http://www.roblox.com/asset/?id=" .. soundIds[i]
-			s.Volume = 5
-			s.RollOffMaxDistance = 500
-			s.RollOffMinDistance = 50
-			s.Parent = nooop
-			sounds[#sounds + 1] = s
-		end
-
-		while true do
-			wait(math.random(3,7))
-			local i = math.random(1, #sounds)
-			sounds[i]:Play()
-		end
-
 		local screenGui = Instance.new("ScreenGui")
 		screenGui.Name = "JumpscareOverlay"
 		screenGui.IgnoreGuiInset = true
