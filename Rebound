@@ -27,7 +27,7 @@ pitch3.Parent = cue1
 pitch3.Octave = 0.5
 cue1.Volume = 0.1
 cue1:Play()
-wait(0.5
+wait(0.5)
 local cue2 = Instance.new("Sound")
 cue2.Parent = game.Workspace
 cue2.Name = "Spawn"
