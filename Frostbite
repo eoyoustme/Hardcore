@@ -76,8 +76,11 @@ if not s then
 end
 
 local entity = s:FindFirstChildWhichIsA("BasePart")
+if not entity then
+	error("Không tìm thấy BasePart.")
+end
+
 entity.CFrame = GetRoom():WaitForChild("RoomEntrance").CFrame * CFrame.new(0, 5, -35)
-entity.Part.CFrame = entity.CFrame
 
 pcall(function() entity.Ambience:Stop() end)
 pcall(function() entity.AmbienceFar:Stop() end)
@@ -120,7 +123,7 @@ local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(sha
 	camara.CFrame = camara.CFrame * shakeCf
 end)
 camShake:Start()
-camShake:ShakeOnce(10,3,0.1,6,2,0.5)
+camShake:ShakeOnce(10,3,0.1,6,7,0.5)
 
 wait(8)
 
@@ -129,22 +132,6 @@ wait(8)
 for _, v in ipairs({"face", "Heylois", "BlackTrai2l", "BlackTrai3l","Frostky","Frostky2"}) do
 	if entity:FindFirstChild("Attachment") and entity.Attachment:FindFirstChild(v) then
 		entity.Attachment[v].Enabled = true
-	end
-end
-
--- Bật tất cả particle trong Frostbite > FrostyNew > part
-local frostbiteModel = s:FindFirstChild("Frostbite")
-if frostbiteModel then
-	local frostyNew = frostbiteModel:FindFirstChild("FrostyNew")
-	if frostyNew then
-		local frostPart = frostyNew:FindFirstChild("part")
-		if frostPart then
-			for _, particle in ipairs(frostPart:GetDescendants()) do
-				if particle:IsA("ParticleEmitter") then
-					particle.Enabled = true
-				end
-			end
-		end
 	end
 end
 
@@ -172,24 +159,9 @@ game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 dmg = false
 
 -- Tắt các hiệu ứng khi rời phòng
-for _, v in ipairs({"face", "Heylois", "BlackTrai2l", "BlackTrai3l"}) do
+for _, v in ipairs({"face", "Heylois", "BlackTrai2l", "BlackTrai3l","Frostky","Frostky2"}) do
 	if entity:FindFirstChild("Attachment") and entity.Attachment:FindFirstChild(v) then
 		entity.Attachment[v].Enabled = false
-	end
-end
-
--- Tắt particle trong Frostbite > FrostyNew > part
-if frostbiteModel then
-	local frostyNew = frostbiteModel:FindFirstChild("FrostyNew")
-	if frostyNew then
-		local frostPart = frostyNew:FindFirstChild("part")
-		if frostPart then
-			for _, particle in ipairs(frostPart:GetDescendants()) do
-				if particle:IsA("ParticleEmitter") then
-					particle.Enabled = false
-				end
-			end
-		end
 	end
 end
 
