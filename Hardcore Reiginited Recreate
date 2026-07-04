@@ -53,6 +53,11 @@ local entityList = {
 		name = "Silence",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Silence",
 		chance = 1
+	},
+	{
+		name = "Frostbite",
+		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Frostbite",
+		chance = math.random(3.25,3.5)
 	}
 }
 
@@ -103,13 +108,21 @@ end
 math.randomseed(os.clock() * 1e6)
 
 while true do
-	task.wait(5)
+	task.wait(Random.new():NextNumber(10,14))
 
 	if not IsSeekActive() then
+		local threads = {}
+
 		for _, entityData in ipairs(entityList) do
 			if rollChance(entityData.chance) then
-				spawnEntity(entityData)
+				table.insert(threads, entityData)
 			end
+		end
+
+		for _, entityData in ipairs(threads) do
+			task.spawn(function()
+				spawnEntity(entityData)
+			end)
 		end
 	end
 end
