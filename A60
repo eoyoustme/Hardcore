@@ -204,7 +204,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 
 		-- Âm thanh jumpscare
 		local sound = Instance.new("Sound", workspace)
-		sound.SoundId = "rbxassetid://103879029437685"
+		sound.SoundId = "rbxassetid://103959751518518"
 		sound.Volume = 5
 		sound:Play()
 
@@ -256,7 +256,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 		-- 😱 HIỆU ỨNG JUMPSCARE SAU 1 GIÂY (DISPLAY HÌNH ẢNH + TWEEN)
 		--------------------------------------------------------------------
 
-		task.wait(0.754)
+		task.wait(1.3)
 
 		-- GUI cho jumpscare
 		local gui = Instance.new("ScreenGui", player.PlayerGui)
