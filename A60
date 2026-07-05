@@ -132,10 +132,10 @@ entity:SetCallback("OnSpawned", function()
 		camShake:ShakeOnce(50, 50, 0, 2, 1, 6)
 
 		local tints = {
-			{Color = Color3.fromRGB(30, 30, 30), Time = 0.25},
-			{Color = Color3.fromRGB(60, 60, 60), Time = 0.25},
-			{Color = Color3.fromRGB(120, 120, 120), Time = 0.6},
-			{Color = Color3.fromRGB(255, 255, 255), Time = 0.6}
+			{Color = Color3.fromRGB(30, 30, 30), Time = 0.5},
+			{Color = Color3.fromRGB(60, 60, 60), Time = 0.5},
+			{Color = Color3.fromRGB(120, 120, 120), Time = 1.2},
+			{Color = Color3.fromRGB(255, 255, 255), Time = 1.2}
 		}
 
 		for _, tint in ipairs(tints) do
@@ -151,7 +151,7 @@ entity:SetCallback("OnSpawned", function()
 			if not rolled then
 				rolled = true
 
-				if rollChance(50) then
+				if rollChance(20) then
 					loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Extremely/refs/heads/main/B60"))()
 				end
 			end
@@ -313,8 +313,7 @@ local blacklist = {
 	"desk",
 	"gold",
 	"dresser",
-	"floor",
-	"wall"
+	"floor"
 }
 
 local function IsBlacklisted(name)
@@ -359,21 +358,16 @@ entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 				continue
 			end
 
+			obj.Anchored = true
+            task.wait()
 			obj.Anchored = false
 			obj.Massless = true
 
 			obj.AssemblyLinearVelocity = Vector3.new(
-				math.random(-120,120),
-				math.random(80,200),
-				math.random(-120,120)
+				math.random(-150, 150),
+				math.random(50, 50),
+				math.random(-180, 180)
 			)
-			
-			local sound = Instance.new("Sound")
-			sound.SoundId = "rbxassetid://7142843615"
-			sound.Volume = 4
-			sound.PlaybackSpeed = 0.5
-			sound.Parent = enit
-			sound:Play()
 
 			obj.AssemblyAngularVelocity = Vector3.new(
 				math.random(-25,25),
