@@ -361,9 +361,12 @@ entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 obj.Anchored = false
 obj.CanCollide = false
 obj.CanQuery = false
-obj.Massless = true
-obj.AssemblyLinearVelocity = Vector3.zero
-obj.AssemblyAngularVelocity = Vector3.zero
+
+obj.AssemblyLinearVelocity = Vector3.new(
+	math.random(-100, 100),
+	math.random(50, 150),
+	math.random(-100, 100)
+)
 		end
 	end
 end)
