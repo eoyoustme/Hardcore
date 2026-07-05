@@ -111,84 +111,6 @@ entity:SetCallback("OnSpawned", function()
 		end
 	end)
 
-local blacklist = {
-	"wardrobe",
-	"bed",
-	"rug",
-	"key",
-	"drawer",
-	"book",
-	"breaker",
-	"table",
-	"desk",
-	"gold",
-	"dresser",
-	"floor",
-	"door",
-    "wall_strip"
-}
-
-local function IsBlacklisted(name)
-	local lowerName = name:lower()
-
-	for _, v in ipairs(blacklist) do
-		if string.find(lowerName, v, 1, true) then
-			return true
-		end
-	end
-
-	return false
-end
-
-local function IsInsideBlacklistedModel(obj)
-	local current = obj.Parent
-
-	while current and current ~= workspace do
-		if current:IsA("Model") and IsBlacklisted(current.Name) then
-			return true
-		end
-		current = current.Parent
-	end
-
-	return false
-end
-
-entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
-	for _, obj in ipairs(room:GetDescendants()) do
-		if obj:IsA("BasePart") then
-			local model = obj:FindFirstAncestorOfClass("Model")
-			if model and model:FindFirstChildOfClass("Humanoid") then
-				continue
-			end
-
-			if IsBlacklisted(obj.Name) then
-				continue
-			end
-
-			if IsInsideBlacklistedModel(obj) then
-				continue
-			end
-
-			obj.Anchored = true
-            task.wait()
-			obj.Anchored = false
-			obj.Massless = true
-
-			obj.AssemblyLinearVelocity = Vector3.new(
-                                math.random(-60, 60),
-                                math.random(20, 50),
-                                math.random(-60, 60)
-			)
-
-			obj.AssemblyAngularVelocity = Vector3.new(
-				math.random(-25,25),
-				math.random(-25,25),
-				math.random(-25,25)
-			)
-		end
-	end
-end)
-
 	entity:SetCallback("OnDespawning", function()
 
 		local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
@@ -203,13 +125,11 @@ end)
 
 		running = false
 
-	local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
-	local camara = game.Workspace.CurrentCamera
-	local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-		camara.CFrame = camara.CFrame * shakeCf
-	end)
-	camShake:Start()
-	camShake:ShakeOnce(40,70,0,4,2,12)
+		local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+			camera.CFrame = camera.CFrame * shakeCf
+		end)
+		camShake:Start()
+		camShake:ShakeOnce(50, 50, 0, 2, 1, 6)
 
 		local tints = {
 			{Color = Color3.fromRGB(30, 30, 30), Time = 0.5},
@@ -379,6 +299,85 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 			Image = "rbxassetid://132714224363069"
 		})
 	end)
+end)
+
+local blacklist = {
+	"wardrobe",
+	"bed",
+	"rug",
+	"key",
+	"drawer",
+	"book",
+	"breaker",
+	"table",
+	"desk",
+	"gold",
+	"dresser",
+	"floor"
+}
+
+local function IsBlacklisted(name)
+	local lowerName = name:lower()
+
+	for _, v in ipairs(blacklist) do
+		if string.find(lowerName, v, 1, true) then
+			return true
+		end
+	end
+
+	return false
+end
+
+local function IsInsideBlacklistedModel(obj)
+	local current = obj.Parent
+
+	while current and current ~= workspace do
+		if current:IsA("Model") and IsBlacklisted(current.Name) then
+			return true
+		end
+		current = current.Parent
+	end
+
+	return false
+end
+
+entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
+	local enit = game.Workspace.A60
+	for _, obj in ipairs(room:GetDescendants()) do
+		if obj:IsA("BasePart") then
+			local model = obj:FindFirstAncestorOfClass("Model")
+			if model and model:FindFirstChildOfClass("Humanoid") then
+				continue
+			end
+
+			if IsBlacklisted(obj.Name) then
+				continue
+			end
+
+			if IsInsideBlacklistedModel(obj) then
+				continue
+			end
+
+			obj.Anchored = true
+            task.wait()
+			obj.Anchored = false
+			obj.Massless = true
+			obj.CanCollide = false
+			obj.CanQuery = false
+
+			obj.AssemblyLinearVelocity = Vector3.new(
+				math.random(-150, 150),
+				math.random(50, 50),
+				math.random(-180, 180)
+			)
+
+			obj.AssemblyAngularVelocity = Vector3.new(
+				math.random(-25,25),
+				math.random(-25,25),
+				math.random(-25,25)
+			)
+		end
+	end
 end)
 
 -- ================== CHẠY ENTITY ==================
