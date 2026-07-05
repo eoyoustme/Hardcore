@@ -67,11 +67,11 @@ local entity = Spawner:Create({
 		Reversed = false
 	},
 	Rebounding = {
-		Enabled = false,
+		Enabled = true,
 		Type = "Ambush", -- "Blitz"
 		Min = 1,
-		Max = 1,
-		Delay = 2
+		Max = 2,
+		Delay = 0
 	},
 	Damage = {
 		Enabled = true,
@@ -158,8 +158,54 @@ end)
 entity:SetCallback("OnRebounding", function(startOfRebound: boolean)
 	if startOfRebound == true then
 		print("Entity has started rebounding")
+		local player = game.Players.LocalPlayer
+		if player and player:FindFirstChild("PlayerGui") then
+			local flashGui = Instance.new("ScreenGui")
+			flashGui.Name = "ReboundDoorFlash"
+			flashGui.IgnoreGuiInset = true
+			flashGui.DisplayOrder = 999998
+			flashGui.Parent = player.PlayerGui
+
+			local flashFrame = Instance.new("Frame")
+			flashFrame.Size = UDim2.new(1, 0, 1, 0)
+			flashFrame.BackgroundColor3 = Color3.fromRGB(0, 102, 255) -- Vibrant Blue
+			flashFrame.BackgroundTransparency = 0 -- Full visibility instantly
+			flashFrame.BorderSizePixel = 0
+			flashFrame.Parent = flashGui
+
+			-- Smoothly fade out the flash frame
+			local tweenInfo = TweenInfo.new(0.6, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+			local fadeTween = game:GetService("TweenService"):Create(flashFrame, tweenInfo, {BackgroundTransparency = 1})
+			fadeTween:Play()
+
+			fadeTween.Completed:Wait()
+			flashGui:Destroy()
+		end
 	else
 		print("Entity has finished rebounding")
+		local player = game.Players.LocalPlayer
+		if player and player:FindFirstChild("PlayerGui") then
+			local flashGui = Instance.new("ScreenGui")
+			flashGui.Name = "ReboundDoorFlash"
+			flashGui.IgnoreGuiInset = true
+			flashGui.DisplayOrder = 999998
+			flashGui.Parent = player.PlayerGui
+
+			local flashFrame = Instance.new("Frame")
+			flashFrame.Size = UDim2.new(1, 0, 1, 0)
+			flashFrame.BackgroundColor3 = Color3.fromRGB(0, 102, 255) -- Vibrant Blue
+			flashFrame.BackgroundTransparency = 0 -- Full visibility instantly
+			flashFrame.BorderSizePixel = 0
+			flashFrame.Parent = flashGui
+
+			-- Smoothly fade out the flash frame
+			local tweenInfo = TweenInfo.new(0.6, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+			local fadeTween = game:GetService("TweenService"):Create(flashFrame, tweenInfo, {BackgroundTransparency = 1})
+			fadeTween:Play()
+
+			fadeTween.Completed:Wait()
+			flashGui:Destroy()
+		end
 	end
 end)
 
