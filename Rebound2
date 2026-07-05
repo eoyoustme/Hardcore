@@ -43,7 +43,7 @@ local entity = Spawner:Create({
 	Entity = {
 		Name = "Rebound2",
 		Asset = "https://github.com/eoyoustme/Hardcore/blob/main/Rebound1.rbxm?raw=true",
-		HeightOffset = 1
+		HeightOffset = 3
 	},
 	Lights = {
 		Flicker = {
@@ -96,7 +96,7 @@ local entity = Spawner:Create({
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
 	light(2,Color3.fromRGB(127, 249, 255),Color3.fromRGB(65, 138, 255))
-	local bruh = workspace.Rebound2.Rebound
+	local bruh = workspace.Rebound2.RushNew
 	local TweenService = game:GetService("TweenService")
 	wait(6.5)
 	local cue2 = Instance.new("Sound")
