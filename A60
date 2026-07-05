@@ -125,11 +125,13 @@ entity:SetCallback("OnSpawned", function()
 
 		running = false
 
-		local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-			camera.CFrame = camera.CFrame * shakeCf
-		end)
-		camShake:Start()
-		camShake:ShakeOnce(50, 50, 0, 2, 1, 6)
+	local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
+	local camara = game.Workspace.CurrentCamera
+	local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+		camara.CFrame = camara.CFrame * shakeCf
+	end)
+	camShake:Start()
+	camShake:ShakeOnce(40,70,0,4,2,12)
 
 		local tints = {
 			{Color = Color3.fromRGB(30, 30, 30), Time = 0.5},
@@ -313,7 +315,8 @@ local blacklist = {
 	"desk",
 	"gold",
 	"dresser",
-	"floor"
+	"floor",
+    "door"
 }
 
 local function IsBlacklisted(name)
