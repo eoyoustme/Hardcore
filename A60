@@ -112,7 +112,7 @@ entity:SetCallback("OnSpawned", function()
 	end)
 
 	entity:SetCallback("OnDespawning", function()
-		
+
 		local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
 
 		---====== Display achievement ======---
@@ -142,20 +142,20 @@ entity:SetCallback("OnSpawned", function()
 			local t = TweenService:Create(lighting.MainColorCorrection, TweenInfo.new(tint.Time), {TintColor = tint.Color})
 			t:Play()
 			task.wait(tint.Time)
-local rolled = false
+			local rolled = false
 
-local function rollChance(percent)
-	return math.random(1, 100) <= percent
-end
+			local function rollChance(percent)
+				return math.random(1, 100) <= percent
+			end
 
-if not rolled then
-	rolled = true
+			if not rolled then
+				rolled = true
 
-	if rollChance(50) then
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Extremely/refs/heads/main/B60"))()
-	end
-end
-			
+				if rollChance(50) then
+					loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Extremely/refs/heads/main/B60"))()
+				end
+			end
+
 		end
 	end)
 end)
@@ -343,6 +343,7 @@ local function IsInsideBlacklistedModel(obj)
 end
 
 entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
+	local enit = game.Workspace.A60
 	for _, obj in ipairs(room:GetDescendants()) do
 		if obj:IsA("BasePart") then
 			local model = obj:FindFirstAncestorOfClass("Model")
@@ -358,20 +359,27 @@ entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 				continue
 			end
 
-obj.Anchored = false
-obj.Massless = true
+			obj.Anchored = false
+			obj.Massless = true
 
-obj.AssemblyLinearVelocity = Vector3.new(
-	math.random(-120,120),
-	math.random(80,200),
-	math.random(-120,120)
-)
+			obj.AssemblyLinearVelocity = Vector3.new(
+				math.random(-120,120),
+				math.random(80,200),
+				math.random(-120,120)
+			)
+			
+			local sound = Instance.new("Sound")
+			sound.SoundId = "rbxassetid://7142843615"
+			sound.Volume = 4
+			sound.PlaybackSpeed = 0.5
+			sound.Parent = enit
+			sound:Play()
 
-obj.AssemblyAngularVelocity = Vector3.new(
-	math.random(-25,25),
-	math.random(-25,25),
-	math.random(-25,25)
-)
+			obj.AssemblyAngularVelocity = Vector3.new(
+				math.random(-25,25),
+				math.random(-25,25),
+				math.random(-25,25)
+			)
 		end
 	end
 end)
