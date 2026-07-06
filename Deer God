@@ -35,7 +35,7 @@ local entity = Spawner:Create({
 	Entity = {
 		Name = "Deer God",
 		Asset = "https://github.com/eoyoustme/Hardcore/blob/main/Deer%20God.rbxm?raw=true",
-		HeightOffset = 1
+		HeightOffset = 0.4
 	},
 	Lights = {
 		Flicker = {
