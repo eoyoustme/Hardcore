@@ -87,6 +87,14 @@ local entity = Spawner:Create({
 
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
+	local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
+	local camara = game.Workspace.CurrentCamera
+	local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+		camara.CFrame = camara.CFrame * shakeCf
+	end)
+	camShake:Start()
+	camShake:ShakeOnce(10,3.5,0.1,15,15,0.5)
+	
 	task.spawn(function()
 		while true do
 			task.wait(0.5)
@@ -153,50 +161,52 @@ entity:SetCallback("OnSpawned", function()
 		imageLabel.Image = jumpscareImage4
 		task.wait()
 	end
-	
+
 end)
 
 entity:SetCallback("OnStartMoving", function()
-local player = game.Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local camera = workspace.CurrentCamera
-task.spawn(function()
-	while true do
-		task.wait(0.5)
+	local player = game.Players.LocalPlayer
+	local playerGui = player:WaitForChild("PlayerGui")
+	local character = player.Character or player.CharacterAdded:Wait()
+	local humanoid = character:WaitForChild("Humanoid")
+	local camera = workspace.CurrentCamera
+	task.spawn(function()
+		while true do
+			task.wait(0.5)
 
-		local player = game.Players.LocalPlayer
-		local char = player.Character
-		if not char then continue end
+			local player = game.Players.LocalPlayer
+			local char = player.Character
+			if not char then continue end
 
-		local hum = char:FindFirstChildWhichIsA("Humanoid")
-		local hrp = char:FindFirstChild("HumanoidRootPart")
+			local hum = char:FindFirstChildWhichIsA("Humanoid")
+			local hrp = char:FindFirstChild("HumanoidRootPart")
 			local entity = workspace:FindFirstChild("Deer God") and workspace["Deer God"]:FindFirstChildWhichIsA("BasePart")
 
-		if hum and hrp and entity then
-			if (hrp.Position - entity.Position).Magnitude <= 50 then
-				if game.Players.LocalPlayer.Character:GetAttribute("Hiding") and hum.Health > 0 then
-					hum.Health = 0
-					loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Deer%20God%20Jumpscare"))()
+			if hum and hrp and entity then
+				if (hrp.Position - entity.Position).Magnitude <= 50 then
+					if game.Players.LocalPlayer.Character:GetAttribute("Hiding") and hum.Health > 0 then
+						hum.Health = 0
+						loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Deer%20God%20Jumpscare"))()
 
-					local stats = game:GetService("ReplicatedStorage").GameStats:FindFirstChild("Player_" .. player.Name)
-					if stats and stats:FindFirstChild("Total") then
-						stats.Total.DeathCause.Value = "Deer God"
+						local stats = game:GetService("ReplicatedStorage").GameStats:FindFirstChild("Player_" .. player.Name)
+						if stats and stats:FindFirstChild("Total") then
+							stats.Total.DeathCause.Value = "Deer God"
+						end
+
+						break -- hoặc return
 					end
-
-					break -- hoặc return
 				end
 			end
 		end
-	end
-end)
-	
+	end)
+
 end)
 
 entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 	if firstTime == true then
-		print("Entity has entered room: ".. room.Name.. " for the first time")
+		wait(math.random(0.5,1))
+		print("Entity has entered room: " .. room.Name .. " for the first time")
+
 		local a1 = ({
 			"Join us",
 			"Why do you run, child",
@@ -205,6 +215,29 @@ entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 		})[math.random(4)]
 
 		require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption(a1, true)
+
+		local s = Instance.new("Sound")
+		s.Volume = 6
+		s.Parent = workspace
+
+		if a1 == "Join us" then
+			s.SoundId = "rbxassetid://6250814572"
+
+		elseif a1 == "Why do you run, child" then
+			s.SoundId = "rbxassetid://6250812725"
+
+		elseif a1 == "Your submission is inevitable" then
+			s.SoundId = "rbxassetid://6250815445"
+
+		elseif a1 == "Your flesh will sustain my children" then
+			s.SoundId = "rbxassetid://6250816544"
+		end
+
+		s:Play()
+
+		s.Ended:Connect(function()
+			s:Destroy()
+		end)
 	else
 		print("Entity has entered room: ".. room.Name.. " again")
 	end
@@ -240,13 +273,13 @@ entity:SetCallback("OnDespawning", function()
 		Reason = "Survive a God...",
 		Image = "rbxassetid://91924400987994"
 	})
-	
+
 	local anhguoc = player:WaitForChild("PlayerGui")
 	local cac = anhguoc:WaitForChild("JumpscareOverlay")
 	if cac then
 		cac:Destroy()
 	end
-	
+
 	Lord:Destroy()
 end)
 
