@@ -62,7 +62,7 @@ task.spawn(function()
 	camShake:ShakeOnce(20,10,0,4,2,12)
 	local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
 	local camara = game.Workspace.CurrentCamera
-	
+
 	local gui = Instance.new("ScreenGui")
 	gui.Name = "Dude"
 	gui.IgnoreGuiInset = true
@@ -131,6 +131,12 @@ task.spawn(function()
 
 				if not Character:GetAttribute("Crouching") then
 					Humanoid.Health = 0
+					local sound = Instance.new("Sound")
+					sound.SoundId = "rbxassetid://4988621968"
+					sound.Volume = 10
+					sound.PlaybackSpeed = 0.7
+					sound.Parent = workspace
+					sound:Play()
 					break
 				end
 			end
