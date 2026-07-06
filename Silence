@@ -11,7 +11,6 @@ local function GetRoom()
 	return workspace.CurrentRooms:FindFirstChild(ReplicatedStorage.GameData.LatestRoom.Value)
 end
 
--- Không cho spawn 2 con
 local old = workspace:FindFirstChild("Silence")
 if old then
 	old:Destroy()
@@ -22,7 +21,7 @@ Silence5.Name = "Silence"
 Silence5.Parent = workspace
 
 local Silence = Silence5:FindFirstChild("RushNew") or Silence5:FindFirstChildWhichIsA("BasePart")
-assert(Silence,"Không tìm thấy RushNew!")
+assert(Silence,"Not dind")
 
 local room = GetRoom()
 local entrance = room:WaitForChild("RoomEntrance")
@@ -37,7 +36,7 @@ Silence.CFrame = startCF
 
 TweenService:Create(
 	Silence,
-	TweenInfo.new(1.5,Enum.EasingStyle.Linear,Enum.EasingDirection.Out),
+	TweenInfo.new(1.5,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),
 	{
 		CFrame = endCF
 	}
