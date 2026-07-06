@@ -313,7 +313,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 			ImageTransparency = 0,
 			Rotation = math.random(-20, 20),
 			Position = UDim2.new(0.5, 0,0.5, 0),
-			Size = UDim2.new(0, 500, 0, 500),
+			Size = UDim2.new(0, 800, 0, 800),
 			AnchorPoint = Vector2.new(0.5, 0.5)
 		})
 
