@@ -106,11 +106,9 @@ entity:SetCallback("OnSpawned", function()
 					if isMovingByInput and isMovingByVelocity then
 						humanoid.Health = 0
 						local sound = Instance.new("Sound")
-						sound.SoundId = "rbxassetid://9043182627"
+						sound.SoundId = "rbxassetid://4988621968"
 						sound.Volume = 10
 						sound.Parent = workspace
-						sound.PlaybackRegionsEnabled = true
-						sound.PlaybackRegions = NumberRange.new(1.2, 6000)
 						sound:Play()
 
 						print(player.Name .. " bị Cease giết vì di chuyển!")
