@@ -10,11 +10,11 @@ local function GetGitSound(GithubSnd, SoundName)
 	return sound
 end
 
-local SeekMusic = game.SoundService:FindFirstChild("SeekMusic")
+local SeekMusic = game.ReplicatedStorage.FloorReplicated:FindFirstChild("SeekMusic")
 if SeekMusic then
 	local s = GetGitSound(
-		"https://github.com/eoyoustme/Hardcore/blob/main/Your_Consenting_Mind.mp3?raw=true",
-		"Your_Consenting_Mind"
+		"https://github.com/reboundplayz/Doors-Fixed-Modes/blob/main/SeekMoving.mp3?raw=true",
+		"Seek"
 	)
 
 	SeekMusic.SoundId = s.SoundId
