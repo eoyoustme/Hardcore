@@ -37,7 +37,7 @@ Silence.CFrame = startCF
 
 TweenService:Create(
 	Silence,
-	TweenInfo.new(3,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),
+	TweenInfo.new(1.5,Enum.EasingStyle.Linear,Enum.EasingDirection.Out),
 	{
 		CFrame = endCF
 	}
