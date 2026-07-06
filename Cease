@@ -103,11 +103,12 @@ entity:SetCallback("OnSpawned", function()
 					local isMovingByVelocity = hrp.AssemblyLinearVelocity.Magnitude > 2
 
 					-- Chỉ giết khi cả hai đều đúng
-					if isMovingByInput and isMovingByVelocity then
+					if isMovingByInput and isMovingByVelocity and humanoid.Health > 0  then
 						humanoid.Health = 0
 						local sound = Instance.new("Sound")
 						sound.SoundId = "rbxassetid://4988621968"
 						sound.Volume = 10
+						sound.PlaybackSpeed = 0.7
 						sound.Parent = workspace
 						sound:Play()
 
@@ -134,7 +135,7 @@ entity:SetCallback("OnSpawned", function()
 		if raycastLoop then
 			raycastLoop:Disconnect()
 		end
-		
+
 		light(2,Color3.fromRGB(55, 0, 55),Color3.fromRGB(255, 0, 255))
 
 		---====== Load achievement giver ======---
@@ -161,3 +162,4 @@ end)
 
 ---====== Run entity ======---
 entity:Run()
+
