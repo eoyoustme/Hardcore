@@ -1,11 +1,21 @@
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+local function GetGitSound(GithubSnd, SoundName)
+	local url = GithubSnd
+	if not isfile(SoundName .. ".mp3") then
+		writefile(SoundName .. ".mp3", game:HttpGet(url))
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+	return sound
+end
+local Lord = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Your_Consenting_Mind.mp3?raw=true","Your")
+Lord.Parent = workspace
+Lord.Volume = 3
+Lord.PlaybackSpeed = 1
+Lord:Play()
 
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("you being follow...", true)
 
----====== Tải Spawner ======---
-local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
 
----====== Các Dịch Vụ (Services) ======---
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -13,448 +23,213 @@ local Lighting = game:GetService("Lighting")
 local Debris = game:GetService("Debris")
 local UserInputService = game:GetService("UserInputService")
 
----====== Tham Chiếu Người Chơi và Camera ======---
-local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-local Camera = workspace.CurrentCamera
+local player = Players.LocalPlayer
 
----====== Biến Trạng Thái (State Variables) ======---
-local entityModel -- Model "Deer god" của thực thể
-local entityPart -- Part "RushNew" bên trong entityModel, dùng cho vị trí và di chuyển
-local chaseConnection = nil -- Kết nối Heartbeat để đuổi theo
-local destroyTimer = nil -- Timer tự hủy Deer God (Biến này sẽ điều khiển việc tự hủy sau 13-15 giây)
-local MoveActive = true -- Biến kiểm soát việc di chuyển của Deer God
-local customSpeed = 26 -- Tốc độ Deer God đuổi theo người chơi
-local activationRange = 34 -- Khoảng cách kích hoạt Deer God đuổi theo
+---====== Load spawner ======---
 
--- Biến lưu trữ trạng thái ánh sáng ban đầu
-local originalTintColor
-local originalContrast
+local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Deer%20god%20spawner"))()
 
--- Biến cho Jumpscare
-local isJumpscareActive = false
-local cameraConn, inputConn1, inputConn2
-local activeSounds = {}
+---====== Create entity ======---
 
----====== Tạo ColorCorrectionEffect nếu chưa có ======---
-local colorCorrection = Lighting:FindFirstChildOfClass("ColorCorrectionEffect")
-if not colorCorrection then
-	colorCorrection = Instance.new("ColorCorrectionEffect")
-	colorCorrection.Name = "MainColorCorrection"
-	colorCorrection.Parent = Lighting
-end
-
----====== Tạo Thực Thể (Deer God) ======---
-local entity = spawner.Create({
+local entity = Spawner:Create({
 	Entity = {
-		Name = "Deer god",
+		Name = "Deer God",
 		Asset = "https://github.com/eoyoustme/Hardcore/blob/main/Deer%20God.rbxm?raw=true",
 		HeightOffset = 0
 	},
 	Lights = {
-		Flicker = { Enabled = true, Duration = 5 },
+		Flicker = {
+			Enabled = true,
+			Duration = 100
+		},
 		Shatter = true,
 		Repair = false
 	},
-	Earthquake = { Enabled = false },
+	Earthquake = {
+		Enabled = true
+	},
 	CameraShake = {
 		Enabled = true,
 		Range = 100,
-		Values = {1.5, 20, 0.1, 1}
+		Values = {1.5, 20, 0.1, 1} -- Magnitude, Roughness, FadeIn, FadeOut
 	},
 	Movement = {
-		Speed = 23, -- Đặt một giá trị dương nhỏ để tránh lỗi "invalid number"
+		Speed = 23,
 		Delay = 0,
 		Reversed = false
 	},
-	Rebounding = { Enabled = false },
-	Damage = { Enabled = true, Range = 1, Amount = 125 },
-	Crucifixion = { Enabled = true, Range = 40, Resist = false, Break = true },
+	Rebounding = {
+		Enabled = false,
+		Type = "Ambush", -- "Blitz"
+		Min = 1,
+		Max = 1,
+		Delay = 2
+	},
+	Damage = {
+		Enabled = true,
+		Range = 500,
+		Amount = 0.001
+	},
+	Crucifixion = {
+		Enabled = true,
+		Range = 40,
+		Resist = false,
+		Break = true
+	},
 	Death = {
-		Type = "Guiding",
-		Hints = {"Uhmmmmm", "why you here", "you die  by deer god?", "HE is crazy"},
+		Type = "Guiding", -- "Curious"
+		Hints = {"Death", "Hints", "Go", "Here"},
 		Cause = ""
 	}
 })
 
----====== Hàm Hỗ Trợ cho Âm Thanh Tùy Chỉnh (Tùy chọn: chỉ dùng nếu có exploit) ======---
-
----====== Hàm Jumpscare ======---
-
--- Hàm này sẽ được gọi sau khi hiệu ứng nhiễu và khóa camera hoàn tất
-local function executeRealJumpscare()
-	if inputConn1 then inputConn1:Disconnect(); inputConn1 = nil end
-	if inputConn2 then inputConn2:Disconnect(); inputConn2 = nil end
-
-	local jumpscareGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
-	jumpscareGui.Name = "JumpscareGUI"
-	jumpscareGui.IgnoreGuiInset = true
-	jumpscareGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-	local jumpscareImg = Instance.new("ImageLabel", jumpscareGui)
-	jumpscareImg.Size = UDim2.new(1, 0, 1, 0)
-	jumpscareImg.BackgroundTransparency = 1
-	jumpscareImg.ImageTransparency = 1 -- Bắt đầu với hình ảnh trong suốt
-	jumpscareImg.Image = "rbxassetid://11826279208" -- Ảnh jumpscare Deer God ban đầu
-	jumpscareImg.ZIndex = 10
-
-	local jumpscareSound = Instance.new("Sound", workspace)
-	jumpscareSound.SoundId = "rbxassetid://6567183465" -- Âm thanh jumpscare đầu tiên
-	jumpscareSound.Volume = 3
-	jumpscareSound:Play()
-	activeSounds[jumpscareSound] = true
-
-	-- Deer God xuất hiện mờ và rõ dần (giống video)
-	TweenService:Create(jumpscareImg, TweenInfo.new(0.1), {ImageTransparency = 0}):Play()
-	-- Giữ cho Deer God hiển thị một lúc trước khi chuyển sang ảnh khác
-	task.wait(0.5) -- Thời gian hiển thị của ảnh Deer God ban đầu
-
-	-- Hiệu ứng màu sắc và độ tương phản khi jumpscare
-	colorCorrection.TintColor = Color3.fromRGB(250, 0, 0)
-	colorCorrection.Contrast = 10
-	TweenService:Create(colorCorrection, TweenInfo.new(0.25), {Contrast = 0}):Play()
-	TweenService:Create(colorCorrection, TweenInfo.new(0.5), {TintColor = originalTintColor}):Play() -- Màu sắc trở lại bình thường
-
-	task.wait(1.0) -- Đợi thêm một chút trước khi chuyển ảnh, tổng thời gian ảnh Deer God khoảng 1.5s (0.5+1.0)
-
-	-- Chuyển sang ảnh thứ hai (Hộp sọ/Khuôn mặt ghê rợn)
-	jumpscareImg.ImageTransparency = 1 -- Làm mờ ảnh Deer God
-	jumpscareImg.Image = "rbxassetid://12331751893" -- Ảnh hộp sọ/khuôn mặt ghê rợn
-	jumpscareImg.ZIndex = 12 -- Đảm bảo ảnh này ở trên cùng
-
-	local skullSound = Instance.new("Sound", workspace)
-	skullSound.SoundId = "rbxassetid://18459521002" -- Âm thanh hộp sọ/khuôn mặt
-	skullSound.Volume = 2
-	skullSound:Play()
-	activeSounds[skullSound] = true
-
-	TweenService:Create(jumpscareImg, TweenInfo.new(0.3), {ImageTransparency = 0}):Play() -- Ảnh thứ hai hiện rõ dần
-	task.wait(1.5) -- Thời gian hiển thị của ảnh thứ hai
-
-	TweenService:Create(jumpscareImg, TweenInfo.new(0.5), {ImageTransparency = 1}):Play().Completed:Wait() -- Làm mờ ảnh thứ hai và đợi hoàn tất
-
-	-- Khôi phục trạng thái camera và người chơi
-	if cameraConn then cameraConn:Disconnect(); cameraConn = nil end
-	Camera.CameraType = Enum.CameraType.Custom
-	isJumpscareActive = false
-	jumpscareGui:Destroy()
-
-	-- Dừng và dọn dẹp tất cả các âm thanh jumpscare đang hoạt động
-	for sound, _ in pairs(activeSounds) do
-		if sound and sound.Playing then
-			sound:Stop()
-		end
-		if sound and sound.Parent then
-			sound:Destroy()
-		end
-	end
-	activeSounds = {}
-
-	local char = LocalPlayer.Character
-	if char then
-		local hum = char:FindFirstChild("Humanoid")
-		if hum then
-			hum.WalkSpeed = 16
-			hum.JumpPower = 50
-			hum.AutoRotate = true
-			hum.PlatformStand = false
-			for _, part in ipairs(char:GetDescendants()) do
-				if part:IsA("BasePart") then
-					part.Anchored = false
-				end
-			end
-		end
-	end
-	print("Jumpscare đã kết thúc và trạng thái người chơi đã được khôi phục.")
-end
-
--- Hàm này thiết lập môi trường cho jumpscare (khóa người chơi, camera, hiệu ứng nhiễu)
-local function doJumpscareWithEffect()
-	if isJumpscareActive then return end
-	isJumpscareActive = true
-
-	local char = LocalPlayer.Character
-	if char then
-		local hum = char:FindFirstChild("Humanoid")
-		if hum then
-			hum.WalkSpeed = 0
-			hum.JumpPower = 0
-			hum.AutoRotate = false
-			hum.PlatformStand = true
-			for _, part in ipairs(char:GetDescendants()) do
-				if part:IsA("BasePart") then
-					part.Anchored = true
-				end
-			end
-		end
-	end
-
-	Camera.CameraType = Enum.CameraType.Scriptable
-	if cameraConn then cameraConn:Disconnect() end
-	cameraConn = RunService.RenderStepped:Connect(function()
-		if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head") and entityPart and entityModel and entityModel.Parent then
-			Camera.CFrame = CFrame.new(LocalPlayer.Character.Head.Position, entityPart.Position)
-		else
-			warn("Không thể khóa camera: entityPart, đầu người chơi hoặc entityModel không tồn tại.")
-			if cameraConn then cameraConn:Disconnect() end
-		end
-	end)
-	print("Camera đã được khóa vào entity ngay khi người chơi bị đóng băng.")
-
-	if inputConn1 then inputConn1:Disconnect(); inputConn1 = nil end
-	if inputConn2 then inputConn2:Disconnect(); inputConn2 = nil end
-	inputConn1 = UserInputService.InputBegan:Connect(function() return Enum.ContextActionResult.Sink end)
-	inputConn2 = UserInputService.InputChanged:Connect(function() return Enum.ContextActionResult.Sink end)
-
-	local staticGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
-	staticGui.Name = "StaticGUI"
-	local staticImg = Instance.new("ImageLabel", staticGui)
-	staticImg.Size = UDim2.new(1, 0, 1, 0)
-	staticImg.BackgroundTransparency = 1
-	staticImg.ImageTransparency = 0
-	staticImg.Image = "rbxassetid://1568285513"
-	staticImg.ZIndex = 11
-
-	local staticSound = Instance.new("Sound", workspace)
-	staticSound.SoundId = "rbxassetid://1845110821"
-	staticSound.Volume = 1
-	staticSound.Looped = true
-	staticSound:Play()
-	activeSounds[staticSound] = true
-
-	local currentBrightness = Lighting.Brightness
-	TweenService:Create(Lighting, TweenInfo.new(0.5), {Brightness = -1}):Play()
-
-	task.wait(1.5)
-
-	staticImg.ImageTransparency = 1
-	if staticSound and staticSound.Playing then staticSound:Stop() end
-	staticSound:Destroy()
-	staticGui:Destroy()
-
-	TweenService:Create(Lighting, TweenInfo.new(0.5), {Brightness = currentBrightness}):Play()
-
-	colorCorrection.TintColor = Color3.fromRGB(255, 255, 255)
-	colorCorrection.Contrast = 0
-
-	task.wait(0.5)
-
-	executeRealJumpscare()
-end
-
----====== Entity Callbacks ======---
+---====== Debug entity ======---
 
 entity:SetCallback("OnSpawned", function()
-	print("Thực thể đã xuất hiện (spawn)")
-	local Players = game:GetService("Players")
-	local player = Players.LocalPlayer
+	print("Entity has spawned")
+	task.spawn(function()
+		while true do
+			task.wait(0.5)
 
-	local function GetGitSound(GithubSnd, SoundName)
-		local url = GithubSnd
-		if not isfile(SoundName .. ".mp3") then
-			writefile(SoundName .. ".mp3", game:HttpGet(url))
-		end
-		local sound = Instance.new("Sound")
-		sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
-		return sound
-	end
-	local Lord = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Your_Consenting_Mind.mp3?raw=true","Your")
-	Lord.Parent = workspace
-	Lord.Volume = 3
-	Lord.PlaybackSpeed = 1
-	Lord:Play()
+			local player = game.Players.LocalPlayer
+			local char = player.Character
+			if not char then continue end
 
-	entityModel = entity.Model
-	entityModel.Parent = workspace
+			local hum = char:FindFirstChildWhichIsA("Humanoid")
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			local entity = workspace:FindFirstChild("Deer God") and workspace["Deer God"]:FindFirstChildWhichIsA("BasePart")
 
-	if entityModel then
-		entityPart = entityModel:FindFirstChild("RushNew")
-		if not entityPart then
-			warn("Model Deer God KHÔNG chứa part có tên 'RushNew'!")
-			entityPart = entityModel.PrimaryPart or entityModel:FindFirstChildOfClass("BasePart")
-			if not entityPart then
-				warn("Không tìm thấy 'RushNew' hoặc bất kỳ BasePart nào phù hợp cho Deer God! Thực thể có thể không di chuyển đúng.")
-				return
-			end
-		end
-		entityModel.PrimaryPart = entityPart
-		print("DeerGod.PrimaryPart đã được đặt thành: " .. entityModel.PrimaryPart.Name)
-	end
+			if hum and hrp and entity then
+				if (hrp.Position - entity.Position).Magnitude <= 9 then
+					if hum.Health > 0 then
+						hum.Health = 0
+						loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Deer%20God%20Jumpscare"))()
 
-	coroutine.wrap(function()
-		for i, v in ipairs(entityModel:GetDescendants()) do
-			if v.Name == "RushNew" then
-				pcall(function()
-					if v:FindFirstChild("Breathing") then v.Breathing:Destroy() end
-				end)
-				pcall(function()
-					if v:FindFirstChild("Footsteps") then v.Footsteps:Destroy() end
-				end)
-			end
-		end
-	end)()
+						local stats = game:GetService("ReplicatedStorage").GameStats:FindFirstChild("Player_" .. player.Name)
+						if stats and stats:FindFirstChild("Total") then
+							stats.Total.DeathCause.Value = "Deer God"
+						end
 
-	originalTintColor = colorCorrection.TintColor
-	originalContrast = colorCorrection.Contrast
-
-	colorCorrection.TintColor = Color3.fromRGB(255, 255, 255)
-	colorCorrection.Contrast = 0.1
-	TweenService:Create(colorCorrection, TweenInfo.new(2.5), {Contrast = 0}):Play()
-	TweenService:Create(colorCorrection, TweenInfo.new(5), {TintColor = Color3.fromRGB(255, 255, 255)}):Play()
-
-	MoveActive = true
-	-- Loại bỏ biến isDestroyingAtDoor và currentDoor vì không còn logic cửa
-	-- Loại bỏ hàm DoorDetection() vì không còn logic cửa
-
-	if chaseConnection then chaseConnection:Disconnect() end
-	chaseConnection = RunService.Heartbeat:Connect(function(dt)
-		if not MoveActive or not entityModel or not entityModel.PrimaryPart or not HumanoidRootPart or not HumanoidRootPart.Parent then return end
-
-		-- Không còn gọi DoorDetection() ở đây nữa
-
-		local pos = entityModel.PrimaryPart.Position
-		local target = HumanoidRootPart.Position
-		local distance = (target - pos).Magnitude
-
-		if distance <= activationRange then -- Chỉ đuổi theo nếu trong phạm vi kích hoạt
-			local dir = (target - pos).Unit
-			local moveVec = dir * customSpeed * dt
-			local newCFrame = CFrame.new(pos + moveVec, target)
-			entityModel:SetPrimaryPartCFrame(newCFrame)
-		else
-			-- Nếu ngoài phạm vi, Deer God đứng yên
-			-- (Hoặc bạn có thể thêm hành vi khác ở đây nếu muốn)
-		end
-	end)
-
-	-- >>> PHẦN TỰ HỦY SAU 13-15 GIÂY ĐƯỢC ĐẶT LẠI VÀO ĐÂY <<<
-	if destroyTimer then task.cancel(destroyTimer) end
-	destroyTimer = task.delay(math.random(35, 36), function()
-		Lord:Destroy()
-		print("Deer God self-destruct timer activated. Despawning regardless of proximity.")
-		MoveActive = true -- Dừng di chuyển trước khi biến mất
-		task.wait(0.1) -- Đợi một chút để tạo hiệu ứng dừng
-		if entityModel and entityModel.PrimaryPart then
-			entityModel:SetPrimaryPartCFrame(entityModel.PrimaryPart.CFrame * CFrame.new(0, -300, 0)) -- Di chuyển xuống dưới đất
-		end
-		task.wait(0) -- Đợi một frame để CFrame cập nhật
-		entity:Despawn() -- Hủy thực thể
-	end)
-
-	local spawnedRushNew = entityModel:FindFirstChild("RushNew")
-	if spawnedRushNew then
-		spawnedRushNew.Touched:Connect(function(hit)
-			local h = hit.Parent and hit.Parent:FindFirstChild("Humanoid")
-			if h and hit:IsDescendantOf(Character) then
-				h:TakeDamage(100)
-				loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Deer%20God%20Jumpscare"))()
-				local stats = game:GetService("ReplicatedStorage").GameStats
-				if stats:FindFirstChild("Player_"..LocalPlayer.Name) then
-					stats["Player_"..LocalPlayer.Name].Total.DeathCause.Value = "Deer God"
+						break -- hoặc return
+					end
 				end
 			end
-
-		end)
-		
-		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = "JumpscareOverlay"
-		screenGui.IgnoreGuiInset = true
-		screenGui.DisplayOrder = 999999
-		screenGui.Parent = player:WaitForChild("PlayerGui")
-
-		local imageLabel = Instance.new("ImageLabel")
-		imageLabel.BackgroundTransparency = 1
-		imageLabel.BorderSizePixel = 0
-		imageLabel.Position = UDim2.new(0, 0, 0, 0)
-		imageLabel.Size = UDim2.new(1, 0, 1, 0)
-		imageLabel.ScaleType = Enum.ScaleType.Stretch
-		imageLabel.ImageTransparency = 0.7
-		imageLabel.Visible = true
-		imageLabel.Parent = screenGui
-
-		local jumpscareImage1 = "rbxassetid://134346506410955"		
-		local jumpscareImage2 = "rbxassetid://7578853379"
-		local jumpscareImage3 = "rbxassetid://103846711769666"
-		local jumpscareImage4 = "rbxassetid://78199392475572"
-
-
-		local flashDuration = 35
-		local start = tick()
-
-		while tick() - start < flashDuration do
-			imageLabel.Image = jumpscareImage1
-			task.wait()
-			imageLabel.Image = jumpscareImage2
-			task.wait()
-			imageLabel.Image = jumpscareImage3
-			task.wait()
-			imageLabel.Image = jumpscareImage4
-			task.wait()
 		end
+	end)
 
-		imageLabel:Destroy()
 
-	else
-		warn("Spawned Deer God model does not contain 'RushNew' for Touched event!")
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "JumpscareOverlay"
+	screenGui.IgnoreGuiInset = true
+	screenGui.DisplayOrder = 999999
+	screenGui.Parent = player:WaitForChild("PlayerGui")
+
+	local imageLabel = Instance.new("ImageLabel")
+	imageLabel.BackgroundTransparency = 1
+	imageLabel.BorderSizePixel = 0
+	imageLabel.Position = UDim2.new(0, 0, 0, 0)
+	imageLabel.Size = UDim2.new(1, 0, 1, 0)
+	imageLabel.ScaleType = Enum.ScaleType.Stretch
+	imageLabel.ImageTransparency = 0.7
+	imageLabel.Visible = true
+	imageLabel.Parent = screenGui
+
+	local jumpscareImage1 = "rbxassetid://134346506410955"		
+	local jumpscareImage2 = "rbxassetid://7578853379"
+	local jumpscareImage3 = "rbxassetid://103846711769666"
+	local jumpscareImage4 = "rbxassetid://78199392475572"
+
+
+	local flashDuration = 350
+	local start = tick()
+
+	while tick() - start < flashDuration do
+		imageLabel.Image = jumpscareImage1
+		task.wait()
+		imageLabel.Image = jumpscareImage2
+		task.wait()
+		imageLabel.Image = jumpscareImage3
+		task.wait()
+		imageLabel.Image = jumpscareImage4
+		task.wait()
 	end
+	
 end)
 
 entity:SetCallback("OnStartMoving", function()
-	print("Thực thể đã bắt đầu di chuyển (Lưu ý: Di chuyển được kiểm soát bởi Heartbeat, không phải logic mặc định của spawner).")
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local camera = workspace.CurrentCamera
+task.spawn(function()
+	while true do
+		task.wait(0.5)
+
+		local player = game.Players.LocalPlayer
+		local char = player.Character
+		if not char then continue end
+
+		local hum = char:FindFirstChildWhichIsA("Humanoid")
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+			local entity = workspace:FindFirstChild("Deer God") and workspace["Deer God"]:FindFirstChildWhichIsA("BasePart")
+
+		if hum and hrp and entity then
+			if (hrp.Position - entity.Position).Magnitude <= 50 then
+				if game.Players.LocalPlayer.Character:GetAttribute("Hiding") and hum.Health > 0 then
+					hum.Health = 0
+					loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Deer%20God%20Jumpscare"))()
+
+					local stats = game:GetService("ReplicatedStorage").GameStats:FindFirstChild("Player_" .. player.Name)
+					if stats and stats:FindFirstChild("Total") then
+						stats.Total.DeathCause.Value = "Deer God"
+					end
+
+					break -- hoặc return
+				end
+			end
+		end
+	end
+end)
+	
 end)
 
-entity:SetCallback("OnEnterRoom", function(room, firstTime)
-	if firstTime then
-		print("Thực thể đã vào phòng: ".. room.Name.. " lần đầu tiên")
+entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
+	if firstTime == true then
+		print("Entity has entered room: ".. room.Name.. " for the first time")
+		local a1 = ({
+			"Join us",
+			"Why do you run, child",
+			"Your submission is inevitable",
+			"Your flesh will sustain my children"
+		})[math.random(4)]
+
+		require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption(a1, true)
 	else
-		print("Thực thể đã vào phòng: ".. room.Name.. " lần nữa")
+		print("Entity has entered room: ".. room.Name.. " again")
 	end
 end)
 
-entity:SetCallback("OnLookAt", function(lineOfSight)
-	if lineOfSight then
-		print("Người chơi đang nhìn vào thực thể")
+entity:SetCallback("OnLookAt", function(lineOfSight: boolean)
+	if lineOfSight == true then
+		print("Player is looking at entity")
 	else
-		print("Góc nhìn của người chơi bị cản trở bởi vật gì đó")
+		print("Player view is obstructed by something")
 	end
 end)
 
-entity:SetCallback("OnRebounding", function(startOfRebound)
-	if startOfRebound then
-		print("Thực thể đã bắt đầu phản lực")
+entity:SetCallback("OnRebounding", function(startOfRebound: boolean)
+	if startOfRebound == true then
+		print("Entity has started rebounding")
 	else
-		print("Thực thể đã kết thúc phản lực")
+		print("Entity has finished rebounding")
 	end
 end)
 
 entity:SetCallback("OnDespawning", function()
-	print("Thực thể đang biến mất (despawning)")
-	if chaseConnection then
-		chaseConnection:Disconnect()
-		chaseConnection = nil
-	end
-	if destroyTimer then
-		task.cancel(destroyTimer)
-		destroyTimer = nil
-	end
-
-	TweenService:Create(colorCorrection, TweenInfo.new(2.5), {Contrast = originalContrast}):Play()
-	TweenService:Create(colorCorrection, TweenInfo.new(5), {TintColor = originalTintColor}):Play()
-
-	if entityModel then
-		for _, part in ipairs(entityModel:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.Anchored = false
-			end
-		end
-		print("Thực thể đã được bỏ neo trước khi biến mất.")
-	end
-	-- Loại bỏ reset currentDoor và isDestroyingAtDoor
-end)
-
-entity:SetCallback("OnDespawned", function()
-	print("Thực thể đã biến mất (despawned)")
+	print("Entity is despawning")
+	local deer = workspace:WaitForChild("Deer God")
+	deer:Destroy()
 	---====== Load achievement giver ======---
 	local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
 
@@ -465,164 +240,58 @@ entity:SetCallback("OnDespawned", function()
 		Reason = "Survive a God...",
 		Image = "rbxassetid://91924400987994"
 	})
+	
+	local anhguoc = player:WaitForChild("PlayerGui")
+	local cac = anhguoc:WaitForChild("JumpscareOverlay")
+	if cac then
+		cac:Destroy()
+	end
+	
+	Lord:Destroy()
 end)
 
-entity:SetCallback("OnDamagePlayer", function(newHealth)
-	local player = game.Players.LocalPlayer
-	local playerGui = player:WaitForChild("PlayerGui")
-	local character = player.Character or player.CharacterAdded:Wait()
-	local humanoid = character:WaitForChild("Humanoid")
-	local camera = workspace.CurrentCamera
+entity:SetCallback("OnDespawned", function()
+	print("Entity has despawned")
+end)
 
-	-- Bắt đầu Jumpscare nếu player chết
+entity:SetCallback("OnDamagePlayer", function(newHealth: number)
 	if newHealth <= 0 then
-		local screenGui = Instance.new("ScreenGui")
-		screenGui.Parent = playerGui
-		screenGui.Name = "ScreenGui"
-		screenGui.IgnoreGuiInset = true
-
-		local stopEffects = false
-		local doneFading = false
-
-		-- Âm thanh jumpscare
-		local killSound = Instance.new("Sound")
-		killSound.Parent = workspace
-		killSound.PlaybackSpeed = 1
-		killSound.SoundId = "rbxassetid://18459521002"
-		killSound.Name = "Dear god death sound chat"
-		killSound.Volume = 10
-		killSound.Looped = true
-
-		-- Hiệu ứng âm thanh
-		Instance.new("FlangeSoundEffect", killSound).Rate = 0.2
-		Instance.new("TremoloSoundEffect", killSound).Frequency = 1
-		Instance.new("PitchShiftSoundEffect", killSound).Octave = 1
-		Instance.new("DistortionSoundEffect", killSound).Level = 0.2
-
-		-- UI
-		local background = Instance.new("ImageLabel", screenGui)
-		background.Size = UDim2.new(1, 0, 1, 0)
-		background.Image = "rbxassetid://1712510813"
-		background.ImageTransparency = 0.5
-		background.BackgroundColor3 = Color3.new(0, 0, 0)
-		background.BackgroundTransparency = 0
-
-		local face = Instance.new("ImageLabel", screenGui)
-		face.AnchorPoint = Vector2.new(0.5, 0.5)
-		face.Position = UDim2.new(0.5, 0, 0.589, 0)
-		face.Size = UDim2.new(0, 30, 0, 30)
-		face.Image = "rbxassetid://11395249132"
-		face.BackgroundTransparency = 1
-
-		local text = Instance.new("ImageLabel", screenGui)
-		text.AnchorPoint = Vector2.new(0.5, 0.5)
-		text.Position = UDim2.new(0.5, 0, 0.5, 0)
-		text.Size = UDim2.new(0, 150, 0, 150)
-		text.Image = "rbxassetid://99132041298170"
-		text.BackgroundTransparency = 1
-
-		killSound:Play()
-
-		-- Camera zoom
-		local startFov = camera.FieldOfView
-		local zoomFov = 60
-		local zoomDuration = 0.7
-
-		camera.CameraType = Enum.CameraType.Scriptable
-		game:GetService("TweenService"):Create(camera, TweenInfo.new(zoomDuration), {FieldOfView = zoomFov}):Play()
-
-		game:GetService("TweenService"):Create(face, TweenInfo.new(zoomDuration), {
-			Size = UDim2.new(0, 1200, 0, 1200),
-			Position = UDim2.new(0.5, 0, 0.5, 0)
-		}):Play()
-
-		-- Jumpscare Effects
-		task.spawn(function()
-			while not stopEffects do
-				background.ImageTransparency = 0.3
-				background.BackgroundTransparency = 0
-				task.wait(0.1)
-				background.ImageTransparency = 0
-				background.BackgroundTransparency = 0.3
-				task.wait(0.1)
-			end
-		end)
-
-		task.spawn(function()
-			while not stopEffects do
-				background.Image = "rbxassetid://131073231978514"
-				task.wait(0.0589)
-				background.Image = "rbxassetid://105841646930424"
-				task.wait(0.0589)
-			end
-		end)
-
-		task.spawn(function()
-			while not stopEffects do
-				face.Rotation = 10
-				face.Image = "rbxassetid://17787953801"
-				task.wait(0.0589)
-				face.Rotation = -10
-				task.wait(0.0589)
-			end
-		end)
-
-		task.spawn(function()
-			while not stopEffects do
-				text.Image = "rbxassetid://88490592395124"
-				task.wait(0.0589)
-				text.Image = "rbxassetid://99132041298170"
-				task.wait(0.0589)
-			end
-		end)
-
-		task.spawn(function()
-			while not stopEffects do
-				text.Position = UDim2.new(math.random(), 0, math.random(), 0)
-				task.wait(0.05)
-			end
-		end)
-
-		task.spawn(function()
-			while not stopEffects do
-				text.ImageTransparency = 0
-				task.wait(0.1)
-				text.ImageTransparency = 1
-				task.wait(0.1)
-			end
-		end)
-
-		-- Đợi và fade out
-		task.wait(zoomDuration)
-		stopEffects = true
-		killSound:Stop()
-
-		task.spawn(function()
-			while not doneFading do
-				face.ImageTransparency = math.min(face.ImageTransparency + 0.1, 1)
-				text.ImageTransparency = math.min(text.ImageTransparency + 0.1, 1)
-				background.ImageTransparency = math.min(background.ImageTransparency + 0.1, 1)
-				background.BackgroundTransparency = math.min(background.BackgroundTransparency + 0.1, 1)
-				if face.ImageTransparency >= 1 then
-					doneFading = true
-				end
-				task.wait(0.05)
-			end
-			screenGui:Destroy()
-		end)
-
-		task.wait(0.7)
-		camera.CameraType = Enum.CameraType.Custom
-		camera.FieldOfView = startFov
+		print("Entity has killed the player")
 	else
-		print("Thực thể đã gây sát thương cho người chơi")
+		print("Entity has damaged the player")
+		local TweenService = game:GetService("TweenService")
+
+		local model = workspace:WaitForChild("Deer God")
+		local part = model.RushNew
+		assert(part, "Model chưa có PrimaryPart!")
+
+		local player = game.Players.LocalPlayer
+		local hrp = (player.Character or player.CharacterAdded:Wait()):WaitForChild("HumanoidRootPart")
+
+		part.Anchored = true
+
+		local tween = TweenService:Create(
+			part,
+			TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			{CFrame = hrp.CFrame}
+		)
+
+		tween:Play()
+		tween.Completed:Wait()
 	end
 end)
 
-LocalPlayer.CharacterAdded:Connect(function(char)
-	Character = char
-	HumanoidRootPart = char:WaitForChild("HumanoidRootPart")
+--[[
+
+DEVELOPER NOTE:
+By overwriting 'CrucifixionOverwrite' the default crucifixion callback will be replaced with your custom callback.
+
+entity:SetCallback("CrucifixionOverwrite", function()
+    print("Custom crucifixion callback")
 end)
 
----====== Chạy Thực Thể ======---
-entity:Run()
+]]--
+
+---====== Run entity ======---
+
+entity:Run(true)
