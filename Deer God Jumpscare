@@ -207,6 +207,5 @@
 		end)
 		task.wait(0.1)
 		task.wait(0.1)
-		game.Players.LocalPlayer.Character.Humanoid.Health = 0
 		task.wait(3)
 		done = true
