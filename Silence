@@ -30,7 +30,7 @@ Silence.Anchored = true
 
 local startCF = entrance.CFrame * CFrame.new(0,30,-35)
 local spaw5n = entrance.CFrame * CFrame.new(0,0,-35)
-local endCF = entrance.CFrame * CFrame.new(0,0,-35)
+local endCF = entrance.CFrame * CFrame.new(0,2,-35)
 
 Silence.CFrame = startCF
 
@@ -42,7 +42,7 @@ TweenService:Create(
 	}
 ):Play()
 
-local light = Silence:WaitForChild("Attachment"):WaitForChild("PointLight")
+local light = Silence:WaitForChild("PointLight")
 
 TweenService:Create(
 	light,
