@@ -16,7 +16,7 @@ if old then
 	old:Destroy()
 end
 
-local Silence5 = game:GetObjects("rbxassetid://11535812658")[1]
+local Silence5 = game:GetObjects("rbxassetid://75200967024105")[1]
 Silence5.Name = "Silence"
 Silence5.Parent = workspace
 
