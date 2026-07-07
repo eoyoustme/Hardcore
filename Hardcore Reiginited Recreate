@@ -27,7 +27,7 @@ local entityList = {
 	{
 		name = "Deer God",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Deer%20God",
-		chance = math.random(1,1.5)
+		chance = math.random(2,2.5)
 	},
 	{
 		name = "Shocker",
@@ -52,7 +52,7 @@ local entityList = {
 	{
 		name = "Silence",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Silence",
-		chance = 1
+		chance = 2
 	},
 	{
 		name = "Frostbite",
