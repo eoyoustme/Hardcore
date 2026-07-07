@@ -2,7 +2,7 @@ require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("
 
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
-require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Hardcore Reginited Recreate has Activated (alpha)", true)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Hardcore Reginited Recreate has Activated", true)
 wait(2)
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("credit to Nhankgnew , Og Hunger(New) (Mode developder) , Hatsune Miku (orgin hardcore reiginited game) , Vynixy(Spawner) , Noonie ( I forgot srry u:( ) Ping (i Forgot too)", true)
 
