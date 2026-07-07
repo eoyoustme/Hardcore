@@ -1,0 +1,184 @@
+		local player = game.Players.LocalPlayer
+		local playergui = player:WaitForChild("PlayerGui")
+
+		local screenGui = Instance.new("ScreenGui")
+		screenGui.Parent = playergui
+		screenGui.Name = "Screen Gui"
+		screenGui.IgnoreGuiInset = true
+
+
+		local stop = false
+		local done = false
+
+		local kill = Instance.new("Sound")
+		kill.Parent = workspace
+		kill.PlaybackSpeed = 1
+		kill.SoundId = "rbxassetid://126046703819355"
+		kill.Name = "Dear god death sound chat"
+		kill.Volume = 5
+		kill.Looped = true
+
+
+
+		local flange = Instance.new("FlangeSoundEffect")
+		flange.Parent = kill
+		flange.Depth = 1
+		flange.Mix = 1
+		flange.Rate = 0.2
+
+		local trem = Instance.new("TremoloSoundEffect")
+		trem.Parent = kill
+		trem.Depth = 1
+		trem.Duty = 0.94
+		trem.Frequency = 20
+
+		local distort = Instance.new("DistortionSoundEffect")
+		distort.Parent = kill
+		distort.Level = 0.98
+
+		kill:Play()
+
+		local Backgroun = Instance.new("ImageLabel")
+		Backgroun.Parent = screenGui
+		Backgroun.Size = UDim2.new(1, 0, 1, 0)
+		Backgroun.ImageTransparency = 1
+		Backgroun.BackgroundTransparency = 0
+		Backgroun.BackgroundColor3 = Color3.new(0, 0, 0)
+		Backgroun.Image = "rbxassetid://105983470581183"
+
+		task.wait()
+
+		local face = Instance.new("ImageLabel")
+		face.Parent = screenGui
+		face.AnchorPoint = Vector2.new(0.5, 0.5)
+		face.Position = UDim2.new(0.5, 0, 0.589, 0)
+		face.Size = UDim2.new(0, 1460, 0, 1460)
+		face.Image = "rbxassetid://73683518024275"
+		face.ImageTransparency = 0
+		face.BackgroundTransparency = 1
+
+
+		task.spawn(function()
+			while task.wait() do
+				if stop == true then
+					break
+				end
+				kill.SoundId = "rbxassetid://107434170605724"
+				task.wait(0.2)
+				kill.SoundId = "rbxassetid://140217414944350"
+				task.wait(0.1)
+			end
+		end)
+
+
+
+		task.spawn(function()
+			while task.wait() do
+				if stop == true then
+					break
+				end
+				Backgroun.BackgroundTransparency = 0
+				Backgroun.ImageTransparency = 1
+				task.wait(0.1)
+				Backgroun.BackgroundTransparency = 1
+				Backgroun.ImageTransparency = 0
+			end
+		end)
+
+		task.spawn(function()
+			while task.wait() do
+				if stop == true then
+					break
+				end
+				Backgroun.Image = "rbxassetid://131073231978514"
+				task.wait(0.0589)
+				Backgroun.Image = "rbxassetid://105841646930424"
+			end
+		end)
+
+		task.spawn(function()
+			while task.wait() do
+				if stop == true then
+					break
+				end
+				face.Rotation = 0
+				face.Image = "rbxassetid://122859819664215"
+				task.wait(0.0589)
+				face.Rotation = -0
+				face.Image = "rbxassetid://84489429478798"
+				task.wait(0.0589)
+				face.Rotation = 0
+				face.Image = "rbxassetid://73683518024275"
+				task.wait(0.0589)
+				face.Rotation = -0
+			end
+		end)
+
+
+
+		task.wait()
+
+
+		local text = Instance.new("ImageLabel")
+		text.Parent = screenGui
+		text.AnchorPoint = Vector2.new(0.5, 0.5)
+		text.Position = UDim2.new(0.5, 0, 0.5, 0)
+		text.Size = UDim2.new(0, 300, 0, 300)
+		text.Image = "rbxassetid://117106082021449"
+		text.ImageTransparency = 0
+		text.BackgroundTransparency = 1
+
+		task.spawn(function()
+			while task.wait() do
+				if stop == true then
+					break
+				end
+				text.Image = "rbxassetid://89229444931090"
+				task.wait(0.0589)
+				text.Image = "rbxassetid://117106082021449"
+			end
+		end)
+
+		task.spawn(function()
+			while task.wait() do
+				if stop == true then
+					break
+				end
+				text.Position = UDim2.new(Random.new():NextNumber(0, 0.5), 0, Random.new():NextNumber(0, 0.6), 0)
+				task.wait()
+				text.Position = UDim2.new(Random.new():NextNumber(0, 0.5), 0, Random.new():NextNumber(0, 0.6), 0)
+			end
+		end)
+
+		task.spawn(function()
+			while task.wait() do
+				if stop == true then
+					break
+				end
+				text.ImageTransparency = 0
+				task.wait()
+				text.ImageTransparency = 1
+			end
+		end)
+
+
+		wait(0.96)
+		stop = true
+		kill:Stop()
+		task.wait()
+		task.spawn(function()
+			while task.wait() do
+				if done == true then
+					break
+				end
+				face.ImageTransparency = 1
+				text.ImageTransparency = 1
+				Backgroun.ImageTransparency = 1
+				Backgroun.BackgroundTransparency = 1
+			end
+		end)
+		task.wait(0.1)
+		task.wait(0.1)
+		game.Players.LocalPlayer.Character.Humanoid.Health = 0
+		task.wait(3)
+		done = true
