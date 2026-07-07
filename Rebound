@@ -82,7 +82,7 @@ local entity = Spawner:Create({
 	Entity = {
 		Name = "Rebound",
 		Asset = "https://github.com/eoyoustme/Hardcore/blob/main/Rebound1.rbxm?raw=true",
-		HeightOffset = 0
+		HeightOffset = 3
 	},
 	Lights = {
 		Flicker = {
