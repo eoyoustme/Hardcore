@@ -282,13 +282,13 @@ local function PlayerHasItemEquipped(name: string): boolean
 	return false
 end
 
-local function CrucifixEntity(entity: any, tool: Tool)
+local function CrucifixEntity(entity: any, Crucifix: Tool)
 	local model = entity.Model
 	local config = entity.Config
 
 	local resist = config.Crucifixion.Resist
 
-	local toolPivot = tool:GetPivot()
+	local toolPivot = Crucifix:GetPivot()
 	local entityPivot = model:GetPivot()
 
 	local params = RaycastParams.new()
@@ -335,11 +335,14 @@ local function CrucifixEntity(entity: any, tool: Tool)
 			task.wait()
 		end
 		model:Destroy()
+		Crucifix:Destroy()
 	end)
+	
+	require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Thank for Free me ,Child,I remeber my children....", true)
 
 	-- Animation
-	TweenService:Create(pentagram.Circle, TweenInfo.new(2, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), { CFrame = pentagram.Circle.CFrame - Vector3.new(0, 25, 0) }):Play()
-	TweenService:Create(crucifix.BodyAngularVelocity, TweenInfo.new(4, Enum.EasingStyle.Sine, Enum.EasingDirection.In), { AngularVelocity = Vector3.new(0, 40, 0) }):Play()
+	TweenService:Create(pentagram.Circle, TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), { CFrame = pentagram.Circle.CFrame - Vector3.new(0, 25, 0) }):Play()
+	TweenService:Create(crucifix.BodyAngularVelocity, TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.In), { AngularVelocity = Vector3.new(0, 40, 0) }):Play()
 	task.delay(2, pentagram.Circle.Destroy, pentagram.Circle)
 
 	task.spawn(function()
