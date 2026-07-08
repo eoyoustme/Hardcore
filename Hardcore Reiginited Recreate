@@ -72,7 +72,7 @@ local entityList = {
 	}
 	{
 		name = "Troll",
-		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Singularity",
+		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/IndiHome",
 		chance = math.random(0.05,1)
 	}
 }
