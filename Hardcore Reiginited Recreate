@@ -6,12 +6,10 @@ require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("
 wait(2)
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("credit to Nhankgnew , Og Hunger(New) (Mode developder) , Hatsune Miku (orgin hardcore reiginited game) , Vynixy(Spawner) , Noonie ( I forgot srry u:( ) Ping (i Forgot too)", true)
 
-pcall(function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/HC%20Entity"))()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Stamina"))()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Intro"))()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/rebouna/refs/heads/main/guiding%20light"))()
-end)
 
 local entityList = {
 	{
