@@ -65,11 +65,11 @@ local entityList = {
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Frostbite",
 		chance = math.random(3.25,3.5)
 	},
-	{,
+	{
 		name = "Singularity",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Singularity",
 		chance = math.random(5.25,5.5)
-	}
+	},
 	{
 		name = "Troll",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/IndiHome",
