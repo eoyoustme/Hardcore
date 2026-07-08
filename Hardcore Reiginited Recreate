@@ -2,7 +2,7 @@ require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("
 
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
-require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Hardcore Reginited Recreate has Activated", true)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Hardcore Reginited Recreate has Activated (alpha)", true)
 wait(2)
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("credit to Nhankgnew , Og Hunger(New) (Mode developder) , Hatsune Miku (orgin hardcore reiginited game) , Vynixy(Spawner) , Noonie ( I forgot srry u:( ) Ping (i Forgot too)", true)
 
@@ -14,7 +14,6 @@ pcall(function()
 end)
 
 task.spawn(function()
-	wait(2)
 	require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Hi there thank for play my mode", true)
 	wait(2)
 	require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Have Fun (you won't)", true)
@@ -39,7 +38,7 @@ local entityList = {
 	{
 		name = "Shocker",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Shocker",
-		chance = 35
+		chance = 12.5
 	},
 	{
 		name = "Cease",
@@ -65,6 +64,11 @@ local entityList = {
 		name = "Frostbite",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Frostbite",
 		chance = math.random(3.25,3.5)
+	},
+	{
+		name = "Singularity",
+		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Singularity",
+		chance = math.random(5.25,5.5)
 	}
 }
 
