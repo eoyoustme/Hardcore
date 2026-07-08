@@ -1,0 +1,47 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local Debris = game:GetService("Debris")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+
+local function GetGitSound(GithubSnd, SoundName)
+	local url = GithubSnd
+	if not isfile(SoundName .. ".mp3") then
+		writefile(SoundName .. ".mp3", game:HttpGet(url))
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+	return sound
+end
+local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/source.mp3?raw=true","IndiHome")
+Jumpscare.Parent = workspace
+Jumpscare.Volume = 3
+Jumpscare.PlaybackSpeed = 1
+Jumpscare:Play()
+
+wait(1)
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "Aihoi"
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 999999
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local imageLabel = Instance.new("ImageLabel")
+imageLabel.BackgroundTransparency = 1
+imageLabel.BorderSizePixel = 0
+imageLabel.Position = UDim2.new(0, 0,0, 0)
+imageLabel.Size = UDim2.new(0, 1259, 0, 838)
+imageLabel.ScaleType = Enum.ScaleType.Stretch
+imageLabel.ImageTransparency = 0
+imageLabel.Image = "rbxassetid://15551015450"
+imageLabel.Visible = true
+imageLabel.Parent = screenGui
+
+wait(13)
+
+Jumpscare:Destroy()
+screenGui:Destroy()
