@@ -34,14 +34,14 @@ local imageLabel = Instance.new("ImageLabel")
 imageLabel.BackgroundTransparency = 1
 imageLabel.BorderSizePixel = 0
 imageLabel.Position = UDim2.new(0, 0,0, 0)
-imageLabel.Size = UDim2.new(0, 1259, 0, 838)
+imageLabel.Size = UDim2.new(1,0, 1, 0)
 imageLabel.ScaleType = Enum.ScaleType.Stretch
 imageLabel.ImageTransparency = 0
 imageLabel.Image = "rbxassetid://15551015450"
 imageLabel.Visible = true
 imageLabel.Parent = screenGui
 
-wait(13)
+wait(15)
 
 Jumpscare:Destroy()
 screenGui:Destroy()
