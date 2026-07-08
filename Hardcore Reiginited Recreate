@@ -61,6 +61,11 @@ local entityList = {
 		name = "Singularity",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Singularity",
 		chance = math.random(5.25,5.5)
+	},
+	{
+		name = "Troll",
+		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/IndiHome",
+		chance = math.random(0.25,1.5)
 	}
 }
 
