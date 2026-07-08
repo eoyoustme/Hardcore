@@ -116,7 +116,7 @@ end
 math.randomseed(os.clock() * 1e6)
 
 while true do
-	task.wait(Random.new():NextNumber(10,14))
+	task.wait(10)
 
 	if not IsSeekActive() then
 		local threads = {}
