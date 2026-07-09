@@ -1,8 +1,9 @@
 -- Create the ScreenGui and Sprint Bar
-local player = game.Players.LocalPlayer
+local player = game:GetService("Players")
+local LocalPlayer = player.LocalPlayer
 local screenGui = Instance.new("ScreenGui")
 screenGui.IgnoreGuiInset = true
-screenGui.Parent = player.PlayerGui
+screenGui.Parent = LocalPlayer.PlayerGui
 
 --------------------------------------------------------
 -- NEW STAMINA UI STRUCTURE (3 FRAMES)
@@ -77,11 +78,6 @@ local staminaRegenRate = 20
 local staminaDrainRate = 18
 local canSprint = true
 
-local sprintSpeed = 20
-local walkSpeed = 15
-
-local humanoid = player.Character:WaitForChild("Humanoid")
-
 local function updateSprintBar()
 	sprintBar.Size = UDim2.new(currentStamina / maxStamina, 0, 1, 0)
 end
@@ -109,13 +105,14 @@ buttonCorner.CornerRadius = UDim.new(1, 0)
 buttonCorner.Parent = sprintButton
 
 sprintButton.MouseButton1Click:Connect(function()
-	if canSprint and currentStamina > 0 then
+	local Character = LocalPlayer.Character -- Lấy nhân vật hiện tại khi bấm nút
+	if Character and canSprint and currentStamina > 0 then
 		sprinting = not sprinting
 
 		if sprinting then
-			humanoid.WalkSpeed = sprintSpeed
+			Character:SetAttribute("SpeedBoost", 5)
 		else
-			humanoid.WalkSpeed = walkSpeed
+			Character:SetAttribute("SpeedBoost", 0)
 		end
 	end
 end)
@@ -123,15 +120,19 @@ end)
 local runService = game:GetService("RunService")
 
 runService.Heartbeat:Connect(function(dt)
+	local Character = LocalPlayer.Character -- Đảm bảo luôn cập nhật đúng nhân vật hiện tại
+	
 	if sprinting then
 		if currentStamina > 0 then
 			currentStamina -= staminaDrainRate * dt
 		else
 			sprinting = false
 			canSprint = false 
-			humanoid.WalkSpeed = walkSpeed
+			if Character then
+				Character:SetAttribute("SpeedBoost", 0)
+			end
 
-			require(player.PlayerGui.MainUI.Initiator.Main_Game).caption("You're exhausted", true)
+			require(LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("You're exhausted", true)
 		end
 	else
 		if currentStamina < maxStamina then
