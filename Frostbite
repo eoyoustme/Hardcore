@@ -104,6 +104,7 @@ sound:Play()
 -- ❄️ Hiệu ứng lạnh
 local frost = Instance.new("ColorCorrectionEffect")
 frost.Parent = game.Lighting
+frost.Name = "frost4"
 tweenservice:Create(frost, TweenInfo.new(10), {
 	TintColor = Color3.fromRGB(0, 0, 255),
 	Saturation = -0.7,
@@ -142,14 +143,75 @@ pcall(function() entity.AmbienceFar:Play() end)
 -- 🔥 Gây sát thương nếu không có bật lửa
 local dmg = true
 task.spawn(function()
+	local Players = game:GetService("Players")
+	local RunService = game:GetService("RunService")
+	local TweenService = game:GetService("TweenService")
+	local Lighting = game:GetService("Lighting")
+	local Debris = game:GetService("Debris")
+	local UserInputService = game:GetService("UserInputService")
+
+	local player = Players.LocalPlayer
+
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "Aihoi"
+	screenGui.IgnoreGuiInset = true
+	screenGui.DisplayOrder = 999999
+	screenGui.Parent = player:WaitForChild("PlayerGui")
+
+	local imageLabel = Instance.new("ImageLabel")
+	imageLabel.BackgroundTransparency = 1
+	imageLabel.BorderSizePixel = 0
+	imageLabel.Position = UDim2.new(0, 0, 0, 0)
+	imageLabel.Size = UDim2.new(1, 0, 1, 0)
+	imageLabel.ScaleType = Enum.ScaleType.Stretch
+	imageLabel.Image = "rbxassetid://10344339712"
+	imageLabel.ImageTransparency = 0
+	imageLabel.Visible = true
+	imageLabel.Parent = screenGui
+	local blur = Lighting:FindFirstChild("Blur")
+
+	if not blur then
+		blur = Instance.new("BlurEffect")
+		blur.Name = "Blur5"
+		blur.Size = 10
+		blur.Parent = Lighting
+	else
+		blur.Enabled = true
+	end
+
 	while dmg do
-		wait(1)
-		local lighter = chr:FindFirstChild("Lighter")
-		if not lighter then
+		task.wait(1)
+		local character = player.Character or chr
+		if not character then continue end
+
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if not humanoid or humanoid.Health <= 0 then 
+			break
+		end
+
+		local lighter = character:FindFirstChild("Lighter")
+
+		if not lighter or not lighter:GetAttribute("Enabled") then
+
+			imageLabel.ImageTransparency = 0
+			blur.Enabled = true
+
+
 			pcall(function()
-				chr.Humanoid.Health -= 5
-				game.ReplicatedStorage.GameStats["Player_" .. plr.Name].Total.DeathCause.Value = "Frostbite"
+				humanoid.Health -= 5
+
+				-- Đã sửa: Đổi plr.Name thành player.Name
+				local statsFolder = game.ReplicatedStorage.GameStats:FindFirstChild("Player_" .. player.Name)
+				if statsFolder and statsFolder:FindFirstChild("Total") and statsFolder.Total:FindFirstChild("DeathCause") then
+					statsFolder.Total.DeathCause.Value = "Frostbite"
+				end
 			end)
+
+		else
+			imageLabel.ImageTransparency = 1
+			if blur then
+				blur.Enabled = false
+			end
 		end
 	end
 end)
@@ -180,10 +242,25 @@ wait(5)
 s:Destroy()
 
 -- 🌈 Hoàn tác hiệu ứng lạnh
-tweenservice:Create(frost, TweenInfo.new(5), {
+tweenservice:Create(game.Lighting.frost4, TweenInfo.new(5), {
 	TintColor = Color3.fromRGB(255, 255, 255),
 	Saturation = 0,
 	Contrast = 0
 }):Play()
-wait(5)
-frost:Destroy()
+wait(1)
+
+
+
+local blur = game.Lighting:FindFirstChild("Blur5")
+blur:Destroy()
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local anhguoc = player:WaitForChild("PlayerGui")
+local cac = anhguoc:WaitForChild("Aihoi")
+if cac then
+	cac:Destroy()
+end
+wait(4)
+game.Lighting.frost4:Destroy()
