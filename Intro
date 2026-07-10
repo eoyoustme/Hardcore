@@ -2,7 +2,7 @@ local k = Instance.new("Sound")
 k.Parent = workspace
 k.SoundId = "rbxassetid://136669683183289"
 k.Parent = workspace
-k.Volume = 5
+k.Volume = 0.5
 k:Play()
 
 local shut = game.Players.LocalPlayer.PlayerGui.MainUI.MainFrame.IntroText
