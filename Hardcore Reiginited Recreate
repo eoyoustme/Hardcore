@@ -66,7 +66,7 @@ local entityList = {
 	{
 		name = "Troll",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/IndiHome",
-		chance = math.random(0.25,1.5)
+		chance = 0.25
 	}
 }
 
@@ -114,7 +114,7 @@ local function IsSeekActive()
 	return false
 end
 
-math.randomseed(os.clock() * 1e6)
+math.randomseed(os.clock() * 30)
 
 while true do
 	task.wait(10)
