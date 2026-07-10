@@ -16,7 +16,7 @@ local function spawnShocker()
 	shockerModel:SetPrimaryPartCFrame(camera.CFrame * CFrame.new(0, -1, -11))
 	shockerModel.Parent = Workspace
 
-	local oogaBoogaaPart = shockerModel:WaitForChild("OOGA BOOGAAAA")
+	local oogaBoogaaPart = shockerModel:WaitForChild("Base")
 	local horrorScream = oogaBoogaaPart:WaitForChild("HORROR SCREAM 15")
 
 	local lookDuration = 2
@@ -47,7 +47,7 @@ local function spawnShocker()
 		local playerLookVector = camera.CFrame.LookVector
 		local dot = directionToShocker:Dot(playerLookVector)
 
-		if dot > 0.45 then
+		if dot > 0.05 then
 			-- Đang nhìn
 			if not lookStart then
 				lookStart = tick()
@@ -59,13 +59,13 @@ local function spawnShocker()
 				humanoid:TakeDamage(30)
 
 				-- Tween lao tới player
-				local targetPos = character.HumanoidRootPart.Position + Vector3.new(0, 2, 0)
+				local targetPos = character.HumanoidRootPart.Position + Vector3.new(0, 0, 0)
 				local tweenInfo = TweenInfo.new(1.2, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
 				local tween = TweenService:Create(oogaBoogaaPart, tweenInfo, {Position = targetPos})
 				tween:Play()
 
 				tween.Completed:Connect(function()
-					-- Sau khi lao tới thì rơi xuống đất
+					wait(1)
 					fallToGround()
 				end)
 
