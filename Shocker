@@ -18,6 +18,8 @@ local function spawnShocker()
 
 	local oogaBoogaaPart = shockerModel:WaitForChild("Base")
 	local horrorScream = oogaBoogaaPart:WaitForChild("HORROR SCREAM 15")
+	local sb = oogaBoogaaPart:WaitForChild("PlaySound")
+	local sb2 = oogaBoogaaPart:WaitForChild("Repent")
 
 	local lookDuration = 2
 	local lookStart = nil
@@ -46,6 +48,9 @@ local function spawnShocker()
 		local directionToShocker = (oogaBoogaaPart.Position - camera.CFrame.Position).Unit
 		local playerLookVector = camera.CFrame.LookVector
 		local dot = directionToShocker:Dot(playerLookVector)
+		sb.Volume = 1.5
+		sb:Play()
+		sb2:Play()
 
 		if dot > 0.05 then
 			-- Đang nhìn
