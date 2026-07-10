@@ -10,6 +10,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/re
 loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Intro"))()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/rebouna/refs/heads/main/guiding%20light"))()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Stamina"))()
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Stamin a load to long srry:)", true)
 
 local entityList = {
 	{
