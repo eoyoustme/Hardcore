@@ -88,7 +88,7 @@ task.spawn(function()
 			fakerwin:Play()
 			fakerwin.Completed:Wait()
 
-			task.wait(10) -- Hold text on screen for exactly 10 seconds
+			task.wait(10)
 
 			fakerthuavl:Play()
 			fakerthuavl.Completed:Wait()
@@ -114,7 +114,7 @@ task.spawn(function()
 
 		for _, inst in ipairs(game.Workspace:GetDescendants()) do
 			local n = string.lower(inst.Name)
-			if string.find(n, "rushmoving" or "shocker" or "eyes") then
+			if string.find(n, "shocker") then
 				return true
 			end
 		end
