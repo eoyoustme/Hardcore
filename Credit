@@ -99,9 +99,8 @@ task.spawn(function()
 	local function Entity()
 
 		local namesToCheck = {
-			"RushMoving",
-			"Eyes",
 			"Shocker",
+			"Eyes",
 			"RipperNotMoving",
 			"Rebound"
 		}
