@@ -1,4 +1,4 @@
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
 function light(tim,color0,color1)
 	local tweenservice = game:GetService("TweenService")
 	local info = TweenInfo.new(tim,Enum.EasingStyle.Linear)
