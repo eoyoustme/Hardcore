@@ -1,6 +1,5 @@
 
 task.spawn(function()
-	game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 			local function GetGitSound(GithubSnd, SoundName)
 				local url = GithubSnd
 				if not isfile(SoundName .. ".mp3") then
