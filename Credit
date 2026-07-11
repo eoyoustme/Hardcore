@@ -33,11 +33,10 @@ task.spawn(function()
 			CanvasGroup.Parent = ScreenGui
 
 			local targetTextSize = 45 
-			if UserInputService.TouchEnabled then
+			if UserInputService.TouchEnabled then -- what are u looking?
 				targetTextSize = 20 
 			end
 
-			-- Create the Credits Text Label
 			local TextLabel = Instance.new("TextLabel")
 			TextLabel.Size = UDim2.new(0.4, 0, 0.8, 0) 
 			TextLabel.Position = UDim2.new(0.98, 0, 0.5, 0) 
