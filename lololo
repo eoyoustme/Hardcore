@@ -1,0 +1,53 @@
+		local FLASH_COLOR = Color3.fromRGB(85, 170, 255) -- White flash
+		local FLASH_DURATION = 0.05 -- How long it stays visible
+		local FLASH_REPEAT =  7 -- How many times to flash
+
+		-- Create the GUI container
+		local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+		local screenGui = Instance.new("ScreenGui")
+		screenGui.Name = "FlashOverlay"
+		screenGui.IgnoreGuiInset = true -- Fills the whole screen
+		screenGui.Parent = playerGui
+
+		-- Create the Frame
+		local frame = Instance.new("Frame")
+		frame.Size = UDim2.new(1, 0, 1, 0)
+		frame.BackgroundColor3 = FLASH_COLOR
+		frame.BackgroundTransparency = 1 -- Start invisible
+		frame.BorderSizePixel = 0
+		frame.Parent = screenGui
+		
+		local cue2 = Instance.new("Sound")
+		cue2.Parent = game.Workspace
+		cue2.Name = "Spawn"
+		cue2.SoundId = "rbxassetid://109582246349306"
+		cue2.Volume = 1
+		cue2.TimePosition = 0
+		cue2.PlaybackSpeed = 1
+		cue2:Play()
+		
+		local rebound = Instance.new("ImageLabel")
+		rebound.Image = "rbxassetid://90496912456918"
+		rebound.Size = UDim2.new(0, 100, 0, 100)
+		rebound.Position = UDim2.new(0.5, 0, 0.5, 0)
+		rebound.AnchorPoint = Vector2.new(0.5, 0.5)
+		rebound.Parent = screenGui
+		rebound.BackgroundTransparency = 1
+		rebound.ResampleMode = Enum.ResamplerMode.Pixelated
+		rebound.ImageTransparency = 0
+		rebound.ZIndex = 1000
+		game.TweenService:Create(rebound, TweenInfo.new(1), {Size = UDim2.new(0, 2000, 0, 1000), ImageTransparency = 0}):Play()
+		game.Debris:AddItem(rebound)
+
+		-- Flashing logic
+		for i = 1, FLASH_REPEAT do
+			frame.BackgroundTransparency = 0 -- Flash on
+			task.wait(FLASH_DURATION)
+			frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+			frame.BackgroundTransparency = 0 -- Flash off
+			task.wait(FLASH_DURATION)
+			frame.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+		end
+
+		-- Cleanup: Remove the GUI after the effect finishes
+		screenGui:Destroy()
