@@ -20,6 +20,10 @@ local MainGame = MainUI:WaitForChild("Initiator"):WaitForChild("Main_Game")
 local Health = MainGame:WaitForChild("Health")
 local Music = Health:WaitForChild("Music")
 
+	game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.Health.Music.Blue.SoundId = "rbxassetid://10472612727";
+
+	game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.Health.Music.Blue.Pitch = 0.55;
+
 Camera.ChildAdded:Connect(function(Child)
 	if Child.Name ~= DeathName then return end
 	if not _G.DO_RED_GUY then return end
@@ -63,9 +67,5 @@ Camera.ChildAdded:Connect(function(Child)
 	end
 
 	HelpfulDialogue.TextColor3 = Color3.fromRGB(255, 0, 0)
-
-	game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.Health.Music.Blue.SoundId = "rbxassetid://10472612727";
-
-	game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.Health.Music.Blue.Pitch = 0.55;
 
 end)
