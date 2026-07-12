@@ -340,82 +340,91 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 end)
 
 local blacklist = {
-	"wardrobe",
-	"bed",
-	"rug",
-	"key",
-	"drawer",
-	"book",
-	"breaker",
-	"table",
-	"desk",
-	"gold",
-	"dresser",
-	"floor"
+    "wardrobe",
+    "bed",
+    "rug",
+    "key",
+    "drawer",
+    "book",
+    "breaker",
+    "table",
+    "desk",
+    "gold",
+    "dresser",
+    "floor",
+    "wall",
+    "door",
+    "frame",
+    "ceiling",
+    "light",
+    "pillar",
+    "beam",
+    "window",
+    "gate",
+    "stairs"
 }
 
 local function IsBlacklisted(name)
-	local lowerName = name:lower()
+    local lowerName = name:lower()
 
-	for _, v in ipairs(blacklist) do
-		if string.find(lowerName, v, 1, true) then
-			return true
-		end
-	end
+    for _, v in ipairs(blacklist) do
+        if string.find(lowerName, v, 1, true) then
+            return true
+        end
+    end
 
-	return false
+    return false
 end
 
 local function IsInsideBlacklistedModel(obj)
-	local current = obj.Parent
+    local current = obj.Parent
 
-	while current and current ~= workspace do
-		if current:IsA("Model") and IsBlacklisted(current.Name) then
-			return true
-		end
-		current = current.Parent
-	end
+    while current and current ~= workspace do
+        if current:IsA("Model") and IsBlacklisted(current.Name) then
+            return true
+        end
+        current = current.Parent
+    end
 
-	return false
+    return false
 end
 
 entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
-	local enit = game.Workspace.A60
-	for _, obj in ipairs(room:GetDescendants()) do
-		if obj:IsA("BasePart") then
-			local model = obj:FindFirstAncestorOfClass("Model")
-			if model and model:FindFirstChildOfClass("Humanoid") then
-				continue
-			end
+    local enit = game.Workspace.A60
+    for _, obj in ipairs(room:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            local model = obj:FindFirstAncestorOfClass("Model")
+            if model and model:FindFirstChildOfClass("Humanoid") then
+                continue
+            end
 
-			if IsBlacklisted(obj.Name) then
-				continue
-			end
+            if IsBlacklisted(obj.Name) then
+                continue
+            end
 
-			if IsInsideBlacklistedModel(obj) then
-				continue
-			end
+            if IsInsideBlacklistedModel(obj) then
+                continue
+            end
 
-			obj.Anchored = true
+            obj.Anchored = true
             task.wait()
-			obj.Anchored = false
-			obj.Massless = true
-			obj.CanCollide = false
-			obj.CanQuery = false
+            obj.Anchored = false
+            obj.Massless = true
+            obj.CanCollide = true
 
-			obj.AssemblyLinearVelocity = Vector3.new(
-				math.random(-150, 150),
-				math.random(50, 50),
-				math.random(-180, 180)
-			)
+            obj.AssemblyLinearVelocity = Vector3.new(
+                math.random(-150, 150),
+                math.random(50, 50),
+                math.random(-180, 180)
+            )
 
-			obj.AssemblyAngularVelocity = Vector3.new(
-				math.random(-25,25),
-				math.random(-25,25),
-				math.random(-25,25)
-			)
-		end
-	end
+            obj.AssemblyAngularVelocity = Vector3.new(
+                math.random(-25,25),
+                math.random(-25,25),
+                math.random(-25,25)
+            )
+        end
+    end
 end)
 
 -- ================== CHẠY ENTITY ==================
