@@ -162,6 +162,7 @@ end)
 entity:SetCallback("OnRebounding", function(startOfRebound: boolean)
 	if startOfRebound == true then
 		print("Entity has started rebounding")
+		entity.Config.Movement.Speed = entity.Config.Movement.Speed + 50
 		local player = game.Players.LocalPlayer
 		if player and player:FindFirstChild("PlayerGui") then
 			local flashGui = Instance.new("ScreenGui")
