@@ -13,7 +13,7 @@ end
 local SeekMusic = game.ReplicatedStorage.FloorReplicated:FindFirstChild("SeekMusic")
 if SeekMusic then
 	local s = GetGitSound(
-		"https://github.com/reboundplayz/Doors-Fixed-Modes/blob/main/SeekMoving.mp3?raw=true",
+		"https://github.com/eoyoustme/Hardcore/blob/main/SeekMoving.mp3?raw=true",
 		"Seek"
 	)
 
