@@ -169,6 +169,12 @@ entity:SetCallback("OnSpawned", function()
 	wait(1)
 	vroom:Play()
 	move:Play()
+	task.spawn(function()
+		while true do
+			wait(0.1)
+			entity.Config.Movement.Speed = entity.Config.Movement.Speed + 0.1
+			end
+	end)
 end)
 
 entity:SetCallback("OnStartMoving", function()
@@ -196,6 +202,7 @@ end)
 entity:SetCallback("OnRebounding", function(startOfRebound: boolean)
 	if startOfRebound == true then
 		print("Entity has started rebounding")
+		entity.Config.Movement.Speed = entity.Config.Movement.Speed + 50
 	else
 		print("Entity has finished rebounding")
 	end
