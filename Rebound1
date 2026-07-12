@@ -131,6 +131,12 @@ entity:SetCallback("OnSpawned", function()
 	wait(1)
 	vroom:Play()
 	move:Play()
+	task.spawn(function()
+		while true do
+			wait(0.1)
+			entity.Config.Movement.Speed = entity.Config.Movement.Speed + 0.1
+			end
+	end)
 end)
 
 entity:SetCallback("OnStartMoving", function()
