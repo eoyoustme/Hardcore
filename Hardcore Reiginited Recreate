@@ -14,7 +14,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/re
 pcall(function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/HC%20Entity"))()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Intro"))()
-	require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Stamina load too long lol", true)
+	require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Every 2 two i will make a troll thing is make all entity chance to 99!", true)
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Stamina"))()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Guiding%20light"))()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Seek"))()
