@@ -163,16 +163,7 @@ end)
 
 entity:SetCallback("OnDespawning", function()
 	print("Entity is despawning")
-	---====== Load achievement giver ======---
-	local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
-
-	---====== Display achievement ======---
-	achievementGiver({
-		Title = "Out Of Many Rebound",
-		Desc = "Back Every Seconds",
-		Reason = "Encounter and survive Rebound",
-		Image = "rbxassetid://95393302884559"
-	})
+loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Reboundl"))()
 end)
 
 entity:SetCallback("OnDespawned", function()
