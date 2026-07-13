@@ -69,7 +69,7 @@ local entityList = {
 	{
 		name = "Singularity",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Singularity",
-		chance = 8
+		chance = 13
 	},
 	{
 		name = "Troll",
