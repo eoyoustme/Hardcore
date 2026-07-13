@@ -1,4 +1,4 @@
-require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("a60PROJECT I SEE U....", true)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Mode make Rebound Fan ( Og Hunger(New)", true)
 
 game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.Health.Music.Blue.SoundId = "rbxassetid://10472612727"
 
@@ -8,7 +8,7 @@ game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.Health.Music.Blue.
 
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
-require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("I SEE YOUR STREAM I WILL SPAM ENTITY", true)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Hardcore Reiginited Recreate Has Activited", true)
 loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Credit"))()
 
 pcall(function()
@@ -24,12 +24,12 @@ local entityList = {
 	{
 		name = "Ripper",
 		url = "https://raw.githubusercontent.com/eoyoustme/Extremely/refs/heads/main/Ripper",
-		chance = 99
+		chance = 11
 	},
 	{
 		name = "A60",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/A60",
-		chance = math.random(99, 99.9)
+		chance = math.random(0.8, 1.2)
 	},
 	{
 		name = "Deer God",
@@ -39,7 +39,7 @@ local entityList = {
 	{
 		name = "Shocker",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Shocker",
-		chance = 99
+		chance = 25
 	},
 	{
 		name = "Cease",
@@ -49,7 +49,7 @@ local entityList = {
 	{
 		name = "Rebound",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Rebound",
-		chance = 40
+		chance = 4
 	},
 	{
 		name = "A-90",
@@ -59,7 +59,7 @@ local entityList = {
 	{
 		name = "Silence",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Silence",
-		chance = 99
+		chance = 2
 	},
 	{
 		name = "Frostbite",
@@ -69,7 +69,7 @@ local entityList = {
 	{
 		name = "Singularity",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Singularity",
-		chance = 99
+		chance = 13
 	},
 	{
 		name = "Troll",
