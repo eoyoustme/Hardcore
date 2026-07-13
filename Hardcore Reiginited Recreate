@@ -8,7 +8,7 @@ game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.Health.Music.Blue.
 
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
-require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Hardcore Reginited Recreate has Activated (alpha)", true)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("I SEE YOUR SCREAM", true)
 loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Credit"))()
 
 pcall(function()
@@ -24,7 +24,7 @@ local entityList = {
 	{
 		name = "Ripper",
 		url = "https://raw.githubusercontent.com/eoyoustme/Extremely/refs/heads/main/Ripper",
-		chance = 11
+		chance = 99
 	},
 	{
 		name = "A60",
@@ -39,7 +39,7 @@ local entityList = {
 	{
 		name = "Shocker",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Shocker",
-		chance = 25
+		chance = 99
 	},
 	{
 		name = "Cease",
@@ -49,7 +49,7 @@ local entityList = {
 	{
 		name = "Rebound",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Rebound",
-		chance = 4
+		chance = 40
 	},
 	{
 		name = "A-90",
@@ -59,7 +59,7 @@ local entityList = {
 	{
 		name = "Silence",
 		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Silence",
-		chance = 2
+		chance = 99
 	},
 	{
 		name = "Frostbite",
