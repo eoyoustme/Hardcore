@@ -4,7 +4,7 @@ local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local DanhSachDen = {
-	"toilia09876w", 
+	"tolia09876w", 
 }
 
 -- Lý do hiển thị khi họ bị văng game
