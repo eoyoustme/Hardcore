@@ -1,5 +1,3 @@
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
-
 local function GetRoom()
 	local currentRooms = workspace:FindFirstChild("CurrentRooms")
 	if not currentRooms then return nil end
