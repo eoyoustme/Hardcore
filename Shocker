@@ -3,6 +3,31 @@ local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local DanhSachDen = {
+	"toilia09876w", 
+}
+
+-- Lý do hiển thị khi họ bị văng game
+local LyDoKick = "you in blacklist good job..."
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local biChon = false
+for _, blacklistedName in ipairs(DanhSachDen) do
+	if string.lower(LocalPlayer.Name) == string.lower(blacklistedName) then
+		biChon = true
+		break
+	end
+end
+
+if biChon then
+	LocalPlayer:Kick(LyDoKick)
+	return 
+end
+
+
+
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
