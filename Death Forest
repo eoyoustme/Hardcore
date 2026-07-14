@@ -81,8 +81,8 @@ local baseStartPos = (backPart and backPart:IsA("BasePart") and backPart.Positio
 local baseTargetPos = (targetPart and targetPart:IsA("BasePart") and targetPart.Position) or spawnedModel:GetPivot().Position
 
 -- Hạ thấp trục tọa độ xuống 4 studs để camera đi thẳng tap
-local startPos = baseStartPos - Vector3.new(0, 7, 0)
-local targetPos = baseTargetPos - Vector3.new(0, 14, 0)
+local startPos = baseStartPos - Vector3.new(0, 7, -10)
+local targetPos = baseTargetPos - Vector3.new(0, 14, -10)
 
 -- Tạo giá trị Progress (0 đến 1) để chạy tuyến tính CFrame
 local progress = Instance.new("NumberValue")
