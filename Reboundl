@@ -41,7 +41,7 @@ local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/Regul
 
 local entity = Spawner:Create({
 	Entity = {
-		Name = "Rebound2",
+		Name = "Rebound5",
 		Asset = "https://github.com/eoyoustme/Hardcore/blob/main/Rebound1.rbxm?raw=true",
 		HeightOffset = 3
 	},
@@ -63,7 +63,7 @@ local entity = Spawner:Create({
 	},
 	Movement = {
 		Speed = 200,
-		Delay = 1,
+		Delay = 3,
 		Reversed = true
 	},
 	Rebounding = {
