@@ -1,3 +1,19 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local Debris = game:GetService("Debris")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local mainUI = playerGui:WaitForChild("MainUI")
+local caption = mainUI.MainFrame.Caption
+
+local threadA = nil
+local threadB = nil
+
+-- === Tải âm thanh từ GitHub ===
 local function GetGitSound(GithubSnd, SoundName)
 	local url = GithubSnd
 	if not isfile(SoundName .. ".mp3") then
@@ -7,20 +23,14 @@ local function GetGitSound(GithubSnd, SoundName)
 	sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
 	return sound
 end
+
 local Lord = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Your_Consenting_Mind.mp3?raw=true","Your")
 Lord.Parent = workspace
 Lord.Volume = 3
 Lord.PlaybackSpeed = 1
 Lord:Play()
 
-local TweenService = game:GetService("TweenService")
-local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
-local mainUI = playerGui:WaitForChild("MainUI")
-local caption = mainUI.MainFrame.Caption
-
 caption.TextColor3 = Color3.fromRGB(117, 0, 175)
-
 task.spawn(function()
 	caption.TextTransparency = 0
 	caption.Visible = true
@@ -28,26 +38,13 @@ task.spawn(function()
 
 	local info = TweenInfo.new(5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 	local tween = TweenService:Create(caption, info, {TextTransparency = 1})
-
 	tween:Play()
 end)
 
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
-local Debris = game:GetService("Debris")
-local UserInputService = game:GetService("UserInputService")
-
-local player = Players.LocalPlayer
-
 ---====== Load spawner ======---
-
 local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Deer%20god%20spawner"))()
 
 ---====== Create entity ======---
-
 local entity = Spawner:Create({
 	Entity = {
 		Name = "Deer God",
@@ -77,7 +74,7 @@ local entity = Spawner:Create({
 	},
 	Rebounding = {
 		Enabled = false,
-		Type = "Ambush", -- "Blitz"
+		Type = "Ambush",
 		Min = 1,
 		Max = 1,
 		Delay = 2
@@ -94,14 +91,15 @@ local entity = Spawner:Create({
 		Break = true
 	},
 	Death = {
-		Type = "Guiding", -- "Curious"
+		Type = "Guiding",
 		Hints = {"Death", "Hints", "Go", "Here"},
 		Cause = ""
 	}
 })
 
----====== Debug entity ======---
+---====== CÁC SỰ KIỆN CỦA ENTITY (Đã được tách phẳng) ======---
 
+-- 1. Khi Entity Spawn
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
 	local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
@@ -111,144 +109,133 @@ entity:SetCallback("OnSpawned", function()
 	end)
 	camShake:Start()
 	camShake:ShakeOnce(10,3.5,0.1,15,15,0.5)
+
+	-- Jumpscare Overlay
 	task.spawn(function()
-	local alive = false
+		local screenGui = Instance.new("ScreenGui")
+		screenGui.Name = "JumpscareOverlay"
+		screenGui.IgnoreGuiInset = true
+		screenGui.DisplayOrder = 999999
+		screenGui.Parent = player:WaitForChild("PlayerGui")
 
-	local screenGui = Instance.new("ScreenGui")
-	screenGui.Name = "JumpscareOverlay"
-	screenGui.IgnoreGuiInset = true
-	screenGui.DisplayOrder = 999999
-	screenGui.Parent = player:WaitForChild("PlayerGui")
-
-	local imageLabel = Instance.new("ImageLabel")
-	imageLabel.BackgroundTransparency = 1
-	imageLabel.BorderSizePixel = 0
-	imageLabel.Position = UDim2.new(0, 0, 0, 0)
-	imageLabel.Size = UDim2.new(1, 0, 1, 0)
-	imageLabel.ScaleType = Enum.ScaleType.Stretch
-	imageLabel.ImageTransparency = 0.7
-	imageLabel.Visible = true
-	imageLabel.Parent = screenGui
-
-	local jumpscareImage1 = "rbxassetid://134346506410955"		
-	local jumpscareImage2 = "rbxassetid://7578853379"
-	local jumpscareImage3 = "rbxassetid://103846711769666"
-	local jumpscareImage4 = "rbxassetid://78199392475572"
-
-
-	local flashDuration = 350
-	local start = tick()
-
-
-	alive = true
-
-
-	while tick() - start < flashDuration do
-		imageLabel.Image = jumpscareImage1
+		local imageLabel = Instance.new("ImageLabel")
+		imageLabel.BackgroundTransparency = 1
+		imageLabel.BorderSizePixel = 0
+		imageLabel.Position = UDim2.new(0, 0, 0, 0)
+		imageLabel.Size = UDim2.new(1, 0, 1, 0)
+		imageLabel.ScaleType = Enum.ScaleType.Stretch
 		imageLabel.ImageTransparency = 0.7
-		task.wait(0.06)
-		imageLabel.Image = jumpscareImage2
-		imageLabel.ImageTransparency = 0.8
-		task.wait(0.06)
-		imageLabel.Image = jumpscareImage3
-		imageLabel.ImageTransparency = 0.9
-		task.wait(0.06)
-		imageLabel.Image = jumpscareImage4
-		imageLabel.ImageTransparency = 0.6
-		task.wait(0.06)
-		end
-		end)
+		imageLabel.Visible = true
+		imageLabel.Parent = screenGui
 
-	task.spawn(function()
+		local jumpscareImage1 = "rbxassetid://134346506410955"		
+		local jumpscareImage2 = "rbxassetid://7578853379"
+		local jumpscareImage3 = "rbxassetid://103846711769666"
+		local jumpscareImage4 = "rbxassetid://78199392475572"
+
+		local flashDuration = 350
+		local start = tick()
+
+		while tick() - start < flashDuration do
+			imageLabel.Image = jumpscareImage1
+			imageLabel.ImageTransparency = 0.7
+			task.wait(0.06)
+			imageLabel.Image = jumpscareImage2
+			imageLabel.ImageTransparency = 0.8
+			task.wait(0.06)
+			imageLabel.Image = jumpscareImage3
+			imageLabel.ImageTransparency = 0.9
+			task.wait(0.06)
+			imageLabel.Image = jumpscareImage4
+			imageLabel.ImageTransparency = 0.6
+			task.wait(0.06)
+		end
+	end)
+
+	threadA = task.spawn(function()
 		while true do
 			task.wait(0.5)
 
-			local player = game.Players.LocalPlayer
 			local char = player.Character
 			if not char then continue end
 
 			local hum = char:FindFirstChildWhichIsA("Humanoid")
 			local hrp = char:FindFirstChild("HumanoidRootPart")
-			local entity = workspace:FindFirstChild("Deer God") and workspace["Deer God"]:FindFirstChildWhichIsA("BasePart")
+			local deerEntity = workspace:FindFirstChild("Deer God") and workspace["Deer God"]:FindFirstChildWhichIsA("BasePart")
 
-			if hum and hrp and entity then
-				if (hrp.Position - entity.Position).Magnitude <= 9 then
+			if hum and hrp and deerEntity then
+				if (hrp.Position - deerEntity.Position).Magnitude <= 9 then
 					if hum.Health > 0 then
 						loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Death%20Forest"))()
-wait(1)
-						entity:Destroy()
-						local anhguoc5 = player:WaitForChild("PlayerGui")
-						local cac5 = anhguoc5:WaitForChild("JumpscareOverlay")
-						if cac5 then
-							cac5:Destroy()
-						end
+						task.wait(1)
+						deerEntity:Destroy()
 
-						Lord:Destroy()
+						local anhguoc5 = player:WaitForChild("PlayerGui")
+						local cac5 = anhguoc5:FindFirstChild("JumpscareOverlay")
+						if cac5 then cac5:Destroy() end
+
+						if Lord then Lord:Destroy() end
 
 						local stats = game:GetService("ReplicatedStorage").GameStats:FindFirstChild("Player_" .. player.Name)
 						if stats and stats:FindFirstChild("Total") then
 							stats.Total.DeathCause.Value = "Deer God"
 						end
 
-						break -- hoặc return
+						break 
 					end
 				end
 			end
 		end
 	end)
-	
-
 end)
 
+-- 2. Khi Entity Bắt đầu di chuyển
 entity:SetCallback("OnStartMoving", function()
-	local player = game.Players.LocalPlayer
-	local playerGui = player:WaitForChild("PlayerGui")
+	local deer = workspace:WaitForChild("Deer God")
 	local character = player.Character or player.CharacterAdded:Wait()
 	local humanoid = character:WaitForChild("Humanoid")
 	local camera = workspace.CurrentCamera
-	task.spawn(function()
+
+	threadB = task.spawn(function()
 		while true do
 			task.wait(0.5)
 
-			local player = game.Players.LocalPlayer
 			local char = player.Character
 			if not char then continue end
 
 			local hum = char:FindFirstChildWhichIsA("Humanoid")
 			local hrp = char:FindFirstChild("HumanoidRootPart")
-			local entity = workspace:FindFirstChild("Deer God") and workspace["Deer God"]:FindFirstChildWhichIsA("BasePart")
+			local deerEntity = workspace:FindFirstChild("Deer God") and workspace["Deer God"]:FindFirstChildWhichIsA("BasePart")
 
-			if hum and hrp and entity then
-				if (hrp.Position - entity.Position).Magnitude <= 50 then
-					if game.Players.LocalPlayer.Character:GetAttribute("Hiding") and hum.Health > 0 then
+			if hum and hrp and deerEntity then
+				if (hrp.Position - deerEntity.Position).Magnitude <= 50 then
+					if char:GetAttribute("Hiding") and hum.Health > 0 then
 						loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Death%20Forest"))()
-wait(1)
-						entity:Destroy()
-						local anhguoc5 = player:WaitForChild("PlayerGui")
-						local cac5 = anhguoc5:WaitForChild("JumpscareOverlay")
-						if cac5 then
-							cac5:Destroy()
-						end
+						deerEntity:Destroy()
 
-						Lord:Destroy()
+						local anhguoc5 = player:WaitForChild("PlayerGui")
+						local cac5 = anhguoc5:FindFirstChild("JumpscareOverlay")
+						if cac5 then cac5:Destroy() end
+
+						if Lord then Lord:Destroy() end
 
 						local stats = game:GetService("ReplicatedStorage").GameStats:FindFirstChild("Player_" .. player.Name)
 						if stats and stats:FindFirstChild("Total") then
 							stats.Total.DeathCause.Value = "Deer God"
 						end
 
-						break -- hoặc return
+						break
 					end
 				end
 			end
 		end
 	end)
-
 end)
 
+-- 3. Khi Entity vào phòng mới
 entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 	if firstTime == true then
-		wait(math.random(0.5,1))
+		task.wait(math.random(0.5, 1))
 		print("Entity has entered room: " .. room.Name .. " for the first time")
 
 		local a1 = ({
@@ -257,10 +244,9 @@ entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 			"Your submission is inevitable",
 			"Your flesh will sustain my children"
 		})[math.random(4)]
-		
+
 		caption.TextTransparency = 0
 		caption.Visible = true
-		
 		caption.Text = a1
 
 		local s = Instance.new("Sound")
@@ -269,19 +255,15 @@ entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 
 		if a1 == "Join us" then
 			s.SoundId = "rbxassetid://6250814572"
-
 		elseif a1 == "Why do you run, child" then
 			s.SoundId = "rbxassetid://6250812725"
-
 		elseif a1 == "Your submission is inevitable" then
 			s.SoundId = "rbxassetid://6250815445"
-
 		elseif a1 == "Your flesh will sustain my children" then
 			s.SoundId = "rbxassetid://6250816544"
 		end
 
 		s:Play()
-
 		s.Ended:Connect(function()
 			s:Destroy()
 		end)
@@ -308,18 +290,30 @@ end)
 
 entity:SetCallback("OnDespawning", function()
 	print("Entity is despawning")
-	local deer = workspace:WaitForChild("Deer God")
-	deer:Destroy()
+
+	local deer = workspace:FindFirstChild("Deer God")
+	if deer then deer:Destroy() end
+
+	if threadA then
+		task.cancel(threadA)
+		threadA = nil
+	end
+	if threadB then
+		task.cancel(threadB)
+		threadB = nil
+	end
 	
 	task.spawn(function()
-		caption.TextTransparency = 0
-		caption.Visible = true
+		if caption then
+			caption.TextTransparency = 0
+			caption.Visible = true
 
-		local info = TweenInfo.new(5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
-		local tween = TweenService:Create(caption, info, {TextTransparency = 1})
-
-		tween:Play()
+			local info = TweenInfo.new(5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+			local tween = TweenService:Create(caption, info, {TextTransparency = 1})
+			tween:Play()
+		end
 	end)
+
 	---====== Load achievement giver ======---
 	local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
 
@@ -332,12 +326,12 @@ entity:SetCallback("OnDespawning", function()
 	})
 
 	local anhguoc = player:WaitForChild("PlayerGui")
-	local cac = anhguoc:WaitForChild("JumpscareOverlay")
+	local cac = anhguoc:FindFirstChild("JumpscareOverlay")
 	if cac then
 		cac:Destroy()
 	end
 
-	Lord:Destroy()
+	if Lord then Lord:Destroy() end
 end)
 
 entity:SetCallback("OnDespawned", function()
@@ -349,24 +343,19 @@ entity:SetCallback("OnDamagePlayer", function(newHealth: number)
 		print("Entity has killed the player")
 	else
 		print("Entity has damaged the player")
-		local TweenService = game:GetService("TweenService")
 
 		local model = workspace:WaitForChild("Deer God")
-		local part = model.RushNew
-		assert(part, "Part not found in model")
+		local part = model:FindFirstChild("RushNew") or model:FindFirstChildWhichIsA("BasePart")
+		if not part then return end
 
-		local player = game.Players.LocalPlayer
 		local chr = player.Character or player.CharacterAdded:Wait()
 		local hrp = chr:WaitForChild("HumanoidRootPart")
 
 		part.Anchored = true
 
 		local SPEED_STUDS_PER_SECOND = 32
-
 		local targetCFrame = hrp.CFrame
-
 		local distance = (targetCFrame.Position - part.Position).Magnitude
-
 		local duration = distance / SPEED_STUDS_PER_SECOND
 
 		if duration <= 0 then
@@ -380,22 +369,9 @@ entity:SetCallback("OnDamagePlayer", function(newHealth: number)
 		)
 
 		tween:Play()
-
 		tween.Completed:Wait()
 	end
 end)
 
---[[
-
-DEVELOPER NOTE:
-By overwriting 'CrucifixionOverwrite' the default crucifixion callback will be replaced with your custom callback.
-
-entity:SetCallback("CrucifixionOverwrite", function()
-    print("Custom crucifixion callback")
-end)
-
-]]--
-
 ---====== Run entity ======---
-
 entity:Run(true)
