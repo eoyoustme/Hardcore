@@ -108,10 +108,14 @@ task.spawn(function()
 	redTint.Contrast = 0.2
 	redTint.Parent = Lighting
 
-	local Lighting = game:GetService("Lighting")
-	Lighting.FogEnd = 70
-	Lighting.FogStart = 0
-	Lighting.FogColor = Color3.new(1, 0, 0)
+    local atmosphereGlow = Instance.new("Atmosphere")
+    atmosphereGlow.Name = "CutsceneRedGlow"
+    atmosphereGlow.Color = Color3.fromRGB(255, 0, 0)
+    atmosphereGlow.Decay = Color3.fromRGB(180, 0, 0)
+    atmosphereGlow.Glare = 1.0 -- Boosted glow reflection
+    atmosphereGlow.Density = 0.65 -- Thicker environmental fog
+    atmosphereGlow.Parent = Lighting
+
 
 	-------------------------------------------------------------------------
 	-- BƯỚC 5: KHÓA CAMERA VÀ VÒNG LẶP UPDATE THEO FRAME (RENDERSTEPPED)
@@ -170,7 +174,7 @@ task.spawn(function()
 	-- Xóa toàn bộ hiệu ứng ánh sáng kinh dị và model dưới đất
 	if cutsceneLight then cutsceneLight:Destroy() end
 	if redTint then redTint:Destroy() end
-	if Lighting then Lighting:Destroy() end
+	if atmosphereGlow then atmosphereGlow:Destroy() end
 	if spawnedModel then spawnedModel:Destroy() end
 	if progress then progress:Destroy() end
 
