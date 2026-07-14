@@ -17,7 +17,7 @@ pcall(function()
 	require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("1 day left i will make a troll thing is make all entity chance to 99!", true)
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Stamina"))()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Guiding%20light"))()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Seek"))()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Seek"))()
 end)
 
 local entityList = {
@@ -77,6 +77,33 @@ local entityList = {
 		chance = 0.25
 	}
 }
+
+task.spawn(function()
+	if game.ReplicatedStorage.GameData.LatestRoom.Value == 50 then
+		---====== Load achievement giver ======---
+		local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
+
+		---====== Display achievement ======---
+		achievementGiver({
+			Title = "Good Job",
+			Desc = "1 / 2 Road",
+			Reason = "Door 50",
+			Image = "rbxassetid://17308358558"
+		})
+		
+	elseif game.ReplicatedStorage.GameData.LatestRoom.Value == 100 then
+		---====== Load achievement giver ======---
+		local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
+
+		---====== Display achievement ======---
+		achievementGiver({
+			Title = "Great",
+			Desc = "The End of Nightmare",
+			Reason = "Door 100...",
+			Image = "rbxassetid://17308358558"
+		})
+	end
+end)
 
 local function rollChance(percent)
 	return math.random(1, 100) <= percent
