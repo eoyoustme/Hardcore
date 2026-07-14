@@ -163,7 +163,10 @@ end)
 
 entity:SetCallback("OnDespawning", function()
 	print("Entity is despawning")
+	local Value = math.random(50,100)
+	if Value == 100 then
 loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Reboundl"))()
+		end
 end)
 
 entity:SetCallback("OnDespawned", function()
