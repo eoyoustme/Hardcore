@@ -25,9 +25,9 @@ task.spawn(function()
 
 
 	-- Cấu hình File & URL (Đã sửa lại thành URL Raw chuẩn của GitHub để tránh lỗi HTTP)
-	local modelUrl = "https://github.com/eoyoustme/Hardcore/blob/main/Death%20Forest.rbxm?raw=true"
-	local modelFile = "Death%20Forest.rbxm"
-	local CUTSCENE_DURATION = 9 -- Thời gian chạy cutscene (giây), bạn có thể tùy chỉnh
+	local modelUrl = "https://github.com/eoyoustme/Hardcore/blob/main/Death%20cor.rbxm?raw=true"
+	local modelFile = "Death%20cor.rbxm"
+	local CUTSCENE_DURATION = 9.6 -- Thời gian chạy cutscene (giây), bạn có thể tùy chỉnh
 
 	-------------------------------------------------------------------------
 	-- BƯỚC 1: DỌN DẸP CÁC MODEL CŨ TRƯỚC KHI SPAWN
@@ -74,15 +74,15 @@ task.spawn(function()
 	-- BƯỚC 3: XÁC ĐỊNH ĐIỂM ĐẦU / ĐIỂM CUỐI VÀ HẠ THẤP KHUNG TRACK
 	-------------------------------------------------------------------------
 	-- Tìm các Part mục tiêu bên trong model vừa tải về
-	local backPart = spawnedModel:FindFirstChild("Back", true)
+	local backPart = spawnedModel:FindFirstChild("Camera", true)
 	local targetPart = spawnedModel:FindFirstChild("Deer God", true)
 
 	local baseStartPos = (backPart and backPart:IsA("BasePart") and backPart.Position) or spawnedModel:GetPivot().Position
 	local baseTargetPos = (targetPart and targetPart:IsA("BasePart") and targetPart.Position) or spawnedModel:GetPivot().Position
 
 	-- Hạ thấp trục tọa độ xuống 4 studs để camera đi thẳng tap
-	local startPos = baseStartPos - Vector3.new(0, 7, -10)
-	local targetPos = baseTargetPos - Vector3.new(0, 14, -10)
+	local startPos = baseStartPos - Vector3.new(1, -1, 0)
+	local targetPos = baseTargetPos - Vector3.new(2, -2, 0)
 
 	-- Tạo giá trị Progress (0 đến 1) để chạy tuyến tính CFrame
 	local progress = Instance.new("NumberValue")
@@ -95,7 +95,7 @@ task.spawn(function()
 	local cutsceneLight = Instance.new("PointLight")
 	cutsceneLight.Name = "CutsceneIllumination"
 	cutsceneLight.Color = Color3.fromRGB(255, 10, 10)
-	cutsceneLight.Range = 450 
+	cutsceneLight.Range = 150 
 	cutsceneLight.Brightness = 35 
 	cutsceneLight.Shadows = false
 	cutsceneLight.Parent = camera 
@@ -112,10 +112,10 @@ task.spawn(function()
 	atmosphereGlow.Name = "CutsceneRedGlow"
 	atmosphereGlow.Color = Color3.fromRGB(255, 0, 0)
 	atmosphereGlow.Decay = Color3.fromRGB(180, 0, 0)
-	atmosphereGlow.Glare = 1.0 -- Boosted glow reflection
-	atmosphereGlow.Density = 0.65 -- Thicker environmental fog
+	atmosphereGlow.Glare = 100 -- Boosted glow reflection
+	atmosphereGlow.Density = 0.86 -- Thicker environmental fog
 	atmosphereGlow.Parent = Lighting
-	
+
 	local PlayerGui = game.Players.LocalPlayer.PlayerGui
 
 	local DeerGod = Instance.new("ScreenGui")
@@ -129,7 +129,7 @@ task.spawn(function()
 	flashter.Image = "rbxassetid://11394027261"
 	flashter.ImageTransparency = 1
 	flashter.Parent = DeerGod
-	
+
 	task.spawn(function()
 		wait(2)
 		flashter.ImageTransparency = 0
@@ -180,11 +180,11 @@ task.spawn(function()
 	-------------------------------------------------------------------------
 	-- BƯỚC 6: CHẠY TWEEN DI CHUYỂN CUTSCENE
 	-------------------------------------------------------------------------
-	local tweenInfo = TweenInfo.new(CUTSCENE_DURATION, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+	local tweenInfo = TweenInfo.new(22, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
 	local cutsceneTween = TweenService:Create(progress, tweenInfo, {Value = 1})
 
 	cutsceneTween:Play()
-	cutsceneTween.Completed:Wait(1.1) -- Đợi chạy hết thời gian cutscene
+wait(9.6)
 
 	-------------------------------------------------------------------------
 	-- BƯỚC 7: DỌN DẸP SAU KHI KẾT THÚC CUTSCENE (TRẢ LẠI TRẠNG THÁI GỐC)
