@@ -108,13 +108,47 @@ task.spawn(function()
 	redTint.Contrast = 0.2
 	redTint.Parent = Lighting
 
-    local atmosphereGlow = Instance.new("Atmosphere")
-    atmosphereGlow.Name = "CutsceneRedGlow"
-    atmosphereGlow.Color = Color3.fromRGB(255, 0, 0)
-    atmosphereGlow.Decay = Color3.fromRGB(180, 0, 0)
-    atmosphereGlow.Glare = 1.0 -- Boosted glow reflection
-    atmosphereGlow.Density = 0.65 -- Thicker environmental fog
-    atmosphereGlow.Parent = Lighting
+	local atmosphereGlow = Instance.new("Atmosphere")
+	atmosphereGlow.Name = "CutsceneRedGlow"
+	atmosphereGlow.Color = Color3.fromRGB(255, 0, 0)
+	atmosphereGlow.Decay = Color3.fromRGB(180, 0, 0)
+	atmosphereGlow.Glare = 1.0 -- Boosted glow reflection
+	atmosphereGlow.Density = 0.65 -- Thicker environmental fog
+	atmosphereGlow.Parent = Lighting
+	
+	local PlayerGui = game.Players.LocalPlayer.PlayerGui
+
+	local DeerGod = Instance.new("ScreenGui")
+	DeerGod.Name = "DeerGodFace"
+	DeerGod.IgnoreGuiInset = true
+	DeerGod.Parent = PlayerGui
+
+	local flashter = Instance.new("ImageLabel")
+	flashter.Size = UDim2.new(1, 0, 1, 0)
+	flashter.BackgroundTransparency = 1
+	flashter.Image = "rbxassetid://11394027261"
+	flashter.ImageTransparency = 1
+	flashter.Parent = DeerGod
+	
+	task.spawn(function()
+		wait(2)
+		flashter.ImageTransparency = 0
+		wait(0.4)
+		flashter.ImageTransparency = 1
+		wait(4)
+		flashter.ImageTransparency = 0
+		wait(0.4)
+		flashter.ImageTransparency = 1
+		wait(0.5)
+		flashter.ImageTransparency = 0
+		wait(0.4)
+		flashter.ImageTransparency = 1
+		wait(0.5)
+		flashter.ImageTransparency = 0
+		wait(0.5)
+		flashter.ImageTransparency = 1
+		wait(0.5)
+	end)
 
 
 	-------------------------------------------------------------------------
