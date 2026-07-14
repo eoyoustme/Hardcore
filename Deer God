@@ -174,6 +174,8 @@ entity:SetCallback("OnSpawned", function()
 			if hum and hrp and entity then
 				if (hrp.Position - entity.Position).Magnitude <= 9 then
 					if hum.Health > 0 then
+						loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Death%20Forest"))()
+wait(1)
 						entity:Destroy()
 						local anhguoc5 = player:WaitForChild("PlayerGui")
 						local cac5 = anhguoc5:WaitForChild("JumpscareOverlay")
@@ -182,7 +184,6 @@ entity:SetCallback("OnSpawned", function()
 						end
 
 						Lord:Destroy()
-						loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Death%20Forest"))()
 
 						local stats = game:GetService("ReplicatedStorage").GameStats:FindFirstChild("Player_" .. player.Name)
 						if stats and stats:FindFirstChild("Total") then
@@ -220,15 +221,17 @@ entity:SetCallback("OnStartMoving", function()
 			if hum and hrp and entity then
 				if (hrp.Position - entity.Position).Magnitude <= 50 then
 					if game.Players.LocalPlayer.Character:GetAttribute("Hiding") and hum.Health > 0 then
+						loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Death%20Forest"))()
+wait(1)
 						entity:Destroy()
-						local anhguoc51 = player:WaitForChild("PlayerGui")
-						local cac51 = anhguoc51:WaitForChild("JumpscareOverlay")
-						if cac51 then
-							cac51:Destroy()
+						local anhguoc5 = player:WaitForChild("PlayerGui")
+						local cac5 = anhguoc5:WaitForChild("JumpscareOverlay")
+						if cac5 then
+							cac5:Destroy()
 						end
 
 						Lord:Destroy()
-						loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Death%20Forest"))()
+
 						local stats = game:GetService("ReplicatedStorage").GameStats:FindFirstChild("Player_" .. player.Name)
 						if stats and stats:FindFirstChild("Total") then
 							stats.Total.DeathCause.Value = "Deer God"
