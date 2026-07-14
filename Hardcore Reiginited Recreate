@@ -1,4 +1,4 @@
-require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Mode make Rebound Fan ( Og Hunger(New)", true)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Mode make by Rebound Fan ( Og Hunger(New)", true)
 
 game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.Health.Music.Blue.SoundId = "rbxassetid://10472612727"
 
