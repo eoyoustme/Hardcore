@@ -96,7 +96,7 @@ local entity = Spawner:Create({
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
 	light(2,Color3.fromRGB(127, 249, 255),Color3.fromRGB(65, 138, 255))
-	local bruh = workspace.Rebound2.RushNew
+	local bruh = workspace.Rebound5.RushNew
 	local TweenService = game:GetService("TweenService")
 	local cue2 = Instance.new("Sound")
 	cue2.Parent = game.Workspace
