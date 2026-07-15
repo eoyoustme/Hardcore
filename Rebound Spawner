@@ -585,12 +585,12 @@ local function EntityMoveTo(model: Model, cframe: CFrame, speed: number)
 	local distance = (cframe.Position - model:GetPivot().Position).Magnitude
 
 	-- tốc độ giống cũ
-	local time = distance / speed
+	local time = 1
 
 	local tweenInfo = TweenInfo.new(
 		time,
 		Enum.EasingStyle.Quad,
-		Enum.EasingDirection.InOut
+		Enum.EasingDirection.Out
 	)
 
 	local value = Instance.new("CFrameValue")
