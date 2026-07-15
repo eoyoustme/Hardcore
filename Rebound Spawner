@@ -528,51 +528,34 @@ local function GetPathfindNodesAmbush(config: any): {BasePart}
 		return tonumber(a.Name) < tonumber(b.Name)
 	end)
 
+
 	for _, room in ipairs(rooms) do
 
-		if config.Movement.Reversed == false then
+		local entrance = room:FindFirstChild("RoomEntrance")
+		local exit = room:FindFirstChild("RoomExit")
 
-			local entrance = room:FindFirstChild("RoomEntrance")
-			if entrance then
-				local node = entrance:Clone()
-				node.Name = "Entrance"
-				node.CFrame -= Vector3.new(0,3,0)
-				table.insert(pathfindNodes,node)
+
+		if config.Movement.Reversed then
+
+			if exit then
+				table.insert(pathfindNodes, exit)
 			end
 
-			local exit = room:FindFirstChild("RoomExit")
-			if exit then
-				local node = exit:Clone()
-				node.Name = "Exit"
-				node.CFrame -= Vector3.new(0,3,0)
-				table.insert(pathfindNodes,node)
+			if entrance then
+				table.insert(pathfindNodes, entrance)
 			end
 
 		else
 
-			local exit = room:FindFirstChild("RoomExit")
-			if exit then
-				local node = exit:Clone()
-				node.Name = "Exit"
-				node.CFrame -= Vector3.new(0,3,0)
-				table.insert(pathfindNodes,node)
+			if entrance then
+				table.insert(pathfindNodes, entrance)
 			end
 
-			local entrance = room:FindFirstChild("RoomEntrance")
-			if entrance then
-				local node = entrance:Clone()
-				node.Name = "Entrance"
-				node.CFrame -= Vector3.new(0,3,0)
-				table.insert(pathfindNodes,node)
+			if exit then
+				table.insert(pathfindNodes, exit)
 			end
 
 		end
-	end
-
-
-	-- nếu reverse thì đảo cả phòng
-	if config.Movement.Reversed then
-		table.reverse(pathfindNodes)
 	end
 
 
@@ -617,37 +600,41 @@ local function GetPathfindNodesBlitz(config: any): ({BasePart}, {BasePart})
 end
 
 local function EntityMoveTo(model: Model, cframe: CFrame, speed: number)
-	if not model or not model.PrimaryPart then return end
 
-	local distance = (cframe.Position - model:GetPivot().Position).Magnitude
+	local distance = (model:GetPivot().Position - cframe.Position).Magnitude
 
-	-- tốc độ giống cũ
-	local time = 1
+	local time = math.max(distance / speed, 0.1)
 
-	local tweenInfo = TweenInfo.new(
-		time,
-		Enum.EasingStyle.Quad,
-		Enum.EasingDirection.Out
-	)
+	local cframeValue = Instance.new("CFrameValue")
+	cframeValue.Value = model:GetPivot()
 
-	local value = Instance.new("CFrameValue")
-	value.Value = model:GetPivot()
 
-	local connection = value:GetPropertyChangedSignal("Value"):Connect(function()
-		if model.Parent and not model:GetAttribute("Paused") then
-			model:PivotTo(value.Value)
+	local connection = cframeValue:GetPropertyChangedSignal("Value"):Connect(function()
+		if model.Parent then
+			model:PivotTo(cframeValue.Value)
 		end
 	end)
 
-	local tween = TweenService:Create(value, tweenInfo, {
-		Value = cframe
-	})
+
+	local tween = TweenService:Create(
+		cframeValue,
+		TweenInfo.new(
+			1,
+			Enum.EasingStyle.Quad,
+			Enum.EasingDirection.Out
+		),
+		{
+			Value = cframe
+		}
+	)
+
 
 	tween:Play()
 	tween.Completed:Wait()
 
+
 	connection:Disconnect()
-	value:Destroy()
+	cframeValue:Destroy()
 end
 
 local function Earthquake()
