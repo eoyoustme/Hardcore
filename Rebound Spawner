@@ -528,36 +528,24 @@ local function GetPathfindNodesAmbush(config: any): {BasePart}
 		return tonumber(a.Name) < tonumber(b.Name)
 	end)
 
-
 	for _, room in ipairs(rooms) do
 
 		local entrance = room:FindFirstChild("RoomEntrance")
 		local exit = room:FindFirstChild("RoomExit")
 
+		if entrance then
+			table.insert(pathfindNodes, entrance)
+		end
 
-		if config.Movement.Reversed then
-
-			if exit then
-				table.insert(pathfindNodes, exit)
-			end
-
-			if entrance then
-				table.insert(pathfindNodes, entrance)
-			end
-
-		else
-
-			if entrance then
-				table.insert(pathfindNodes, entrance)
-			end
-
-			if exit then
-				table.insert(pathfindNodes, exit)
-			end
-
+		if exit then
+			table.insert(pathfindNodes, exit)
 		end
 	end
 
+	-- chỉ đảo khi entity chạy ngược từ đầu
+	if config.Movement.Reversed then
+		table.reverse(pathfindNodes)
+	end
 
 	return pathfindNodes
 end
@@ -994,9 +982,7 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
 					model:SetAttribute("Damage", true)
 					task.spawn(entity.RunCallback, entity, "OnRebounding", true)
 
-					-- Run backwards through nodes
-					for i = #pathfindNodes, 1, -1 do
-						local v = pathfindNodes[i]
+					for _, v in ipairs(pathfindNodes) do
 						local cframe = v.CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
 						EntityMoveTo(model, cframe, config.Movement.Speed)
 						task.spawn(entity.RunCallback, entity, "OnReachNode", v)
