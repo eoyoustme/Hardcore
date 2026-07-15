@@ -4,6 +4,7 @@ local LocalPlayer = player.LocalPlayer
 local screenGui = Instance.new("ScreenGui")
 screenGui.IgnoreGuiInset = true
 screenGui.Parent = LocalPlayer.PlayerGui
+local userInputService = game:GetService("UserInputService")
 
 --------------------------------------------------------
 -- NEW STAMINA UI STRUCTURE (3 FRAMES)
@@ -91,21 +92,11 @@ local function updateDarkScreen()
 	end
 end
 
-local sprintButton = Instance.new("ImageButton")
-sprintButton.Size = UDim2.new(0.083, 0, 0.115, 0)
-sprintButton.Position = UDim2.new(0.916, 0, 0.369, 0)
-sprintButton.Image = "rbxassetid://111292680671790"
-sprintButton.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
-sprintButton.BackgroundTransparency = 1
-sprintButton.ImageTransparency = 0.4
-sprintButton.Parent = screenGui
+local runService = game:GetService("RunService")
 
-local buttonCorner = Instance.new("UICorner")
-buttonCorner.CornerRadius = UDim.new(1, 0)
-buttonCorner.Parent = sprintButton
-
-sprintButton.MouseButton1Click:Connect(function()
-	local Character = LocalPlayer.Character -- Lấy nhân vật hiện tại khi bấm nút
+-- Hàm dùng chung để bật/tắt Sprint (tránh lặp lại code)
+local function toggleSprint()
+	local Character = LocalPlayer.Character
 	if Character and canSprint and currentStamina > 0 then
 		sprinting = not sprinting
 
@@ -115,13 +106,48 @@ sprintButton.MouseButton1Click:Connect(function()
 			Character:SetAttribute("SpeedBoost", 0)
 		end
 	end
+end
+
+-- ==========================================
+-- 1. XỬ LÝ CHO THIẾT BỊ CÓ CẢM ỨNG (MOBILE)
+-- ==========================================
+if userInputService.TouchEnabled then
+	local sprintButton = Instance.new("ImageButton")
+	sprintButton.Size = UDim2.new(0.083, 0, 0.115, 0)
+	sprintButton.Position = UDim2.new(0.916, 0, 0.369, 0)
+	sprintButton.Image = "rbxassetid://111292680671790"
+	sprintButton.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+	sprintButton.BackgroundTransparency = 1
+	sprintButton.ImageTransparency = 0.4
+	sprintButton.Parent = screenGui
+
+	local buttonCorner = Instance.new("UICorner")
+	buttonCorner.CornerRadius = UDim.new(1, 0)
+	buttonCorner.Parent = sprintButton
+
+	sprintButton.MouseButton1Click:Connect(function()
+		toggleSprint()
+	end)
+end
+
+-- ==========================================
+-- 2. XỬ LÝ PHÍM BẤM Q (PC)
+-- ==========================================
+userInputService.InputBegan:Connect(function(input, gameProcessed)
+	-- Bỏ qua nếu người chơi đang gõ chat
+	if gameProcessed then return end 
+
+	if input.KeyCode == Enum.KeyCode.Q then
+		toggleSprint()
+	end
 end)
 
-local runService = game:GetService("RunService")
-
+-- ==========================================
+-- 3. VÒNG LẶP HỆ THỐNG (CHỈ CHẠY DUY NHẤT 1 VÒNG LẶP)
+-- ==========================================
 runService.Heartbeat:Connect(function(dt)
-	local Character = LocalPlayer.Character -- Đảm bảo luôn cập nhật đúng nhân vật hiện tại
-	
+	local Character = LocalPlayer.Character
+
 	if sprinting then
 		if currentStamina > 0 then
 			currentStamina -= staminaDrainRate * dt
@@ -132,8 +158,10 @@ runService.Heartbeat:Connect(function(dt)
 				Character:SetAttribute("SpeedBoost", 0)
 			end
 
-			-- Đã sửa đường dẫn PlayerGui chuẩn xác
-			require(LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("You're exhausted", true)
+			-- Thông báo kiệt sức
+			local mainGame = LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game
+			require(mainGame).caption("You're exhausted", true)
+			wait(1)
 		end
 	else
 		if currentStamina < maxStamina then
