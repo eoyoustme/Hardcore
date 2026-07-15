@@ -519,26 +519,63 @@ local function GetNodesFromRoom(room: Model, reversed: boolean): { BasePart }
 	return nodes
 end
 
-local function GetPathfindNodesAmbush(config: any): { BasePart }
+local function GetPathfindNodesAmbush(config: any): {BasePart}
 	local pathfindNodes = {}
+
 	local rooms = CurrentRooms:GetChildren()
-	if config.Movement.Reversed == false then
-		for i = 1, #rooms, 1 do
-			local room = rooms[i]
-			local roomNodes = GetNodesFromRoom(room, false)
-			for _, node in next, roomNodes do
-				pathfindNodes[#pathfindNodes + 1] = node
+
+	table.sort(rooms, function(a,b)
+		return tonumber(a.Name) < tonumber(b.Name)
+	end)
+
+	for _, room in ipairs(rooms) do
+
+		if config.Movement.Reversed == false then
+
+			local entrance = room:FindFirstChild("RoomEntrance")
+			if entrance then
+				local node = entrance:Clone()
+				node.Name = "Entrance"
+				node.CFrame -= Vector3.new(0,3,0)
+				table.insert(pathfindNodes,node)
 			end
-		end
-	else
-		for i = #rooms, 1, -1 do
-			local room = rooms[i]
-			local roomNodes = GetNodesFromRoom(room, true)
-			for _, node in next, roomNodes do
-				pathfindNodes[#pathfindNodes + 1] = node
+
+			local exit = room:FindFirstChild("RoomExit")
+			if exit then
+				local node = exit:Clone()
+				node.Name = "Exit"
+				node.CFrame -= Vector3.new(0,3,0)
+				table.insert(pathfindNodes,node)
 			end
+
+		else
+
+			local exit = room:FindFirstChild("RoomExit")
+			if exit then
+				local node = exit:Clone()
+				node.Name = "Exit"
+				node.CFrame -= Vector3.new(0,3,0)
+				table.insert(pathfindNodes,node)
+			end
+
+			local entrance = room:FindFirstChild("RoomEntrance")
+			if entrance then
+				local node = entrance:Clone()
+				node.Name = "Entrance"
+				node.CFrame -= Vector3.new(0,3,0)
+				table.insert(pathfindNodes,node)
+			end
+
 		end
 	end
+
+
+	-- nếu reverse thì đảo cả phòng
+	if config.Movement.Reversed then
+		table.reverse(pathfindNodes)
+	end
+
+
 	return pathfindNodes
 end
 
