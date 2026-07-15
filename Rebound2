@@ -35,7 +35,7 @@ end
 
 ---====== Load spawner ======---
 
-local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Rebound%20Spawner"))()
+local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/DOORS-Entity-Spawner-V2/main/init.luau"))()
 
 ---====== Create entity ======---
 
@@ -43,7 +43,7 @@ local entity = Spawner:Create({
 	Entity = {
 		Name = "Rebound2",
 		Asset = "https://github.com/eoyoustme/Hardcore/blob/main/Rebound1.rbxm?raw=true",
-		HeightOffset = 0
+		HeightOffset = 3
 	},
 	Lights = {
 		Flicker = {
