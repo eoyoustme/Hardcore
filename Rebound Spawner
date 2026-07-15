@@ -528,24 +528,42 @@ local function GetPathfindNodesAmbush(config: any): {BasePart}
 		return tonumber(a.Name) < tonumber(b.Name)
 	end)
 
-	for _, room in ipairs(rooms) do
 
-		local entrance = room:FindFirstChild("RoomEntrance")
-		local exit = room:FindFirstChild("RoomExit")
-
-		if entrance then
-			table.insert(pathfindNodes, entrance)
-		end
-
-		if exit then
-			table.insert(pathfindNodes, exit)
-		end
-	end
-
-	-- chỉ đảo khi entity chạy ngược từ đầu
 	if config.Movement.Reversed then
-		table.reverse(pathfindNodes)
+
+		-- đi từ phòng cuối về đầu
+		for i = #rooms, 1, -1 do
+			local room = rooms[i]
+
+			local exit = room:FindFirstChild("RoomExit")
+			if exit then
+				table.insert(pathfindNodes, exit)
+			end
+
+			local entrance = room:FindFirstChild("RoomEntrance")
+			if entrance then
+				table.insert(pathfindNodes, entrance)
+			end
+		end
+
+	else
+
+		-- đi bình thường
+		for _, room in ipairs(rooms) do
+
+			local entrance = room:FindFirstChild("RoomEntrance")
+			if entrance then
+				table.insert(pathfindNodes, entrance)
+			end
+
+			local exit = room:FindFirstChild("RoomExit")
+			if exit then
+				table.insert(pathfindNodes, exit)
+			end
+
+		end
 	end
+
 
 	return pathfindNodes
 end
