@@ -1,1 +1,202 @@
+task.spawn(function()
+	local Workspace = game:GetService("Workspace")
+	local Lighting = game:GetService("Lighting")
+	local RunService = game:GetService("RunService")
+	local TweenService = game:GetService("TweenService")
+	local Players = game:GetService("Players")
 
+	local camera = Workspace.CurrentCamera
+	local localPlayer = Players.LocalPlayer
+	
+	local Jumpscare = Instance.new("Sound")
+	Jumpscare.SoundId = "rbxassetid://140718666763137"
+	Jumpscare.Volume = 7
+	Jumpscare.Looped = true
+	Jumpscare.PlaybackSpeed = 1
+	Jumpscare.Parent = workspace
+	Jumpscare:Play()
+
+	-- Cấu hình File & URL (Đã sửa lại thành URL Raw chuẩn của GitHub để tránh lỗi HTTP)
+	local modelUrl = "https://github.com/eoyoustme/Hardcore/blob/main/Troll%20Mode/School.rbxm?raw=true"
+	local modelFile = "School.rbxm"
+	local CUTSCENE_DURATION = 9.6 -- Thời gian chạy cutscene (giây), bạn có thể tùy chỉnh
+
+	-------------------------------------------------------------------------
+	-- BƯỚC 1: DỌN DẸP CÁC MODEL CŨ TRƯỚC KHI SPAWN
+	-------------------------------------------------------------------------
+	for _, oldObj in ipairs(Workspace:GetChildren()) do
+		if oldObj.Name == "ashj_cutscene_root" or oldObj.Name == "Model" or oldObj.Name == "Dew" then
+			if oldObj:FindFirstChild("Deer God", true) or oldObj:FindFirstChild("Back", true) then
+				oldObj:Destroy()
+			end
+		end
+	end
+
+	-------------------------------------------------------------------------
+	-- BƯỚC 2: TẢI MODEL QUA HỆ THỐNG FILE CỦA EXECUTOR
+	-------------------------------------------------------------------------
+	pcall(function()
+		if not isfile(modelFile) then
+			writefile(modelFile, game:HttpGet(modelUrl))
+		end
+	end)
+
+	local spawnedModel = nil
+	pcall(function()
+		spawnedModel = game:GetObjects(getcustomasset(modelFile))[1]
+	end)
+
+	if not spawnedModel then 
+		warn("Failed to load custom cutscene model asset.")
+		return 
+	end
+
+	spawnedModel.Name = "DeathForest"
+
+	-- Đặt vị trí toàn bộ Model xuống sâu dưới map (-1000 studs)
+	local spawnLocation = CFrame.new(0, -1000, 0)
+	spawnedModel.Parent = Workspace
+	if spawnedModel:IsA("Model") then
+		spawnedModel:PivotTo(spawnLocation)
+	elseif spawnedModel:IsA("BasePart") then
+		spawnedModel.CFrame = spawnLocation
+	end
+
+	-------------------------------------------------------------------------
+	-- BƯỚC 3: XÁC ĐỊNH ĐIỂM ĐẦU / ĐIỂM CUỐI (TWEEN TỚI PART "BALDI" TRONG "SUBTER")
+	-------------------------------------------------------------------------
+	-- Tìm các Part mục tiêu bên trong model vừa tải về
+	local backPart = spawnedModel:FindFirstChild("Back", true)
+
+	-- Tìm kiếm model/folder "Subter" trước, sau đó tìm part "Baldi" bên trong nó
+	local subterModel = spawnedModel:FindFirstChild("Subter", true)
+	local targetPart = nil
+
+	if subterModel then
+		targetPart = subterModel:FindFirstChild("Baldi", true)
+	end
+
+	-- Cơ chế dự phòng: Nếu không thấy "Subter" hoặc không thấy "Baldi" bên trong "Subter", quét tìm "Baldi" trên toàn bộ model lớn
+	if not targetPart then
+		targetPart = spawnedModel:FindFirstChild("Baldi", true)
+	end
+
+	local baseStartPos = (backPart and backPart:IsA("BasePart") and backPart.Position) or spawnedModel:GetPivot().Position
+	local baseTargetPos = (targetPart and targetPart:IsA("BasePart") and targetPart.Position) or spawnedModel:GetPivot().Position
+
+	-- Thiết lập góc xoay mong muốn (giữ nguyên góc xoay -70 độ quanh trục Y như cũ)
+	local startAngle = Vector3.new(0, -90, 0)  
+	local targetAngle = Vector3.new(0, -90, 0) 
+
+	-- Tạo CFrame kết hợp cả Vị trí và Góc xoay (dùng math.rad để đổi từ độ sang radian)
+	local startCF = CFrame.new(baseStartPos - Vector3.new(1, -1, 0)) * CFrame.Angles(math.rad(startAngle.X), math.rad(startAngle.Y), math.rad(startAngle.Z))
+	local targetCF = CFrame.new(baseTargetPos - Vector3.new(2, -2, 0)) * CFrame.Angles(math.rad(targetAngle.X), math.rad(targetAngle.Y), math.rad(targetAngle.Z))
+
+	-- Tạo giá trị Progress (0 đến 1) để chạy tuyến tính CFrame
+	local progress = Instance.new("NumberValue")
+	progress.Value = 0
+
+	-------------------------------------------------------------------------
+	-- BƯỚC 4: TẠO HIỆU ỨNG VÀNG/ĐỎ (VFX, LIGHTING & ATMOSPHERE)
+	-------------------------------------------------------------------------
+	-- Đèn tracking đỏ gắn thẳng vào Camera view
+	local cutsceneLight = Instance.new("PointLight")
+	cutsceneLight.Name = "CutsceneIllumination"
+	cutsceneLight.Color = Color3.fromRGB(255, 10, 10)
+	cutsceneLight.Range = 150 
+	cutsceneLight.Brightness = 35 
+	cutsceneLight.Shadows = false
+	cutsceneLight.Parent = camera 
+
+	-- Môi trường chuyển tông đỏ kinh dị
+	local redTint = Instance.new("ColorCorrectionEffect")
+	redTint.Name = "CutsceneRedTint"
+	redTint.TintColor = Color3.fromRGB(255, 30, 30)
+	redTint.Brightness = 0.25
+	redTint.Contrast = 0.2
+	redTint.Parent = Lighting
+
+	local atmosphereGlow = Instance.new("Atmosphere")
+	atmosphereGlow.Name = "CutsceneRedGlow"
+	atmosphereGlow.Color = Color3.fromRGB(255, 0, 0)
+	atmosphereGlow.Decay = Color3.fromRGB(180, 0, 0)
+	atmosphereGlow.Glare = 100 
+	atmosphereGlow.Density = 1
+	atmosphereGlow.Parent = Lighting
+
+	local PlayerGui = game.Players.LocalPlayer.PlayerGui
+
+	local DeerGod = Instance.new("ScreenGui")
+	DeerGod.Name = "DeerGodFace"
+	DeerGod.IgnoreGuiInset = true
+	DeerGod.Parent = PlayerGui
+
+	local flashter = Instance.new("ImageLabel")
+	flashter.Size = UDim2.new(1, 0, 1, 0)
+	flashter.BackgroundTransparency = 1
+	flashter.Image = "rbxassetid://11394027261"
+	flashter.ImageTransparency = 1
+	flashter.Parent = DeerGod
+
+
+	-------------------------------------------------------------------------
+	-- BƯỚC 5: KHÓA CAMERA VÀ VÒNG LẶP UPDATE THEO FRAME
+	-------------------------------------------------------------------------
+	local cameraConnection
+	cameraConnection = RunService.RenderStepped:Connect(function()
+		camera.CameraType = Enum.CameraType.Scriptable
+
+		-- Lerp mượt mà từ startCF sang targetCF (bao gồm cả Vị trí + Góc xoay đã thiết lập)
+		local currentCF = startCF:Lerp(targetCF, progress.Value)
+		camera.CFrame = currentCF
+
+		-- Logic Anchor Fallback: Giữ chặt mọi Part dưới hầm không cho rơi tự do
+		for _, obj in ipairs(Workspace:GetChildren()) do
+			if obj.Name == "wmetjkn_cutscene_root" or obj.Name == "Model" or obj.Name == "DeathForest" or obj:FindFirstChild("Deer God", true) then
+				for _, part in ipairs(obj:GetDescendants()) do
+					if part:IsA("BasePart") and not part.Anchored then
+						part.Anchored = true
+						part.CanCollide = false
+					end
+				end
+			end
+		end
+	end)
+
+	-------------------------------------------------------------------------
+	-- BƯỚC 6: CHẠY TWEEN DI CHUYỂN CUTSCENE
+	-------------------------------------------------------------------------
+	local tweenInfo = TweenInfo.new(9.6, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+	local cutsceneTween = TweenService:Create(progress, tweenInfo, {Value = 1})
+
+	cutsceneTween:Play()
+	wait(9.6)
+
+	-------------------------------------------------------------------------
+	-- BƯỚC 7: DỌN DẸP SAU KHI KẾT THÚC CUTSCENE
+	-------------------------------------------------------------------------
+	if cameraConnection then
+		cameraConnection:Disconnect()
+	end
+	Jumpscare:Destroy()
+
+	game.Players.LocalPlayer.Character.Humanoid.Health = 0
+	local sound = Instance.new("Sound")
+	sound.SoundId = "rbxassetid://4988621968"
+	sound.Volume = 10
+	sound.PlaybackSpeed = 0.6
+	sound.Parent = workspace
+	sound:Play()
+
+	-- Trả Camera về chế độ bình thường cho người chơi
+	camera.CameraType = Enum.CameraType.Custom
+
+	-- Xóa toàn bộ hiệu ứng ánh sáng kinh dị và model dưới đất
+	if cutsceneLight then cutsceneLight:Destroy() end
+	if redTint then redTint:Destroy() end
+	if atmosphereGlow then atmosphereGlow:Destroy() end
+	if spawnedModel then spawnedModel:Destroy() end
+	if progress then progress:Destroy() end
+
+	print("Cutscene finished and successfully cleaned up!")
+end)
