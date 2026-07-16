@@ -1,6 +1,7 @@
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService") 
 
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -100,49 +101,214 @@ task.wait(3)
 local lastPos = HRP.Position
 local Kill = true
 local damageInterval = 0.054
+local inMinigame = false 
+
+-- Hàm xử lý Heartbeat Minigame khi trốn
+local function StartHeartbeatMinigame()
+	if inMinigame then return end
+	inMinigame = true
+
+	local isPC = UserInputService.KeyboardEnabled
+
+	pcall(function()
+		require(LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Click the heartbeat", true)
+	end)
+
+	local heartbeatGui = Instance.new("ScreenGui")
+	heartbeatGui.Name = "HeartbeatMinigame"
+	heartbeatGui.IgnoreGuiInset = true
+	heartbeatGui.DisplayOrder = 999999
+	heartbeatGui.Parent = LocalPlayer.PlayerGui
+
+	local mainButton = Instance.new("ImageButton")
+	mainButton.Name = "HeartLabel"
+	mainButton.Image = "rbxassetid://8419306829"
+	mainButton.Size = UDim2.new(0.200000003, 50, 0.200000003, 50)
+	mainButton.Position = UDim2.new(0.5, 0, 0.949999988, 0)
+	mainButton.AnchorPoint = Vector2.new(0.5, 0.949999988)
+	mainButton.BackgroundTransparency = 1
+	mainButton.Parent = heartbeatGui
+
+	local hidingCheck
+	hidingCheck = Character:GetAttributeChangedSignal("Hiding"):Connect(function()
+		if not Character:GetAttribute("Hiding") then
+			Humanoid.Health = 0
+			heartbeatGui:Destroy()
+			if hidingCheck then hidingCheck:Disconnect() end
+		end
+	end)
+
+	-- ĐỢI 2 GIÂY TRƯỚC KHI BẮT ĐẦU VÒNG LẶP MINIGAME
+	task.wait(2)
+
+	if not Kill or Humanoid.Health <= 0 or not Character:GetAttribute("Hiding") then
+		if hidingCheck then hidingCheck:Disconnect() end
+		heartbeatGui:Destroy()
+		inMinigame = false
+		return
+	end
+
+	local successClicks = 0
+	local targetClicks = 5
+	local lives = 2 -- KHỞI TẠO CƠ CHẾ 2 MẠNG CHO PLAYER
+
+	for i = 1, targetClicks do
+		if not Kill or Humanoid.Health <= 0 or not Character:GetAttribute("Hiding") then 
+			break 
+		end
+
+		local clickedCorrectly = false
+		local hasClickedThisRound = false
+		local roundFinished = false
+
+		local ring = Instance.new("ImageLabel")
+		ring.Name = "ShrinkingRing"
+		ring.Image = "rbxassetid://8419306829"
+		ring.ImageTransparency = 0.7
+		ring.BackgroundTransparency = 1
+		ring.AnchorPoint = Vector2.new(0.5, 0.5)
+		ring.Position = UDim2.new(0.5, 0, 0.5, 0)
+		ring.Size = UDim2.new(2.5, 0, 2.5, 0) 
+		ring.Parent = mainButton
+
+		-- Vòng tròn thu nhỏ về kích thước gốc trong 0.5 giây
+		local shrinkTween = TweenService:Create(
+			ring,
+			TweenInfo.new(0.5, Enum.EasingStyle.Linear),
+			{Size = UDim2.new(1, 0, 1, 0)}
+		)
+		shrinkTween:Play()
+
+		local startTime = os.clock()
+		local clickConnection
+		local keyConnection
+
+		local function registerInput()
+			if hasClickedThisRound or roundFinished then return end
+			hasClickedThisRound = true
+
+			local timeElapsed = os.clock() - startTime
+			
+			-- Kéo dài thời gian bấm hợp lệ lên 0.8s (0.5s thu nhỏ + 0.3s chờ delay khớp size)
+			if timeElapsed >= 0.35 and timeElapsed <= 0.8 then
+				clickedCorrectly = true
+				roundFinished = true
+			else
+				-- Nhập sai nhịp (quá sớm) -> Bị trừ 1 mạng thay vì chết ngay
+				lives = lives - 1
+				if lives <= 0 then
+					Humanoid.Health = 0
+				end
+				roundFinished = true
+			end
+		end
+
+		clickConnection = mainButton.MouseButton1Click:Connect(registerInput)
+
+		if isPC then
+			keyConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+				if input.KeyCode == Enum.KeyCode.Space and not gameProcessed then
+					registerInput()
+				end
+			end)
+		end
+
+		-- Vòng lặp chờ tối đa 0.8s (0.5s thu nhỏ + 0.3s hoãn lại cho player bấm)
+		local totalRoundTime = 0.8
+		local elapsed = 0
+		while elapsed < totalRoundTime and not roundFinished and Humanoid.Health > 0 and Character:GetAttribute("Hiding") do
+			task.wait(0.02)
+			elapsed = elapsed + 0.02
+		end
+
+		if clickConnection then clickConnection:Disconnect() end
+		if keyConnection then keyConnection:Disconnect() end
+		if ring then ring:Destroy() end
+
+		if Humanoid.Health <= 0 or not Character:GetAttribute("Hiding") then
+			break
+		end
+
+		-- Nếu hết 0.8s hoàn toàn bỏ lỡ không bấm -> Trừ 1 mạng
+		if not hasClickedThisRound then
+			lives = lives - 1
+			if lives <= 0 then
+				Humanoid.Health = 0
+				break
+			end
+		end
+
+		-- Chỉ cộng điểm tích lũy nếu vượt qua lượt đó thành công
+		if clickedCorrectly then
+			successClicks = successClicks + 1
+		end
+		
+		-- Tạo khoảng nghỉ ngắn 0.1s giữa các lần xuất hiện trái tim tiếp theo
+		task.wait(0.1)
+	end
+
+	if hidingCheck then hidingCheck:Disconnect() end
+	heartbeatGui:Destroy()
+
+	if successClicks == targetClicks and Humanoid.Health > 0 then
+		Kill = false 
+		if Silence5 and Silence5.Parent then
+			Silence5:Destroy()
+		end
+	end
+	
+	inMinigame = false
+end
 
 task.spawn(function()
 	while Kill do
 		task.wait(damageInterval)
 
-		local currentPos = HRP.Position
-
-		if (currentPos-lastPos).Magnitude > 0.3 then
-
-			require(LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("",true)
-
-			if Humanoid.Health > 0 and not Character:GetAttribute("Crouching") then
-
-				local s = Instance.new("Sound")
-				s.SoundId = "rbxassetid://7861818231"
-				s.Volume = 4
-				s.Parent = workspace
-				s:Play()
-
-				local tween = TweenService:Create(
-					Silence,
-					TweenInfo.new(0.3,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),
-					{
-						CFrame = HRP.CFrame
-					}
-				)
-
-				tween:Play()
-
-				if not Character:GetAttribute("Crouching") then
-					Humanoid.Health = 0
-					local sound = Instance.new("Sound")
-					sound.SoundId = "rbxassetid://4988621968"
-					sound.Volume = 10
-					sound.PlaybackSpeed = 0.7
-					sound.Parent = workspace
-					sound:Play()
-					break
-				end
-			end
+		-- KIỂM TRA TRẠNG THÁI HIDING ĐỂ BẮT ĐẦU MINIGAME
+		if Character:GetAttribute("Hiding") and not inMinigame then
+			task.spawn(StartHeartbeatMinigame)
 		end
 
-		lastPos = currentPos
+		-- Chỉ kiểm tra di chuyển gây chết nếu KHÔNG ở trong Minigame
+		if not inMinigame then
+			local currentPos = HRP.Position
+
+			if (currentPos-lastPos).Magnitude > 0.3 then
+
+				require(LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("",true)
+
+				if Humanoid.Health > 0 and not Character:GetAttribute("Crouching") then
+
+					local s = Instance.new("Sound")
+					s.SoundId = "rbxassetid://7861818231"
+					s.Volume = 4
+					s.Parent = workspace
+					s:Play()
+
+					local tween = TweenService:Create(
+						Silence,
+						TweenInfo.new(0.3,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),
+						{
+							CFrame = HRP.CFrame
+						}
+					)
+
+					tween:Play()
+
+					if not Character:GetAttribute("Crouching") then
+						Humanoid.Health = 0
+						local sound = Instance.new("Sound")
+						sound.SoundId = "rbxassetid://4988621968"
+						sound.Volume = 10
+						sound.PlaybackSpeed = 0.7
+						sound.Parent = workspace
+						sound:Play()
+						break
+					end
+				end
+			end
+			lastPos = currentPos
+		end
 	end
 end)
 
