@@ -1,0 +1,383 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local Debris = game:GetService("Debris")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local mainUI = playerGui:WaitForChild("MainUI")
+local caption = mainUI.MainFrame.Caption
+local Workspace = game:GetService("Workspace")
+
+local threadA = nil
+local threadB = nil
+local threadcity = nil
+
+local function ForceChaseStats()
+	Humanoid.WalkSpeed = 20
+end
+
+-- === Tải âm thanh từ GitHub ===
+local function GetGitSound(GithubSnd, SoundName)
+	local url = GithubSnd
+	if not isfile(SoundName .. ".mp3") then
+		writefile(SoundName .. ".mp3", game:HttpGet(url))
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+	return sound
+end
+
+local Lord = GetGitSound("https://github.com/eoyoustme/Extremely/blob/main/Schoolhouse%20Madness%202%20Subterbaldi%20Ost.mp3?raw=true","Subterost")
+Lord.Parent = workspace
+Lord.Volume = 5
+Lord.PlaybackSpeed = 1
+Lord:Play()
+
+local function ApplyFireToMap()
+	local currentRooms = Workspace:FindFirstChild("CurrentRooms")
+	if not currentRooms then
+		return
+	end
+
+	ForceChaseStats()
+
+	for _, inst in ipairs(currentRooms:GetDescendants()) do
+		if inst:IsA("BasePart") and not inst:IsDescendantOf(Dummy) and not inst:IsDescendantOf(Character) then
+			if not inst:FindFirstChild("MapFire") then
+				local fire = Instance.new("ParticleEmitter")
+				fire.Name = "MapFire"
+				fire.Texture = "rbxasset://textures/particles/fire_main.dds"
+				fire.Color = ColorSequence.new(Color3.fromRGB(255, 120, 0), Color3.fromRGB(255, 0, 0))
+				fire.LightEmission = 1
+				fire.Size = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 3),
+					NumberSequenceKeypoint.new(1, 0)
+				})
+				fire.Lifetime = NumberRange.new(0.6, 1.1)
+				fire.Rate = 25
+				fire.Speed = NumberRange.new(2, 6)
+				fire.Rotation = NumberRange.new(0, 360)
+				fire.RotSpeed = NumberRange.new(-120, 120)
+				fire.SpreadAngle = Vector2.new(25, 25)
+				fire.Enabled = true
+				fire.Parent = inst
+
+				table.insert(fireEmitters, fire)
+			end
+		end
+	end
+end
+
+local Reboundcolor = Instance.new("ColorCorrectionEffect",game.Lighting) game.Debris:AddItem(Reboundcolor,24)
+Reboundcolor.Name = "Warn"
+Reboundcolor.TintColor = Color3.fromRGB(255, 0, 0) Reboundcolor.Saturation = -0.7 Reboundcolor.Contrast = 0.2
+
+---====== Load spawner ======---
+local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Deer%20god%20spawner"))()
+
+---====== Create entity ======---
+local entity = Spawner:Create({
+	Entity = {
+		Name = "TRUEFORM",
+		Asset = "https://github.com/eoyoustme/Hardcore/blob/main/Troll%20Mode/SubterBaldi.rbxm?raw=true",
+		HeightOffset = 0.4
+	},
+	Lights = {
+		Flicker = {
+			Enabled = true,
+			Duration = 100
+		},
+		Shatter = false,
+		Repair = true
+	},
+	Earthquake = {
+		Enabled = true
+	},
+	CameraShake = {
+		Enabled = true,
+		Range = 100,
+		Values = {1.5, 20, 0.1, 1} -- Magnitude, Roughness, FadeIn, FadeOut
+	},
+	Movement = {
+		Speed = 50,
+		Delay = 0,
+		Reversed = false
+	},
+	Rebounding = {
+		Enabled = false,
+		Type = "Ambush",
+		Min = 1,
+		Max = 1,
+		Delay = 2
+	},
+	Damage = {
+		Enabled = true,
+		Range = 500,
+		Amount = 0.001
+	},
+	Crucifixion = {
+		Enabled = true,
+		Range = 70,
+		Resist = false,
+		Break = true
+	},
+	Death = {
+		Type = "Guiding",
+		Hints = {"Death", "Hints", "Go", "Here"},
+		Cause = ""
+	}
+})
+
+---====== CÁC SỰ KIỆN CỦA ENTITY (Đã được tách phẳng) ======---
+
+-- 1. Khi Entity Spawn
+entity:SetCallback("OnSpawned", function()
+	print("Entity has spawned")
+	local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
+	local camara = game.Workspace.CurrentCamera
+	local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+		camara.CFrame = camara.CFrame * shakeCf
+	end)
+	camShake:Start()
+	camShake:ShakeOnce(10,3.5,0.1,15,15,0.5)
+	
+	threadcity = task.spawn(function()
+		while true do
+			wait(0.3)
+			ApplyFireToMap()
+		end
+	end)
+
+	-- Jumpscare Overlay
+	task.spawn(function()
+		local screenGui = Instance.new("ScreenGui")
+		screenGui.Name = "JumpscareOverlay"
+		screenGui.IgnoreGuiInset = true
+		screenGui.DisplayOrder = 999999
+		screenGui.Parent = player:WaitForChild("PlayerGui")
+
+		local imageLabel = Instance.new("ImageLabel")
+		imageLabel.BackgroundTransparency = 1
+		imageLabel.BorderSizePixel = 0
+		imageLabel.Position = UDim2.new(0, 0, 0, 0)
+		imageLabel.Size = UDim2.new(1, 0, 1, 0)
+		imageLabel.ScaleType = Enum.ScaleType.Stretch
+		imageLabel.ImageTransparency = 0
+		imageLabel.Visible = true
+		imageLabel.Parent = screenGui
+
+		local jumpscareImage1 = "rbxassetid://1038411245"		
+		local jumpscareImage2 = "rbxassetid://410256160"
+		local jumpscareImage3 = "rbxassetid://11273380307"
+		local jumpscareImage4 = "rbxassetid://438356387"
+
+		local flashDuration = 350
+		local start = tick()
+
+		while tick() - start < flashDuration do
+			imageLabel.Image = jumpscareImage1
+			imageLabel.ImageTransparency = 0.1
+			task.wait(0.06)
+			imageLabel.Image = jumpscareImage2
+			imageLabel.ImageTransparency = 0.2
+			task.wait(0.06)
+			imageLabel.Image = jumpscareImage3
+			imageLabel.ImageTransparency = 0.3
+			task.wait(0.06)
+			imageLabel.Image = jumpscareImage4
+			imageLabel.ImageTransparency = 0
+			task.wait(0.06)
+		end
+	end)
+
+	threadA = task.spawn(function()
+		while true do
+			task.wait(0.5)
+
+			local char = player.Character
+			if not char then continue end
+
+			local hum = char:FindFirstChildWhichIsA("Humanoid")
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			local deerEntity = workspace:FindFirstChild("TRUEFORM") and workspace["TRUEFORM"]:FindFirstChildWhichIsA("BasePart")
+
+			if hum and hrp and deerEntity then
+				if (hrp.Position - deerEntity.Position).Magnitude <= 9 then
+					if hum.Health > 0 then
+						loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Troll%20Mode/Troll"))()
+						task.wait(1)
+						deerEntity:Destroy()
+
+						local anhguoc5 = player:WaitForChild("PlayerGui")
+						local cac5 = anhguoc5:FindFirstChild("JumpscareOverlay")
+						if cac5 then cac5:Destroy() end
+
+						if Lord then Lord:Destroy() end
+
+						local stats = game:GetService("ReplicatedStorage").GameStats:FindFirstChild("Player_" .. player.Name)
+						if stats and stats:FindFirstChild("Total") then
+							stats.Total.DeathCause.Value = "SubterBaldi"
+						end
+
+						break 
+					end
+				end
+			end
+		end
+	end)
+end)
+
+-- 2. Khi Entity Bắt đầu di chuyển
+entity:SetCallback("OnStartMoving", function()
+	local deer = workspace:WaitForChild("Deer God")
+	local character = player.Character or player.CharacterAdded:Wait()
+	local humanoid = character:WaitForChild("Humanoid")
+	local camera = workspace.CurrentCamera
+
+	threadB = task.spawn(function()
+		while true do
+			task.wait(0.5)
+
+			local char = player.Character
+			if not char then continue end
+
+			local hum = char:FindFirstChildWhichIsA("Humanoid")
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			local deerEntity = workspace:FindFirstChild("Deer God") and workspace["Deer God"]:FindFirstChildWhichIsA("BasePart")
+
+			if hum and hrp and deerEntity then
+				if (hrp.Position - deerEntity.Position).Magnitude <= 50 then
+					if char:GetAttribute("Hiding") and hum.Health > 0 then
+						loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Troll%20Mode/Troll"))()
+						deerEntity:Destroy()
+
+						local anhguoc5 = player:WaitForChild("PlayerGui")
+						local cac5 = anhguoc5:FindFirstChild("JumpscareOverlay")
+						if cac5 then cac5:Destroy() end
+
+						if Lord then Lord:Destroy() end
+
+						local stats = game:GetService("ReplicatedStorage").GameStats:FindFirstChild("Player_" .. player.Name)
+						if stats and stats:FindFirstChild("Total") then
+							stats.Total.DeathCause.Value = "SubterBaldi"
+						end
+
+						break
+					end
+				end
+			end
+		end
+	end)
+end)
+
+-- 3. Khi Entity vào phòng mới
+entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
+	if firstTime == true then
+	else
+		print("Entity has entered room: ".. room.Name.. " again")
+	end
+end)
+
+entity:SetCallback("OnLookAt", function(lineOfSight: boolean)
+	if lineOfSight == true then
+		print("Player is looking at entity")
+	else
+		print("Player view is obstructed by something")
+	end
+end)
+
+entity:SetCallback("OnRebounding", function(startOfRebound: boolean)
+	if startOfRebound == true then
+		print("Entity has started rebounding")
+	else
+		print("Entity has finished rebounding")
+	end
+end)
+
+entity:SetCallback("OnDespawning", function()
+	print("Entity is despawning")
+	game.TweenService:Create(Reboundcolor,TweenInfo.new(15),{TintColor = Color3.fromRGB(255, 255, 255),Saturation = 0, Contrast = 0}):Play()
+	local TweenService = game:GetService("TweenService")
+	local TW = TweenService:Create(game.Lighting.MainColorCorrection, TweenInfo.new(7),{TintColor = Color3.fromRGB(255, 255, 255)})
+	TW:Play()
+
+	local deer = workspace:FindFirstChild("TRUEFORM")
+	if deer then deer:Destroy() end
+
+	if threadA then
+		task.cancel(threadA)
+		threadA = nil
+	end
+	if threadB then
+		task.cancel(threadB)
+		threadB = nil
+	end
+	if  threadcity then
+		task.cancel(threadcity)
+		threadcity = nil
+	end
+
+	---====== Load achievement giver ======---
+	local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
+
+	---====== Display achievement ======---
+	achievementGiver({
+		Title = "Need Too Run",
+		Desc = "Why u Run?",
+		Reason = "Survive SubterBaldi TRUE FORM",
+		Image = "rbxassetid://341300088"
+	})
+
+	local anhguoc = player:WaitForChild("PlayerGui")
+	local cac = anhguoc:FindFirstChild("JumpscareOverlay")
+	if cac then
+		cac:Destroy()
+	end
+
+	if Lord then Lord:Destroy() end
+end)
+
+entity:SetCallback("OnDespawned", function()
+	print("Entity has despawned")
+end)
+
+entity:SetCallback("OnDamagePlayer", function(newHealth: number)
+	if newHealth <= 0 then
+		print("Entity has killed the player")
+	else
+		print("Entity has damaged the player")
+
+		local model = workspace:WaitForChild("TRUEFORM")
+		local part = model:FindFirstChild("RushNew") or model:FindFirstChildWhichIsA("BasePart")
+		if not part then return end
+
+		local chr = player.Character or player.CharacterAdded:Wait()
+		local hrp = chr:WaitForChild("HumanoidRootPart")
+
+		part.Anchored = true
+
+		local SPEED_STUDS_PER_SECOND = 22.5
+		local targetCFrame = hrp.CFrame
+		local distance = (targetCFrame.Position - part.Position).Magnitude
+		local duration = distance / SPEED_STUDS_PER_SECOND
+
+		if duration <= 0 then
+			duration = 0.05
+		end
+
+		local tween = TweenService:Create(
+			part,
+			TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+			{CFrame = targetCFrame}
+		)
+
+		tween:Play()
+		tween.Completed:Wait()
+	end
+end)
+
+---====== Run entity ======---
+entity:Run(true)
