@@ -1,0 +1,478 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local Debris = game:GetService("Debris")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local thraed = nil
+---====== Load spawner ======---
+
+local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/DOORS-Entity-Spawner-V2/main/init.luau"))()
+
+---====== Create entity ======---
+
+local entity = Spawner:Create({
+	Entity = {
+		Name = "Null",
+		Asset = "https://github.com/eoyoustme/Hardcore/blob/main/Null.rbxm?raw=true",
+		HeightOffset = -3
+	},
+	Lights = {
+		Flicker = {
+			Enabled = true,
+			Duration = 1
+		},
+		Shatter = true,
+		Repair = false
+	},
+	Earthquake = {
+		Enabled = true
+	},
+	CameraShake = {
+		Enabled = true,
+		Range = 100,
+		Values = {1.5, 20, 0.1, 1} -- Magnitude, Roughness, FadeIn, FadeOut
+	},
+	Movement = {
+		Speed = 0.000001,
+		Delay = 0,
+		Reversed = false
+	},
+	Rebounding = {
+		Enabled = false,
+		Type = "Ambush", -- "Blitz"
+		Min = 1,
+		Max = 1,
+		Delay = 2
+	},
+	Damage = {
+		Enabled = true,
+		Range = 9,
+		Amount = 0.001
+	},
+	Crucifixion = {
+		Enabled = true,
+		Range = 40,
+		Resist = false,
+		Break = true
+	},
+	Death = {
+		Type = "Guiding", -- "Curious"
+		Hints = {"Death", "Hints", "Go", "Here"},
+		Cause = ""
+	}
+})
+
+---====== Debug entity ======---
+
+entity:SetCallback("OnSpawned", function()
+	print("Entity has spawned")
+	-- Bọc vào task.spawn để vòng lặp này không làm nghẽn toàn bộ script bên dưới của bạn
+	thraed = task.spawn(function()
+		local SPEED_STUDS_PER_SECOND = 400
+		local MOVE_DURATION = 0.06 -- Thời gian di chuyển (0.1 giây)
+		local COOLDOWN_DURATION = 2 -- Thời gian đứng im chờ (2 giây)
+
+		while true do
+			local model = workspace:WaitForChild("Null", 5)
+			if not model then task.wait(1) continue end
+
+			local part = model:FindFirstChild("Part") or model:FindFirstChildWhichIsA("BasePart")
+			if not part then task.wait(1) continue end
+
+			local chr = player.Character
+			local hrp = chr and chr:FindFirstChild("HumanoidRootPart")
+
+			-- Nếu người chơi chết hoặc chưa tải xong nhân vật, đứng im đợi
+			if not hrp then 
+				task.wait(1) 
+				continue 
+			end
+
+			part.Anchored = true
+
+			-- 1. Tính toán hướng và khoảng cách tới người chơi tại thời điểm hiện tại
+			local startPos = part.Position
+			local targetPos = hrp.Position
+			local distance = (targetPos - startPos).Magnitude
+
+			if distance > 1 then -- Chỉ di chuyển nếu ở xa player
+				local direction = (targetPos - startPos).Unit
+
+				-- Tính quãng đường tối đa đi được trong 0.1 giây (400 * 0.1 = 40 studs)
+				local stepDistance = SPEED_STUDS_PER_SECOND * MOVE_DURATION
+
+				-- Nếu khoảng cách tới player gần hơn bước nhảy, chỉ đi tới vị trí player
+				if distance < stepDistance then
+					stepDistance = distance
+				end
+
+				-- 2. Xác định tọa độ CFrame đích của bước nhảy này (Xoay mặt về hướng player)
+				local nextPosition = startPos + (direction * stepDistance)
+				local nextCFrame = CFrame.lookAt(nextPosition, Vector3.new(targetPos.X, nextPosition.Y, targetPos.Z))
+
+				-- 3. Thực hiện bước lướt đi trong đúng 0.1 giây
+				local tween = TweenService:Create(
+					part,
+					TweenInfo.new(MOVE_DURATION, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+					{CFrame = nextCFrame}
+				)
+
+				tween:Play()
+				tween.Completed:Wait() -- Chờ đi hết 0.1 giây
+			end
+
+			-- 4. Dừng lại hoàn toàn trong 2 giây trước khi tiếp tục chu kỳ mới
+			task.wait(COOLDOWN_DURATION)
+		end
+	end)
+	wait(60)
+	if thraed then
+		task.cancel(thraed)
+		thraed = nil
+	end
+	entity:Destroy()
+end)
+
+entity:SetCallback("OnStartMoving", function()
+	print("Entity has started moving")
+end)
+
+entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
+	if firstTime == true then
+		print("Entity has entered room: ".. room.Name.. " for the first time")
+	else
+		print("Entity has entered room: ".. room.Name.. " again")
+	end
+end)
+
+entity:SetCallback("OnLookAt", function(lineOfSight: boolean)
+	if lineOfSight == true then
+		print("Player is looking at entity")
+	else
+		print("Player view is obstructed by something")
+	end
+end)
+
+entity:SetCallback("OnRebounding", function(startOfRebound: boolean)
+	if startOfRebound == true then
+		print("Entity has started rebounding")
+	else
+		print("Entity has finished rebounding")
+	end
+end)
+
+entity:SetCallback("OnDespawning", function()
+	print("Entity is despawning")
+end)
+
+entity:SetCallback("OnDespawned", function()
+	print("Entity has despawned")
+end)
+
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local chr = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local hrp = chr:WaitForChild("HumanoidRootPart")
+
+
+local hum = chr:FindFirstChildOfClass("Humanoid")
+
+entity:SetCallback("OnDamagePlayer", function(newHealth: number)
+	if newHealth <= 0 then
+		print("Entity has killed the player")
+	else
+		print("Entity has damaged the player")
+		if thraed then
+			task.cancel(thraed)
+			thraed = nil
+		end
+		task.spawn(function()
+			local camera = workspace.CurrentCamera
+			local entityModel = workspace:WaitForChild("Null")
+			local primaryPart = entityModel:FindFirstChild("Part")
+
+			if not (entityModel and hum and hrp and primaryPart and camera) then return end
+
+			-- Khóa di chuyển
+			local originalWalkSpeed = hum.WalkSpeed
+			local originalJumpPower = hum.JumpPower
+			hum.WalkSpeed = 0
+			hum.JumpPower = 0
+
+			-- Khóa điều khiển chuột (camera)
+			local controlsModule = require(LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule")):GetControls()
+			controlsModule:Disable()
+
+			local function SetAllParticlesTimeScale(targetModel, timescale)
+				for _, descendant in ipairs(targetModel:GetDescendants()) do
+					if descendant:IsA("ParticleEmitter") then
+						descendant.TimeScale = timescale
+						print("Set TimeScale = " .. timescale .. " cho ParticleEmitter:", descendant.Name)
+					end
+				end
+			end
+
+			SetAllParticlesTimeScale(entityModel, 1)
+
+			local to = true
+			task.spawn(function()
+				while to and primaryPart.Parent and hrp.Parent do
+					local targetCF = hrp.CFrame
+					local followTween = TweenService:Create(primaryPart, TweenInfo.new(2000000000000, Enum.EasingStyle.Quad), {CFrame = targetCF})
+					followTween:Play()
+					followTween.Completed:Wait()
+				end
+			end)
+
+			camera.CameraType = Enum.CameraType.Scriptable
+
+			local lockConnection
+			lockConnection = RunService.RenderStepped:Connect(function()
+				if not primaryPart or not primaryPart.Parent then
+					if lockConnection then lockConnection:Disconnect() end
+					return
+				end
+				camera.CFrame = CFrame.lookAt(camera.CFrame.Position, primaryPart.Position)
+			end)
+
+			task.wait(0.35)
+
+task.spawn(function()
+
+			local Players = game:GetService("Players")
+			local RunService = game:GetService("RunService")
+			local localPlayer = Players.LocalPlayer
+
+			if not localPlayer then return end
+
+			local random = math.random
+			local colorRGB = Color3.fromRGB
+			local vector3New = Vector3.new
+
+			-- [CẤU HÌNH HIỆU ỨNG]
+			local MAX_DISTANCE = 150        -- Khoảng cách quét xung quanh Player (studs)
+			local GLITCH_INTENSITY = 3.5      -- Cường độ giật xé hình (Tăng lên nếu muốn nát hình hơn)
+			local startTime = os.clock()
+
+			-- [BẢNG LƯU TRỮ HỆ THỐNG]
+			local visualClones = {}         -- Lưu trữ dữ liệu bản sao ảo
+			local targetParts = {}
+
+			setmetatable(visualClones, {__mode = "k"}) -- Tự giải phóng bộ nhớ tránh lag RAM
+
+			-- [TỰ ĐỘNG TẠO UI FRAME NHẤP NHÁY]
+			local playerGui = localPlayer:WaitForChild("PlayerGui")
+			local screenGui = playerGui:FindFirstChild("GlitchGui") or Instance.new("ScreenGui")
+			screenGui.Name = "GlitchGui"
+			screenGui.ResetOnSpawn = false
+			screenGui.Parent = playerGui
+
+			local Frame = screenGui:FindFirstChild("ShaderFrame") or Instance.new("Frame")
+			Frame.Name = "ShaderFrame"
+			Frame.Size = UDim2.new(0, 150, 0, 150)
+			Frame.Position = UDim2.new(0, 10, 0, 10)
+			Frame.BorderSizePixel = 0
+			Frame.Visible = true
+			Frame.Parent = screenGui
+
+			local sound = Instance.new("Sound", workspace)
+			sound.SoundId = "rbxassetid://140558918020400"
+			sound.Volume = 10
+			sound.PlaybackSpeed = 1
+			sound:Play()
+
+			-- [HÀM LỌC PART HỢP LỆ (Bỏ qua Người chơi và Baldi)]
+			local function isExcluded(part)
+				if not part:IsA("BasePart") or part:IsA("Terrain") or part.Name == "GlitchVisualClone" then 
+					return true 
+				end
+				local current = part.Parent
+				while current and current ~= workspace do
+					if current:IsA("Model") and current.Name == "Baldi" then return true end
+					if current:IsA("Model") and Players:GetPlayerFromCharacter(current) then return true end
+					current = current.Parent
+				end
+				return false
+			end
+
+			-- [HÀM TẠO BẢN SAO HIỂN THỊ HÌNH ẢNH (Tắt va chạm vật lý)]
+			local function setupVisualClone(part)
+				if visualClones[part] then return end
+
+				-- Tạo bản sao hiển thị đồ họa
+				local clone = part:Clone()
+
+				-- Dọn dẹp script/vật lý thừa thãi bên trong bản sao để tối ưu CPU
+				for _, child in ipairs(clone:GetDescendants()) do
+					if child:IsA("LuaSourceContainer") or child:IsA("BodyMover") or child:IsA("Constraint") then
+						child:Destroy()
+					end
+				end
+
+				clone.CanCollide = false
+				clone.CanTouch = false
+				clone.CanQuery = false
+				clone.Anchored = true
+				clone.Name = "GlitchVisualClone"
+				clone.Transparency = 1 -- Mặc định ẩn đi khi ở xa
+				clone.Parent = part
+
+				-- Lưu cấu trúc gốc vào bộ nhớ đệm
+				visualClones[part] = {
+					Clone = clone,
+					OriginalSize = part.Size,
+					OriginalCFrame = part.CFrame,
+					OriginalColor = part.Color,
+					OriginalTransparency = part.Transparency
+				}
+			end
+
+			-- [QUÉT BẢN ĐỒ ĐỊNH KỲ]
+			local function refreshCache()
+				local newTargets = {}
+				for _, part in ipairs(workspace:GetDescendants()) do
+					if not isExcluded(part) then
+						table.insert(newTargets, part)
+						setupVisualClone(part)
+					end
+				end
+				targetParts = newTargets
+			end
+
+			refreshCache()
+			task.spawn(function()
+				while true do
+					task.wait(3)
+					refreshCache()
+				end
+			end)
+
+			-- =====================================================================
+			-- VÒNG LẶP CORE: MÔ PHỎNG LỖI ĐỈNH RUNG LẮC MÔ HÌNH (VERTEX GLITCH SHADER)
+			-- =====================================================================
+			RunService.Heartbeat:Connect(function()
+				local character = localPlayer.Character
+				local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+				if not rootPart then return end
+				local playerPosition = rootPart.Position
+
+				-- Tính toán thời gian tăng dần trong 10 giây (từ 0 lên 1)
+				local elapsedTime = os.clock() - startTime
+				local progress = math.clamp(elapsedTime / 15, 0, 1)
+				local currentIntensity = GLITCH_INTENSITY * progress
+
+
+				for i = #targetParts, 1, -1 do
+					local part = targetParts[i]
+
+					-- Nếu Part gốc bị xóa khỏi game, tự động bỏ qua
+					if not part or not part.Parent then
+						table.remove(targetParts, i)
+						continue
+					end
+
+					local data = visualClones[part]
+					if data then
+						local clone = data.Clone
+						local distance = (part.Position - playerPosition).Magnitude
+
+						if distance <= MAX_DISTANCE then
+							-- ----------------------------------------------------
+							-- [TRONG PHẠM VI 150 STUDS: KÍCH HOẠT SHADER LỖI]
+							-- ----------------------------------------------------
+
+							-- ẨN thực thể gốc (Vẫn giữ lại khung xương va chạm vật lý để đi lại)
+							part.Transparency = 1
+
+							-- HIỆN bản sao đồ họa ảo lên để xử lý hiệu ứng giật
+							clone.Transparency = data.OriginalTransparency
+
+
+							-- Tạo các giá trị ma trận nhiễu loạn ngẫu nhiên
+							local shakeX = (random(-100, 100) / 100) * currentIntensity
+							local shakeY = (random(-100, 100) / 100) * currentIntensity
+							local shakeZ = (random(-100, 100) / 100) * currentIntensity
+
+							-- 1. Rung lắc vị trí và xoay góc đồ họa hiển thị (Vertex Translation & Rotation)
+							local offsetCFrame = CFrame.new(shakeX * 0.2, shakeY * 0.2, shakeZ * 0.2) 
+								* CFrame.Angles(math.rad(shakeX * 8), math.rad(shakeY * 8), math.rad(shakeZ * 8))
+
+							clone.CFrame = data.OriginalCFrame * offsetCFrame
+
+							-- 2. Co giãn xé toạc mô hình ngẫu nhiên (Vertex Tearing)
+							if random() > 0.6 then -- Tỷ lệ 40% giật giãn chiều dài/rộng đột ngột
+								clone.Size = data.OriginalSize + vector3New(shakeX * 1.5, shakeY * 1.5, shakeZ * 1.5)
+							else
+								clone.Size = data.OriginalSize
+							end
+
+							-- 3. Phá vỡ dòng chảy bề mặt Texture của bản sao
+							for _, child in ipairs(clone:GetChildren()) do
+								if child:IsA("Texture") then
+									child.OffsetStudsU = random(-50, 50)
+									child.OffsetStudsV = random(-50, 50)
+									child.StudsPerTileU = random(5, 100) * 0.1
+									child.StudsPerTileV = random(5, 100) * 0.1
+								end
+							end
+						else
+							-- ----------------------------------------------------
+							-- [NGOÀI PHẠM VI 150 STUDS: PHỤC HỒI NGUYÊN BẢN]
+							-- ----------------------------------------------------
+							-- Trả lại trạng thái bình thường để tiết kiệm tài nguyên kết xuất đồ họa
+							if part.Transparency ~= data.OriginalTransparency then
+								part.Transparency = data.OriginalTransparency
+								clone.Transparency = 1
+								clone.CFrame = data.OriginalCFrame
+								clone.Size = data.OriginalSize
+								clone.Color = data.OriginalColor
+							end
+						end
+					end
+				end
+				end)
+
+
+			print(">> 100% Physics-Safe Vertex Glitch Shader Ready for Executor! <<")
+			wait(10)
+
+			if entityModel and entityModel.Parent then
+				entityModel:Destroy()
+			end
+
+			if lockConnection then
+				lockConnection:Disconnect()
+			end
+			
+				if hum then hum.Health = 0 end
+
+			camera.CameraType = Enum.CameraType.Custom
+
+			if hum and hum.Health > 0 then
+				hum.WalkSpeed = originalWalkSpeed
+				hum.JumpPower = originalJumpPower
+				controlsModule:Enable()
+				
+			end
+			end)
+end)
+		end
+	end)
+
+--[[
+
+DEVELOPER NOTE:
+By overwriting 'CrucifixionOverwrite' the default crucifixion callback will be replaced with your custom callback.
+
+entity:SetCallback("CrucifixionOverwrite", function()
+    print("Custom crucifixion callback")
+end)
+
+]]--
+
+---====== Run entity ======---
+
+entity:Run(true)
