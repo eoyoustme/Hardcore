@@ -9,7 +9,7 @@ local entity = Spawner:Create({
 	Entity = {
 		Name = "MinusThree",
 		Asset = "https://github.com/eoyoustme/Hardcore/blob/main/Troll%20Mode/MinusThree.rbxm?raw=true",
-		HeightOffset = 4
+		HeightOffset = 0.5
 	},
 	Lights = {
 		Flicker = {
@@ -28,8 +28,8 @@ local entity = Spawner:Create({
 		Values = {30, 57, 0.1, 0.4} -- Magnitude, Roughness, FadeIn, FadeOut
 	},
 	Movement = {
-		Speed = 215,
-		Delay = 3,
+		Speed = 75,
+		Delay = 0,
 		Reversed = false
 	},
 	Rebounding = {
@@ -41,7 +41,7 @@ local entity = Spawner:Create({
 	},
 	Damage = {
 		Enabled = true,
-		Range = 100,
+		Range = 40,
 		Amount = 0.001
 	},
 	Crucifixion = {
@@ -63,7 +63,7 @@ entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
 	local Reboundcolor = Instance.new("ColorCorrectionEffect",game.Lighting) game.Debris:AddItem(Reboundcolor,24)
 	Reboundcolor.Name = "Warn"
-	Reboundcolor.TintColor = Color3.fromRGB(255, 255, 255) Reboundcolor.Saturation = 2 Reboundcolor.Contrast = 0.1
+	Reboundcolor.TintColor = Color3.fromRGB(255, 255, 255) Reboundcolor.Saturation = 2 Reboundcolor.Contrast = 0
 	game.TweenService:Create(Reboundcolor,TweenInfo.new(15),{TintColor = Color3.fromRGB(255, 255, 255),Saturation = 0, Contrast = 0}):Play()
 	local TweenService = game:GetService("TweenService")
 	local TW = TweenService:Create(game.Lighting.MainColorCorrection, TweenInfo.new(7),{TintColor = Color3.fromRGB(255, 255, 255)})
@@ -275,7 +275,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 		)
 
 		tween:Play()
-		task.wait(0.7)
+		task.wait(0)
 
 		if not game.Players.LocalPlayer.Character:GetAttribute("Hiding") then
 			task.spawn(function()
@@ -314,7 +314,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 				Lighting.FogEnd = 240
 				Lighting.FogStart = 240
 				Lighting.FogColor = Color3.new(0, 0, 0)
-				game:GetService("TweenService"):Create(Lighting, TweenInfo.new(4,Enum.EasingStyle.Linear), {FogEnd = 0}):Play()
+				game:GetService("TweenService"):Create(Lighting, TweenInfo.new(2.5,Enum.EasingStyle.Linear), {FogEnd = 0}):Play()
 				game.Debris:AddItem(Lighting, 3)
 
 				-- Tắt tất cả particle trên entity lúc jumpscare bắt đầu
