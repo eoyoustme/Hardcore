@@ -1,3 +1,4 @@
+
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -7,6 +8,23 @@ local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local HRP = Character:WaitForChild("HumanoidRootPart")
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local Debris = game:GetService("Debris")
+local UserInputService = game:GetService("UserInputService")
+
+		local Players = game:GetService("Players")
+		local TweenService = game:GetService("TweenService")
+
+		local player = Players.LocalPlayer
+		local playerGui = player:WaitForChild("PlayerGui")
+
+local player = Players.LocalPlayer
+
+local thread = nil
 
 local function GetRoom()
 	return workspace.CurrentRooms:FindFirstChild(ReplicatedStorage.GameData.LatestRoom.Value)
@@ -32,6 +50,21 @@ Silence.Anchored = true
 local startCF = entrance.CFrame * CFrame.new(0,30,-35)
 local spaw5n = entrance.CFrame * CFrame.new(0,0,-35)
 local endCF = entrance.CFrame * CFrame.new(0,2,-35)
+
+local function GetGitSound(GithubSnd, SoundName)
+	local url = GithubSnd
+	if not isfile(SoundName .. ".mp3") then
+		writefile(SoundName .. ".mp3", game:HttpGet(url))
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+	return sound
+end
+local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/concac.mp3?raw=true","cac")
+Jumpscare.Parent = workspace
+Jumpscare.Volume = 5
+Jumpscare.PlaybackSpeed = 1
+Jumpscare:Play()
 
 Silence.CFrame = startCF
 
@@ -64,37 +97,67 @@ task.spawn(function()
 	local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
 	local camara = game.Workspace.CurrentCamera
 
-	local gui = Instance.new("ScreenGui")
-	gui.Name = "Dude"
-	gui.IgnoreGuiInset = true
-	gui.DisplayOrder = 999998
-	gui.Parent = LocalPlayer.PlayerGui
+		-- 1. Tạo ScreenGui và ImageLabel
+		local screenGui = Instance.new("ScreenGui")
+		screenGui.Name = "JumpscareOverlay"
+		screenGui.IgnoreGuiInset = true
+		screenGui.DisplayOrder = 999999
+		screenGui.Parent = playerGui
 
-	local frame = Instance.new("Frame")
-	frame.Size = UDim2.fromScale(1,1)
-	frame.BorderSizePixel = 0
-	frame.BackgroundColor3 = Color3.fromRGB(170,0,255)
-	frame.Parent = gui
+		local imageLabel = Instance.new("ImageLabel")
+		imageLabel.BackgroundTransparency = 1
+		imageLabel.BorderSizePixel = 0
+		imageLabel.Position = UDim2.new(0, 0, 0, 0)
+		imageLabel.Size = UDim2.new(1, 0, 1, 0)
+		imageLabel.ScaleType = Enum.ScaleType.Stretch
+		imageLabel.ImageTransparency = 0 -- Bắt đầu từ độ mờ 0.25
+		imageLabel.Visible = true
+		imageLabel.Parent = screenGui
+		imageLabel.ImageColor3 = Color3.fromRGB(85, 0, 127)
 
-	local tween = TweenService:Create(
-		frame,
-		TweenInfo.new(0.7,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),
-		{
-			BackgroundTransparency = 1
+		-- Danh sách ảnh jumpscare nhấp nháy
+		local jumpscareImages = {
+			"rbxassetid://134346506410955",
+			"rbxassetid://7578853379",
+			"rbxassetid://103846711769666",
+			"rbxassetid://78199392475572"
 		}
-	)
 
-	tween:Play()
-	tween.Completed:Wait()
+		local duration = 1.5 -- Thời gian diễn ra hiệu ứng (3 giây)
+		local start = os.clock()
+		local imageIndex = 1
 
-	gui:Destroy()
+		-- 2. Khởi tạo Tween mờ dần (từ 0.25 về 1 trong vòng 3 giây)
+		local info = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+		local tween = TweenService:Create(imageLabel, info, {ImageTransparency = 1})
+
+		-- 3. CHẠY TWEEN NGAY TẠI ĐÂY (Tween sẽ chạy ngầm song song)
+		tween:Play()
+
+		-- 4. Vòng lặp đổi ảnh chạy đồng thời với Tween
+		while os.clock() - start < duration do
+			imageLabel.Image = jumpscareImages[imageIndex]
+			imageIndex = (imageIndex % #jumpscareImages) + 1
+			task.wait(0.03) -- Tốc độ chớp ảnh
+		end
+
+		-- 5. Đợi Tween hoàn thành 100% rồi dọn dẹp GUI
+		tween.Completed:Wait()
+		screenGui:Destroy()
 end)
 
 local sound = Instance.new("Sound")
 sound.SoundId = "rbxassetid://7861818231"
-sound.Volume = 4
+sound.Volume = 5
 sound.Parent = workspace
 sound:Play()
+
+local sound5 = Instance.new("Sound")
+sound5.SoundId = "rbxassetid://139784048116231"
+sound5.PlaybackSpeed = 0.8
+sound5.Volume = 2
+sound5.Parent = workspace
+sound5:Play()
 
 task.wait(3)
 
@@ -157,27 +220,6 @@ local function StartHeartbeatMinigame()
 			break 
 		end
 
-		local clickedCorrectly = false
-		local hasClickedThisRound = false
-		local roundFinished = false
-
-		local ring = Instance.new("ImageLabel")
-		ring.Name = "ShrinkingRing"
-		ring.Image = "rbxassetid://8419306829"
-		ring.ImageTransparency = 0.7
-		ring.BackgroundTransparency = 1
-		ring.AnchorPoint = Vector2.new(0.5, 0.5)
-		ring.Position = UDim2.new(0.5, 0, 0.5, 0)
-		ring.Size = UDim2.new(2.5, 0, 2.5, 0) 
-		ring.Parent = mainButton
-
-		-- Vòng tròn thu nhỏ về kích thước gốc trong 0.5 giây
-		local shrinkTween = TweenService:Create(
-			ring,
-			TweenInfo.new(0.5, Enum.EasingStyle.Linear),
-			{Size = UDim2.new(1, 0, 1, 0)}
-		)
-		shrinkTween:Play()
 
 		local startTime = os.clock()
 		local clickConnection
@@ -188,7 +230,7 @@ local function StartHeartbeatMinigame()
 			hasClickedThisRound = true
 
 			local timeElapsed = os.clock() - startTime
-			
+
 			-- Kéo dài thời gian bấm hợp lệ lên 0.8s (0.5s thu nhỏ + 0.3s chờ delay khớp size)
 			if timeElapsed >= 0.35 and timeElapsed <= 0.8 then
 				clickedCorrectly = true
@@ -242,7 +284,7 @@ local function StartHeartbeatMinigame()
 		if clickedCorrectly then
 			successClicks = successClicks + 1
 		end
-		
+
 		-- Tạo khoảng nghỉ ngắn 0.1s giữa các lần xuất hiện trái tim tiếp theo
 		task.wait(0.1)
 	end
@@ -256,11 +298,11 @@ local function StartHeartbeatMinigame()
 			Silence5:Destroy()
 		end
 	end
-	
+
 	inMinigame = false
 end
 
-task.spawn(function()
+thread = task.spawn(function()
 	while Kill do
 		task.wait(damageInterval)
 
@@ -278,24 +320,47 @@ task.spawn(function()
 				require(LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("",true)
 
 				if Humanoid.Health > 0 and not Character:GetAttribute("Crouching") then
+					while true do
 
 					local s = Instance.new("Sound")
 					s.SoundId = "rbxassetid://7861818231"
-					s.Volume = 4
+					s.Volume = 0.5
 					s.Parent = workspace
 					s:Play()
 
+					local model = workspace:WaitForChild("Silence")
+					local part = model:FindFirstChild("RushNew") or model:FindFirstChildWhichIsA("BasePart")
+					if not part then return end
+
+					local chr = player.Character or player.CharacterAdded:Wait()
+					local hrp = chr:WaitForChild("HumanoidRootPart")
+
+					part.Anchored = true
+
+					local SPEED_STUDS_PER_SECOND = 25
+					local targetCFrame = hrp.CFrame
+					local distance = (targetCFrame.Position - part.Position).Magnitude
+					local duration = distance / SPEED_STUDS_PER_SECOND
+
+					if duration <= 0 then
+						duration = 0.05
+					end
+
 					local tween = TweenService:Create(
-						Silence,
-						TweenInfo.new(0.3,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),
-						{
-							CFrame = HRP.CFrame
-						}
+						part,
+						TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+						{CFrame = targetCFrame}
 					)
 
-					tween:Play()
+						tween:Play()
+						wait(0.75)
 
-					if not Character:GetAttribute("Crouching") then
+						local player = game.Players.LocalPlayer
+						local char = player.Character
+						local hum = char and char:FindFirstChildOfClass("Humanoid")
+						local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+						if hum and hrp and (hrp.Position - part.Position).Magnitude <= 9 then
 						Humanoid.Health = 0
 						local sound = Instance.new("Sound")
 						sound.SoundId = "rbxassetid://4988621968"
@@ -304,7 +369,8 @@ task.spawn(function()
 						sound.Parent = workspace
 						sound:Play()
 						break
-					end
+						end
+						end
 				end
 			end
 			lastPos = currentPos
@@ -321,6 +387,11 @@ local function RemoveSilence()
 
 	Removed = true
 	Kill = false
+	
+	if thread then
+		task.cancel(thread)
+		thread = nil
+	end
 
 	if Silence5 and Silence5.Parent then
 		Silence5:Destroy()
