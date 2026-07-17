@@ -10,6 +10,9 @@ local playerGui = player:WaitForChild("PlayerGui")
 local mainUI = playerGui:WaitForChild("MainUI")
 local caption = mainUI.MainFrame.Caption
 local Workspace = game:GetService("Workspace")
+local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local threadA = nil
 local threadB = nil
@@ -36,40 +39,7 @@ Lord.Volume = 5
 Lord.PlaybackSpeed = 1
 Lord:Play()
 
-local function ApplyFireToMap()
-	local currentRooms = Workspace:FindFirstChild("CurrentRooms")
-	if not currentRooms then
-		return
-	end
 
-	ForceChaseStats()
-
-	for _, inst in ipairs(currentRooms:GetDescendants()) do
-		if inst:IsA("BasePart") and not inst:IsDescendantOf(Dummy) and not inst:IsDescendantOf(Character) then
-			if not inst:FindFirstChild("MapFire") then
-				local fire = Instance.new("ParticleEmitter")
-				fire.Name = "MapFire"
-				fire.Texture = "rbxasset://textures/particles/fire_main.dds"
-				fire.Color = ColorSequence.new(Color3.fromRGB(255, 120, 0), Color3.fromRGB(255, 0, 0))
-				fire.LightEmission = 1
-				fire.Size = NumberSequence.new({
-					NumberSequenceKeypoint.new(0, 3),
-					NumberSequenceKeypoint.new(1, 0)
-				})
-				fire.Lifetime = NumberRange.new(0.6, 1.1)
-				fire.Rate = 25
-				fire.Speed = NumberRange.new(2, 6)
-				fire.Rotation = NumberRange.new(0, 360)
-				fire.RotSpeed = NumberRange.new(-120, 120)
-				fire.SpreadAngle = Vector2.new(25, 25)
-				fire.Enabled = true
-				fire.Parent = inst
-
-				table.insert(fireEmitters, fire)
-			end
-		end
-	end
-end
 
 local Reboundcolor = Instance.new("ColorCorrectionEffect",game.Lighting) game.Debris:AddItem(Reboundcolor,24)
 Reboundcolor.Name = "Warn"
@@ -131,6 +101,44 @@ local entity = Spawner:Create({
 	}
 })
 
+local Dummy = entity
+local fireEmitters = {}
+
+local function ApplyFireToMap()
+	local currentRooms = Workspace:FindFirstChild("CurrentRooms")
+	if not currentRooms then
+		return
+	end
+
+	ForceChaseStats()
+
+	for _, inst in ipairs(currentRooms:GetDescendants()) do
+		if inst:IsA("BasePart") and not inst:IsDescendantOf(Dummy) and not inst:IsDescendantOf(Character) then
+			if not inst:FindFirstChild("MapFire") then
+				local fire = Instance.new("ParticleEmitter")
+				fire.Name = "MapFire"
+				fire.Texture = "rbxasset://textures/particles/fire_main.dds"
+				fire.Color = ColorSequence.new(Color3.fromRGB(255, 120, 0), Color3.fromRGB(255, 0, 0))
+				fire.LightEmission = 1
+				fire.Size = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 3),
+					NumberSequenceKeypoint.new(1, 0)
+				})
+				fire.Lifetime = NumberRange.new(0.6, 1.1)
+				fire.Rate = 25
+				fire.Speed = NumberRange.new(2, 6)
+				fire.Rotation = NumberRange.new(0, 360)
+				fire.RotSpeed = NumberRange.new(-120, 120)
+				fire.SpreadAngle = Vector2.new(25, 25)
+				fire.Enabled = true
+				fire.Parent = inst
+
+				table.insert(fireEmitters, fire)
+			end
+		end
+	end
+end
+
 ---====== CÁC SỰ KIỆN CỦA ENTITY (Đã được tách phẳng) ======---
 
 -- 1. Khi Entity Spawn
@@ -145,10 +153,10 @@ entity:SetCallback("OnSpawned", function()
 	camShake:ShakeOnce(10,3.5,0.1,15,15,0.5)
 	
 	threadcity = task.spawn(function()
-		while true do
-			wait(0.3)
+		local latestRoom = ReplicatedStorage:WaitForChild("GameData"):WaitForChild("LatestRoom")
+		latestRoom.Changed:Connect(function()
 			ApplyFireToMap()
-		end
+		end)
 	end)
 
 	-- Jumpscare Overlay
