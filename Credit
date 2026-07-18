@@ -11,7 +11,7 @@ task.spawn(function()
 	end
 	local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Doors%20hardcore%20reignited%20Door%201%20OST.mp3?raw=true","Ost")
 	Jumpscare.Parent = workspace
-	Jumpscare.Volume = 1
+	Jumpscare.Volume = 3
 	Jumpscare.PlaybackSpeed = 1
 	Jumpscare:Play()
 
@@ -123,6 +123,22 @@ task.spawn(function()
 
 	if Entity() then
 		Jumpscare:Destroy()
+
+	local function GetGitSound(GithubSnd, SoundName)
+		local url = GithubSnd
+		if not isfile(SoundName .. ".mp3") then
+			writefile(SoundName .. ".mp3", game:HttpGet(url))
+		end
+		local sound = Instance.new("Sound")
+		sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+		return sound
+	end
+	local Ahoi = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Doors%20hardcore%20reignited%20Door%201%20OST.mp3?raw=true","Ost")
+	Ahoi.Parent = workspace
+	Ahoi.Volume = 3
+	Ahoi.PlaybackSpeed = 1
+	Ahoi:Play()
+
 		local a1 = ({
 			"Who tf is joe?!?!",
 			"Ty SD-PAINTER For music:D",
