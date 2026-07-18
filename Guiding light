@@ -20,6 +20,27 @@ local MainGame = MainUI:WaitForChild("Initiator"):WaitForChild("Main_Game")
 local Health = MainGame:WaitForChild("Health")
 local Music = Health:WaitForChild("Music")
 
+-- 1. Hàm tải âm thanh từ GitHub (Giữ nguyên logic executor của bạn)
+local function GetGitSound(GithubSnd, SoundName)
+	local url = GithubSnd
+	if not isfile(SoundName .. ".mp3") then
+		writefile(SoundName .. ".mp3", game:HttpGet(url))
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+	return sound
+end
+
+local blueSound = game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.Health.Music.Blue
+
+local gitSoundTemp = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/guidinglight%20reignited%20compressed.mp3?raw=true", "gui")
+
+blueSound.SoundId = gitSoundTemp.SoundId
+blueSound.PlaybackSpeed = 1
+blueSound.Volume = 5
+
+gitSoundTemp:Destroy()
+
 Camera.ChildAdded:Connect(function(Child)
 	if Child.Name ~= DeathName then return end
 	if not _G.DO_RED_GUY then return end
