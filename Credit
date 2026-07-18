@@ -133,7 +133,7 @@ task.spawn(function()
 		sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
 		return sound
 	end
-	local Ahoi = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Doors%20hardcore%20reignited%20Door%201%20OST.mp3?raw=true","Ost")
+	local Ahoi = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/hotel%20prelude%20end.mp3?raw=true","Hotel")
 	Ahoi.Parent = workspace
 	Ahoi.Volume = 3
 	Ahoi.PlaybackSpeed = 1
