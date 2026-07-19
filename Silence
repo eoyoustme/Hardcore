@@ -53,14 +53,14 @@ local endCF = entrance.CFrame * CFrame.new(0,2,-35)
 
 local function GetGitSound(GithubSnd, SoundName)
 	local url = GithubSnd
-	if not isfile(SoundName .. ".mp3") then
-		writefile(SoundName .. ".mp3", game:HttpGet(url))
+	if not isfile(SoundName .. ".ogg") then
+		writefile(SoundName .. ".ogg", game:HttpGet(url))
 	end
 	local sound = Instance.new("Sound")
-	sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+	sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".ogg")
 	return sound
 end
-local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/concac.mp3?raw=true","cac")
+local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/sound.ogg?raw=true","sound")
 Jumpscare.Parent = workspace
 Jumpscare.Volume = 5
 Jumpscare.PlaybackSpeed = 1
