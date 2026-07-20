@@ -363,6 +363,15 @@ entity:SetCallback("OnDamagePlayer", function(newHealth: number)
 			duration = 0.05
 		end
 		
+
+		local tween = TweenService:Create(
+			part,
+			TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+			{CFrame = targetCFrame}
+		)
+
+		tween:Play()
+
 		local function GetGitSound(GithubSnd, SoundName)
 			local url = GithubSnd
 			if not isfile(SoundName .. ".ogg") then
@@ -381,13 +390,6 @@ entity:SetCallback("OnDamagePlayer", function(newHealth: number)
 
 		gitSoundTemp:Destroy()
 
-		local tween = TweenService:Create(
-			part,
-			TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
-			{CFrame = targetCFrame}
-		)
-
-		tween:Play()
 		tween.Completed:Wait()
 	end
 end)
