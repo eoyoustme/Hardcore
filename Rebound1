@@ -160,9 +160,9 @@ entity:SetCallback("OnSpawned", function()
 	local pitch = Instance.new("PitchShiftSoundEffect")
 	pitch.Octave = 0.5
 	pitch.Parent = sound1
-	
+
 	wait(4)
-	
+
 	local move = GetGitSound("https://github.com/check78/worldcuuuup/blob/main/DoomBegin.mp3?raw=true","Reboun")
 	move.Parent = bruh
 	move.Name = "ReboundMoving"
@@ -371,7 +371,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth: number)
 				end
 
 				-- 5. Đợi Tween hoàn thành 100% rồi dọn dẹp GUI
-				tween.Completed:Wait()
+wait(1.5)
 
 				if freezeConnection then
 					freezeConnection:Disconnect()
