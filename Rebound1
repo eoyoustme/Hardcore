@@ -87,7 +87,7 @@ local entity = Spawner:Create({
 	},
 	Movement = {
 		Speed = 180,
-		Delay = 2,
+		Delay = 8,
 		Reversed = false
 	},
 	Rebounding = {
@@ -161,7 +161,7 @@ entity:SetCallback("OnSpawned", function()
 	pitch.Octave = 0.5
 	pitch.Parent = sound1
 	
-	wait(4)
+	wait(6)
 	
 	local move = GetGitSound("https://github.com/check78/worldcuuuup/blob/main/DoomBegin.mp3?raw=true","Reboun")
 	move.Parent = bruh
