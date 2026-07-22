@@ -1,3 +1,4 @@
+
 function light(tim,color0,color1)
 	local tweenservice = game:GetService("TweenService")
 	local info = TweenInfo.new(tim,Enum.EasingStyle.Linear)
@@ -62,8 +63,8 @@ local entity = Spawner:Create({
 		Values = {7.5, 15, 0.1, 2} -- Magnitude, Roughness, FadeIn, FadeOut
 	},
 	Movement = {
-		Speed = 180,
-		Delay = 5,
+		Speed = 380,
+		Delay = 8,
 		Reversed = true
 	},
 	Rebounding = {
@@ -96,6 +97,47 @@ local entity = Spawner:Create({
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
 	light(2,Color3.fromRGB(127, 249, 255),Color3.fromRGB(65, 138, 255))
+	local TweenService = game:GetService("TweenService")
+	local sound = Instance.new("Sound")
+	sound.SoundId = "rbxassetid://6734393210"
+	sound.Volume = 3
+	sound.Parent = workspace
+	sound:Play()
+
+	local ids = Instance.new("DistortionSoundEffect")
+	ids.Level = 0.65
+	ids.Parent = sound
+
+	local revers = Instance.new("ReverbSoundEffect")
+	revers.DecayTime = 1.5
+	revers.Density = 1
+	revers.Diffusion = 1
+	revers.DryLevel = -6
+	revers.Parent = sound
+
+	local sound1 = Instance.new("Sound")
+	sound1.SoundId = "rbxassetid://5246103002"
+	sound1.Volume = 3
+	sound1.Parent = workspace
+	sound1:Play()
+
+	local ids1 = Instance.new("DistortionSoundEffect")
+	ids1.Level = 0.65
+	ids1.Parent = sound1
+
+	local revers1 = Instance.new("ReverbSoundEffect")
+	revers1.DecayTime = 1.5
+	revers1.Density = 1
+	revers1.Diffusion = 1
+	revers1.DryLevel = -6
+	revers1.Parent = sound1
+
+	local pitch = Instance.new("PitchShiftSoundEffect")
+	pitch.Octave = 0.5
+	pitch.Parent = sound1
+
+	wait(6)
+
 	local function GetGitSound(GithubSnd, SoundName)
 		local url = GithubSnd
 		if not isfile(SoundName .. ".mp3") then
@@ -163,6 +205,40 @@ entity:SetCallback("OnDamagePlayer", function(newHealth: number)
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Rebound%20Jumpscare"))()
 	else
 		print("Entity has damaged the player")
+		local RunService = game:GetService("RunService")
+		local TweenService = game:GetService("TweenService")
+
+		local entityModel = workspace:FindFirstChild("Rebound2")
+		local entityRoot = entityModel and (entityModel:FindFirstChild("HumanoidRootPart") or entityModel:FindFirstChildWhichIsA("BasePart")) 
+
+		if entityRoot then
+			local freezeConnection
+			local doorFreezePos = entityRoot.CFrame
+
+			freezeConnection = RunService.Heartbeat:Connect(function()
+				if entityModel and entityModel.Parent and entityRoot then
+					entityRoot.Anchored = true
+					entityRoot.CFrame = doorFreezePos
+					entityRoot.AssemblyLinearVelocity = Vector3.zero
+					entityRoot.AssemblyAngularVelocity = Vector3.zero
+				end
+				end)
+			
+		local function GetGitSound(GithubSnd, SoundName)
+			local url = GithubSnd
+			if not isfile(SoundName .. ".mp3") then
+				writefile(SoundName .. ".mp3", game:HttpGet(url))
+			end
+			local sound = Instance.new("Sound")
+			sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+			return sound
+		end
+		local Jumpscare = GetGitSound("https://github.com/eoyoustme/Impossible/blob/main/rebound%20jumpscare.mp3?raw=true","Mc")
+		Jumpscare.Parent = workspace
+		Jumpscare.Volume = 10
+		Jumpscare.PlaybackSpeed = 1
+		Jumpscare:Play()
+		
 		local Players = game:GetService("Players")
 		local TweenService = game:GetService("TweenService")
 
@@ -216,9 +292,15 @@ entity:SetCallback("OnDamagePlayer", function(newHealth: number)
 
 			-- 5. Đợi Tween hoàn thành 100% rồi dọn dẹp GUI
 			tween.Completed:Wait()
+			
+				if freezeConnection then
+					freezeConnection:Disconnect()
+				end
+				
 			screenGui:Destroy()
 		end)
-	end
+		end
+end
 end)
 
 --[[
