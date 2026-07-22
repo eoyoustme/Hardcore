@@ -1,3 +1,27 @@
+local player = game.Players.LocalPlayer
+if player and player:FindFirstChild("PlayerGui") then
+	local flashGui = Instance.new("ScreenGui")
+	flashGui.Name = "ReboundDoorFlash"
+	flashGui.IgnoreGuiInset = true
+	flashGui.DisplayOrder = 999998
+	flashGui.Parent = player.PlayerGui
+
+	local flashFrame = Instance.new("Frame")
+	flashFrame.Size = UDim2.new(1, 0, 1, 0)
+	flashFrame.BackgroundColor3 = Color3.fromRGB(0, 102, 255) -- Vibrant Blue
+	flashFrame.BackgroundTransparency = 0 -- Full visibility instantly
+	flashFrame.BorderSizePixel = 0
+	flashFrame.Parent = flashGui
+
+	-- Smoothly fade out the flash frame
+	local tweenInfo = TweenInfo.new(0.6, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+	local fadeTween = game:GetService("TweenService"):Create(flashFrame, tweenInfo, {BackgroundTransparency = 1})
+	fadeTween:Play()
+
+	fadeTween.Completed:Wait()
+	flashGui:Destroy()
+end
+
 function light(tim,color0,color1)
 	local tweenservice = game:GetService("TweenService")
 	local info = TweenInfo.new(tim,Enum.EasingStyle.Linear)
@@ -98,7 +122,7 @@ entity:SetCallback("OnSpawned", function()
 	light(2,Color3.fromRGB(127, 249, 255),Color3.fromRGB(65, 138, 255))
 	local bruh = workspace.Rebound1.RushNew
 	local TweenService = game:GetService("TweenService")
-	wait(6.5)
+	wait(0.1)
 	local cue2 = Instance.new("Sound")
 	cue2.Parent = game.Workspace
 	cue2.Name = "Spawn"
@@ -128,14 +152,14 @@ entity:SetCallback("OnSpawned", function()
 	eq.MidGain = 10
 	eq.LowGain = 10
 	eq.Parent = move
-	wait(1)
+	wait(0.1)
 	vroom:Play()
 	move:Play()
 	task.spawn(function()
 		while true do
 			wait(0.1)
 			entity.Config.Movement.Speed = entity.Config.Movement.Speed + 0.1
-			end
+		end
 	end)
 end)
 
@@ -302,5 +326,5 @@ end)
 
 entity:Run(true)
 
-	game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Rebound2"))()
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Rebound2"))()
