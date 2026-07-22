@@ -162,6 +162,29 @@ entity:SetCallback("OnSpawned", function()
 	pitch.Parent = sound1
 	
 	wait(6)
+
+	local function GetGitSound(GithubSnd, SoundName)
+		local url = GithubSnd
+		if not isfile(SoundName .. ".mp3") then
+			writefile(SoundName .. ".mp3", game:HttpGet(url))
+		end
+		local sound = Instance.new("Sound")
+		sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+		return sound
+	end
+
+	local blueSound = game.Workspace.Rebound.Static_Jumpscare
+
+	local gitSoundTemp = GetGitSound("https://github.com/eoyoustme/Impossible/blob/main/rebound%20jumpscare.mp3?raw=true", "jumpscare")
+
+	blueSound.SoundId = gitSoundTemp.SoundId
+	blueSound.PlaybackSpeed = 1
+	blueSound.Looped = true
+	blueSound.TimePosition = 5.319
+	blueSound.Volume = 3
+	blueSound:Play()
+
+wait(2)
 	
 	local move = GetGitSound("https://github.com/check78/worldcuuuup/blob/main/DoomBegin.mp3?raw=true","Reboun")
 	move.Parent = bruh
