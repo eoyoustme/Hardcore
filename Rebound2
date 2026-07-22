@@ -155,7 +155,7 @@ entity:SetCallback("OnSpawned", function()
 	ReallyNear.SoundId = Github.SoundId
 	ReallyNear.PlaybackSpeed = 1
 	ReallyNear.TimePosition = 0
-	ReallyNear.Volume = 2.5
+	ReallyNear.Volume = 10
 	ReallyNear:Play()
 
 	Github:Destroy()
@@ -291,7 +291,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth: number)
 			end
 
 			-- 5. Đợi Tween hoàn thành 100% rồi dọn dẹp GUI
-			tween.Completed:Wait()
+wait(1)
 			
 				if freezeConnection then
 					freezeConnection:Disconnect()
