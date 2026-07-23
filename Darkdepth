@@ -1,3 +1,4 @@
+task.spawn(function()
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -34,3 +35,83 @@ game.TweenService:Create(imageLabel, TweenInfo.new(1), {ImageTransparency = 1}):
 wait(1)
 
 screenGui:Destroy()
+end)
+
+local entityList = {
+	{
+		name = "A-90",
+		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/A901",
+		chance = 9
+	},
+	{
+		name = "Frostbite",
+		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Frostbite",
+		chance = math.random(3.25,3.5)
+	}
+}
+
+local function rollChance(percent)
+	return math.random(1, 100) <= percent
+end
+
+local function spawnEntity(entityData)
+	pcall(function()
+		loadstring(game:HttpGet(entityData.url))()
+	end)
+end
+
+local function IsSeekActive()
+	local currentRooms = game.Workspace:FindFirstChild("CurrentRooms")
+	if not currentRooms then
+		return false
+	end
+
+	local namesToCheck = {
+		"Seek",
+		"SeekMoving",
+		"SeekMovingNewClone",
+		"SeekEntity",
+		"SeekDoor"
+	}
+
+	for _, name in ipairs(namesToCheck) do
+		if game.Workspace:FindFirstChild(name, true) then
+			return true
+		end
+		if currentRooms:FindFirstChild(name, true) then
+			return true
+		end
+	end
+
+	-- Dò thêm theo tên ch?a "seek"
+	for _, inst in ipairs(game.Workspace:GetDescendants()) do
+		local n = string.lower(inst.Name)
+		if string.find(n, "seek") then
+			return true
+		end
+	end
+
+	return false
+end
+
+math.randomseed(os.clock() * 30)
+
+while true do
+	task.wait(10)
+
+	if not IsSeekActive() then
+		local threads = {}
+
+		for _, entityData in ipairs(entityList) do
+			if rollChance(entityData.chance) then
+				table.insert(threads, entityData)
+			end
+		end
+
+		for _, entityData in ipairs(threads) do
+			task.spawn(function()
+				spawnEntity(entityData)
+			end)
+		end
+	end
+end
