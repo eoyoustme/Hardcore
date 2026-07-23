@@ -1,0 +1,36 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local Debris = game:GetService("Debris")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "Aihoi"
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 999999
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local imageLabel = Instance.new("ImageLabel")
+imageLabel.BackgroundTransparency = 1
+imageLabel.BorderSizePixel = 0
+imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+imageLabel.Position = UDim2.new(0.5, 0,0.206, 0)
+imageLabel.Size = UDim2.new(0,300, 0, 300)
+imageLabel.ScaleType = Enum.ScaleType.Stretch
+imageLabel.ImageTransparency = 1
+imageLabel.Image = "rbxassetid://97049603586965"
+imageLabel.Visible = true
+imageLabel.Parent = screenGui
+
+game.TweenService:Create(imageLabel, TweenInfo.new(1), {ImageTransparency = 0}):Play()
+
+wait(14)
+
+game.TweenService:Create(imageLabel, TweenInfo.new(1), {ImageTransparency = 1}):Play()
+
+wait(1)
+
+screenGui:Destroy()
