@@ -1,107 +1,21 @@
--- 🧊 Frost Entity Script (phiên bản bật toàn bộ hiệu ứng)
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+-- 🛠️ Bộ tương thích Request & Asset cho các Executor khác nhau
+local http_request = (syn and syn.request) or (http and http.request) or http_request or request or (fluxus and fluxus.request)
+local getasset = getcustomasset or getsynasset
 
-function GetRoom()
-	local gruh = workspace.CurrentRooms
-	return gruh:FindFirstChild(game.ReplicatedStorage.GameData.LatestRoom.Value)
-end
+local threadA = nil
 
-local plr = game.Players.LocalPlayer
-local chr = plr.Character or plr.CharacterAdded:Wait()
-local tweenservice = game:GetService("TweenService")
-
--- ⚙️ Tải model từ Asset ID hoặc GitHub
-function LoadCustomInstance(source, parent)
-	local model
-
-	local function NormalizeGitHubURL(url)
-		if url:match("^https://github.com/.+%.rbxm$") and not url:find("?raw=true") then
-			return url .. "?raw=true"
-		end
-		return url
-	end
-
-	while task.wait() and not model do
-		if tonumber(source) then
-			local success, result = pcall(function()
-				return game:GetObjects("rbxassetid://" .. tostring(source))[1]
-			end)
-			if success and result then
-				model = result
-			end
-		elseif typeof(source) == "string" and source:match("^https?://") and source:match("%.rbxm") then
-			local url = NormalizeGitHubURL(source)
-			local success, result = pcall(function()
-				local filename = "temp_" .. math.random(100000, 999999) .. ".rbxm"
-				local content = game:HttpGet(url)
-				if writefile and (getcustomasset or getsynasset) and isfile and delfile then
-					writefile(filename, content)
-					local assetFunc = getcustomasset or getsynasset
-					local obj = game:GetObjects(assetFunc(filename))[1]
-					delfile(filename)
-					return obj
-				else
-					warn("Executor không hỗ trợ file APIs.")
-					return nil
-				end
-			end)
-			if success and result then
-				model = result
-			end
-		else
-			break
-		end
-
-		if model then
-			model.Parent = parent or workspace
-			for _, obj in ipairs(model:GetDescendants()) do
-				if obj:IsA("Script") or obj:IsA("LocalScript") then
-					obj:Destroy()
-				end
-			end
-			pcall(function()
-				model:SetAttribute("LoadedByExecutor", true)
-			end)
-		end
-	end
-
-	return model
-end
-
--- 🔽 Tải Frost entity từ GitHub
-local s = LoadCustomInstance("https://github.com/eoyoustme/Hardcore/blob/main/Frostbote.rbxm?raw=true", workspace)
-if not s then
-	warn("Không thể tải Frost entity.")
+if not (writefile and getasset and http_request) then
+	warn("[Frostbite]: Executor của bạn không hỗ trợ writefile/getcustomasset/request!")
 	return
 end
 
-local entity = s:FindFirstChildWhichIsA("BasePart")
-if not entity then
-	error("Không tìm thấy BasePart.")
-end
+-- ⏳ Chờ phòng thay đổi
+local gameData = game:GetService("ReplicatedStorage"):WaitForChild("GameData")
+local latestRoom = gameData:WaitForChild("LatestRoom")
 
-entity.CFrame = GetRoom():WaitForChild("RoomEntrance").CFrame * CFrame.new(0, 5, -35)
+latestRoom.Changed:Wait()
+local tweenservice = game:GetService("TweenService")
 
-pcall(function() entity.Ambience:Stop() end)
-pcall(function() entity.AmbienceFar:Stop() end)
--- 💡 Ánh sáng xuất hiện
-local pointLight = Instance.new("PointLight")
-pointLight.Color = Color3.new(255, 255, 255)
-pointLight.Range = 120
-pointLight.Brightness = 99999
-pointLight.Parent = entity
-
-tweenservice:Create(pointLight, TweenInfo.new(3), {Range = 0}):Play()
-
--- 🎵 Âm thanh xuất hiện
-local sound = Instance.new("Sound")
-sound.SoundId = "rbxassetid://137044859218769"
-sound.Looped = false
-sound.Volume = 5
-sound.Parent = s
-sound:Play()
-
--- ❄️ Hiệu ứng lạnh
 local frost = Instance.new("ColorCorrectionEffect")
 frost.Parent = game.Lighting
 frost.Name = "frost4"
@@ -111,156 +25,288 @@ tweenservice:Create(frost, TweenInfo.new(10), {
 	Contrast = 0.2
 }):Play()
 
--- ❌ Tắt hiệu ứng ban đầu
-for _, v in ipairs({"face", "Heylois", "BlackTrai2l", "BlackTrai3l","Frostky","Frostky2"}) do
-	if entity:FindFirstChild("Attachment") and entity.Attachment:FindFirstChild(v) then
-		entity.Attachment[v].Enabled = false
-	end
-end
 
-local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
-local camara = game.Workspace.CurrentCamera
-local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-	camara.CFrame = camara.CFrame * shakeCf
-end)
-camShake:Start()
-camShake:ShakeOnce(10,3,0.1,6,7,0.5)
-
-wait(8)
-
--- ✅ Bật lại tất cả hiệu ứng (Attachment + Particle)
--- Bật lại 4 hiệu ứng trong Attachment
-for _, v in ipairs({"face", "Heylois", "BlackTrai2l", "BlackTrai3l","Frostky","Frostky2"}) do
-	if entity:FindFirstChild("Attachment") and entity.Attachment:FindFirstChild(v) then
-		entity.Attachment[v].Enabled = true
-	end
-end
-
--- 🎵 Phát âm thanh ambience
-pcall(function() entity.Ambience:Play() end)
-pcall(function() entity.AmbienceFar:Play() end)
-
--- 🔥 Gây sát thương nếu không có bật lửa
-local dmg = true
-task.spawn(function()
-	local Players = game:GetService("Players")
-	local RunService = game:GetService("RunService")
-	local TweenService = game:GetService("TweenService")
-	local Lighting = game:GetService("Lighting")
-	local Debris = game:GetService("Debris")
-	local UserInputService = game:GetService("UserInputService")
-
-	local player = Players.LocalPlayer
-
-	local screenGui = Instance.new("ScreenGui")
-	screenGui.Name = "Aihoi"
-	screenGui.IgnoreGuiInset = true
-	screenGui.DisplayOrder = 999999
-	screenGui.Parent = player:WaitForChild("PlayerGui")
-
-	local imageLabel = Instance.new("ImageLabel")
-	imageLabel.BackgroundTransparency = 1
-	imageLabel.BorderSizePixel = 0
-	imageLabel.Position = UDim2.new(0, 0, 0, 0)
-	imageLabel.Size = UDim2.new(1, 0, 1, 0)
-	imageLabel.ScaleType = Enum.ScaleType.Stretch
-	imageLabel.Image = "rbxassetid://10344339712"
-	imageLabel.ImageTransparency = 0
-	imageLabel.Visible = true
-	imageLabel.Parent = screenGui
-	local blur = Lighting:FindFirstChild("Blur")
-
-	if not blur then
-		blur = Instance.new("BlurEffect")
-		blur.Name = "Blur5"
-		blur.Size = 10
-		blur.Parent = Lighting
-	else
-		blur.Enabled = true
-	end
-
-	while dmg do
-		task.wait(1)
-		local character = player.Character or chr
-		if not character then continue end
-
-		local humanoid = character:FindFirstChildOfClass("Humanoid")
-		if not humanoid or humanoid.Health <= 0 then 
-			break
-		end
-
-		local lighter = character:FindFirstChild("Lighter")
-
-		if not lighter or not lighter:GetAttribute("Enabled") then
-
-			imageLabel.ImageTransparency = 0
-			blur.Enabled = true
-
-
-			pcall(function()
-				humanoid.Health -= 5
-
-				-- Đã sửa: Đổi plr.Name thành player.Name
-				local statsFolder = game.ReplicatedStorage.GameStats:FindFirstChild("Player_" .. player.Name)
-				if statsFolder and statsFolder:FindFirstChild("Total") and statsFolder.Total:FindFirstChild("DeathCause") then
-					statsFolder.Total.DeathCause.Value = "Frostbite"
-				end
-			end)
-
+-- 🔊 Hàm tải âm thanh an toàn
+local function GetGitSound(GithubSnd, SoundName)
+	local fileName = SoundName .. ".mp3"
+	if not isfile(fileName) then
+		local success, response = pcall(function()
+			return game:HttpGet(GithubSnd)
+		end)
+		if success and response then
+			writefile(fileName, response)
 		else
-			imageLabel.ImageTransparency = 1
-			if blur then
-				blur.Enabled = false
+			warn("[Frostbite]: Không thể tải âm thanh!")
+			return nil
+		end
+	end
+
+	local sound = Instance.new("Sound")
+	sound.SoundId = getasset(fileName)
+	return sound
+end
+
+-- 📦 Hàm tải Model từ GitHub
+local function GetGithubModel(url)
+	local fileName = string.match(url, "([^/]+)$") or "temp_model.rbxm"
+
+	if not isfile(fileName) then
+		local response = http_request({Url = url, Method = "GET"})
+		if response and response.StatusCode == 200 then
+			writefile(fileName, response.Body)
+		else
+			warn("[Frostbite]: Không thể tải Model từ GitHub!")
+			return nil
+		end
+	end
+
+	local assetId = getasset(fileName)
+	local success, result = pcall(function() 
+		return game:GetObjects(assetId)[1] 
+	end)
+
+	return success and result or nil
+end
+
+-- 🎵 Bật nhạc nền Jumpscare
+local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Frostbite.mp3?raw=true", "Frostyman")
+if Jumpscare then
+	Jumpscare.Parent = workspace
+	Jumpscare.Volume = 5
+	Jumpscare.PlaybackSpeed = 1
+	Jumpscare.Looped = true
+	Jumpscare.Name = "Frostyman67"
+	Jumpscare:Play()
+end
+
+local function GetRoom()
+	local rooms = workspace:FindFirstChild("CurrentRooms")
+	if rooms and latestRoom.Value then
+		return rooms:FindFirstChild(tostring(latestRoom.Value))
+	end
+	return nil
+end
+
+-- 📥 Tải Model 1 lần duy nhất ở ngoài vòng lặp
+local modelTemplate = GetGithubModel("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Frostbite.rbxm")
+if not modelTemplate then
+	warn("[Frostbite]: Không thể khởi tạo Model, đã dừng script.")
+	return
+end
+
+-- 🔁 Vòng lặp 8 đợt tấn công
+for i = 1, 8 do
+	local currentRoom = GetRoom()
+	if not currentRoom then break end
+
+	local camera = workspace.CurrentCamera
+	local s = modelTemplate:Clone()
+	s.Parent = workspace
+	s.Name = "Frostyma5n"
+
+	local entity = s:FindFirstChildWhichIsA("BasePart") or s.PrimaryPart or s:FindFirstChild("FrostyNew")
+	if not entity then
+		s:Destroy()
+		break
+	end
+
+	entity.CanCollide = false
+
+	local entrance = currentRoom:FindFirstChild("RoomEntrance")
+	if entrance then
+		entity.CFrame = entrance.CFrame * CFrame.new(0, 10, -30)
+	end
+
+	-- Tắt Particle ban đầu
+	local attachment = entity:FindFirstChild("Attachment")
+	if attachment then
+		for _, v in ipairs(attachment:GetDescendants()) do
+			if v:IsA("ParticleEmitter") then
+				v.Enabled = false
 			end
 		end
 	end
-end)
 
--- 🛑 Khi chuyển phòng
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
-dmg = false
+	task.wait(0.5)
 
--- Tắt các hiệu ứng khi rời phòng
-for _, v in ipairs({"face", "Heylois", "BlackTrai2l", "BlackTrai3l","Frostky","Frostky2"}) do
-	if entity:FindFirstChild("Attachment") and entity.Attachment:FindFirstChild(v) then
-		entity.Attachment[v].Enabled = false
+	camera.CameraType = Enum.CameraType.Custom
+
+	-- Rung camera
+	local isShaking = true
+
+	threadA = task.spawn(function()
+		while isShaking do
+			task.wait(0.1)
+
+			local CameraShaker = game.ReplicatedStorage:FindFirstChild("CameraShaker") or (game.ReplicatedStorage:FindFirstChild("Modules") and game.ReplicatedStorage.Modules:FindFirstChild("CameraShaker"))
+			if CameraShaker then
+				local CameraShakerModule = require(CameraShaker)
+				local camShake = CameraShakerModule.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+					camera.CFrame = camera.CFrame * shakeCf
+				end)
+				camShake:Start()
+				camShake:ShakeOnce(10, 10, 0.5, 0.1, 2, 0.5)
+			end
+		end
+	end)
+
+	-- Bật Particle
+	if attachment then
+		for _, v in ipairs(attachment:GetDescendants()) do
+			if v:IsA("ParticleEmitter") then
+				v.Enabled = true
+			end
+		end
+	end
+
+	local attacking = true
+
+	local roomConnection
+	roomConnection = workspace.CurrentRooms.ChildAdded:Connect(function()
+		if not attacking then return end
+		attacking = false
+
+		if roomConnection then
+			roomConnection:Disconnect()
+		end
+
+		if s and s.Parent then
+			s:Destroy()
+		end
+	end)
+
+	-- Luồng gây sát thương & hiệu ứng màn hình
+	task.spawn(function()
+		local Players = game:GetService("Players")
+		local Lighting = game:GetService("Lighting")
+		local player = Players.LocalPlayer
+
+		local screenGui = Instance.new("ScreenGui")
+		screenGui.Name = "Aihoi"
+		screenGui.IgnoreGuiInset = true
+		screenGui.DisplayOrder = 999999
+		screenGui.Parent = player:WaitForChild("PlayerGui")
+
+		local imageLabel = Instance.new("ImageLabel")
+		imageLabel.BackgroundTransparency = 1
+		imageLabel.BorderSizePixel = 0
+		imageLabel.Position = UDim2.new(0, 0, 0, 0)
+		imageLabel.Size = UDim2.new(1, 0, 1, 0)
+		imageLabel.ScaleType = Enum.ScaleType.Stretch
+		imageLabel.Image = "rbxassetid://10344339712"
+		imageLabel.ImageTransparency = 0
+		imageLabel.Visible = true
+		imageLabel.Parent = screenGui
+
+		local blur = Lighting:FindFirstChild("Blur5")
+		if not blur then
+			blur = Instance.new("BlurEffect")
+			blur.Name = "Blur5"
+			blur.Size = 10
+			blur.Parent = Lighting
+		else
+			blur.Enabled = true
+		end
+
+local damage = 2
+
+		while attacking and entity and entity.Parent do
+			task.wait(1)
+
+			local character = player.Character
+			if not character then continue end
+
+			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			if not humanoid or humanoid.Health <= 0 then 
+				break
+			end
+
+			local lighter = character:FindFirstChild("Lighter")
+
+			if not lighter or not lighter:GetAttribute("Enabled") then
+				imageLabel.ImageTransparency = 0
+				blur.Enabled = true
+
+				pcall(function()
+					humanoid.Health = math.max(0, humanoid.Health - damage)
+
+					local statsFolder = game.ReplicatedStorage:FindFirstChild("GameStats")
+					if statsFolder then
+						local playerStats = statsFolder:FindFirstChild("Player_" .. player.Name)
+						if playerStats and playerStats:FindFirstChild("Total") and playerStats.Total:FindFirstChild("DeathCause") then
+							playerStats.Total.DeathCause.Value = "Frostbite"
+						end
+					end
+					task.spawn(function()
+						while true do
+							task.wait(1)
+							damage = math.max(0, damage + 0.3)
+						end
+					end)
+				end)
+			else
+				imageLabel.ImageTransparency = 1
+				if blur then
+					blur.Enabled = false
+				end
+			end
+		end
+	end)
+
+	-- Chờ lượt tấn công kết thúc
+	repeat
+		task.wait(0.1)
+	until not attacking
+end
+
+isShaking = false
+if threadA then
+	task.cancel(threadA)
+	threadA = nil
+end
+
+
+-- 🧹 Dọn dẹp hiệu ứng an toàn sau khi kết thúc 8 đợt
+local TweenService = game:GetService("TweenService")
+
+-- 🌈 Hoàn tác hiệu ứng màn hình lạnh
+local frost4 = game.Lighting:FindFirstChild("frost4")
+if frost4 then
+	TweenService:Create(frost4, TweenInfo.new(5), {
+		TintColor = Color3.fromRGB(255, 255, 255),
+		Saturation = 0,
+		Contrast = 0
+	}):Play()
+end
+
+task.wait(1)
+
+-- 🧹 Xóa âm thanh Jumpscare
+local soundObj = workspace:FindFirstChild("Frostyman67")
+if soundObj then 
+	soundObj:Destroy() 
+end
+
+-- 🧹 Xóa hiệu ứng Blur
+local blurObj = game.Lighting:FindFirstChild("Blur5")
+if blurObj then 
+	blurObj:Destroy() 
+end
+
+-- 🧹 Xóa giao diện ScreenGui
+local player = game.Players.LocalPlayer
+if player and player:FindFirstChild("PlayerGui") then
+	-- Lặp qua tất cả các thành phần trong PlayerGui
+	for _, gui in ipairs(player.PlayerGui:GetChildren()) do
+		if gui.Name == "Aihoi" then
+			gui:Destroy() -- Xóa tất cả các GUI có tên Aihoi
+		end
 	end
 end
 
--- Âm thanh dừng và biến mất
-pcall(function() entity.Ambience:Stop() end)
-pcall(function() entity.AmbienceFar:Stop() end)
+task.wait(4)
 
-local des = Instance.new("Sound")
-des.SoundId = "rbxassetid://111715441853991"
-des.Looped = false
-des.Volume = 2.5
-des.Parent = s
-des:Play()
-
-wait(5)
-s:Destroy()
-
--- 🌈 Hoàn tác hiệu ứng lạnh
-tweenservice:Create(game.Lighting.frost4, TweenInfo.new(5), {
-	TintColor = Color3.fromRGB(255, 255, 255),
-	Saturation = 0,
-	Contrast = 0
-}):Play()
-wait(1)
-
-
-
-local blur = game.Lighting:FindFirstChild("Blur5")
-blur:Destroy()
-
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
-local anhguoc = player:WaitForChild("PlayerGui")
-local cac = anhguoc:WaitForChild("Aihoi")
-if cac then
-	cac:Destroy()
+-- 🧹 Xóa hiệu ứng frost4 hoàn toàn
+if frost4 and frost4.Parent then
+	frost4:Destroy()
 end
-wait(4)
-game.Lighting.frost4:Destroy()
