@@ -1,6 +1,5 @@
-
 coroutine.wrap(function()
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Connect(function()
+while true do
 		wait(1)
 		game.Players.LocalPlayer.PlayerGui.MainUI.Jumpscare.Jumpscare_Rush.ImageLabel.ImageColor3 = Color3.fromRGB(255, 255, 255)
 		game.Players.LocalPlayer.PlayerGui.MainUI.Jumpscare.Jumpscare_Rush.ImageLabelBig.ImageColor3 = Color3.fromRGB(255, 255, 255)
@@ -21,8 +20,8 @@ game.ReplicatedStorage.GameData.LatestRoom.Changed:Connect(function()
 			game.Workspace.RushMoving.RushNew.PlaySound.Footsteps = 0.35
 
 		end
-	end)
-end)
+	end
+end)()
 --
 
 --
