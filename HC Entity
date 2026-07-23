@@ -1,13 +1,13 @@
 
 coroutine.wrap(function()
-while true do
+	while true do
 		wait(1)
 		game.Players.LocalPlayer.PlayerGui.MainUI.Jumpscare.Jumpscare_Rush.ImageLabel.ImageColor3 = Color3.fromRGB(255, 255, 255)
 		game.Players.LocalPlayer.PlayerGui.MainUI.Jumpscare.Jumpscare_Rush.ImageLabelBig.ImageColor3 = Color3.fromRGB(255, 255, 255)
 		game.Players.LocalPlayer.PlayerGui.MainUI.Jumpscare.Jumpscare_Rush.ImageLabelBig.Image = "rbxassetid://86965329839192"
 		game.Players.LocalPlayer.PlayerGui.MainUI.Jumpscare.Jumpscare_Rush.ImageLabel.Image = "rbxassetid://108323297313724"
 		if game.Workspace:FindFirstChild("AmbushMoving") then
-			game.Workspace.AmbushMoving.RushNew.Attachment.ParticleEmitter.Texture = "rbxassetid://12557955051"
+			game.Workspace.AmbushMoving.RushNew.Attachment.ParticleEmitter.Texture = "rbxassetid://122475073711766"
 
 		end
 
@@ -21,9 +21,9 @@ while true do
 			game.Workspace.RushMoving.RushNew.PlaySound.Footsteps = 0.35
 
 		end
-end
-	end)
-	--
+	end
+end)
+--
 
 --
 
