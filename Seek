@@ -1,35 +1,38 @@
-coroutine.wrap(function()
-	game.ReplicatedStorage.GameData.LatestRoom.Changed:Connect(function()
-		wait(1)
-		if game.Workspace:FindFirstChild("SeekMovingNewclone") then
-			
-			local function GetGitSound(GithubSnd, SoundName)
-				local url = GithubSnd
-				if not isfile(SoundName .. ".mp3") then
-					writefile(SoundName .. ".mp3", game:HttpGet(url))
-				end
-				local sound = Instance.new("Sound")
-				sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
-				return sound
+
+local function GetCustomAsset(url, filename)
+	local filePath = filename .. ".mp3"
+	if not isfile(filePath) then
+		writefile(filePath, game:HttpGet(url))
+	end
+	return (getcustomasset or getsynasset)(filePath)
+end
+
+local function fixSeek(figure: Model)
+	local parent = figure.Parent
+	if not parent then return end
+
+	local origMusic = parent:WaitForChild("SeekMusic")
+
+	origMusic.Volume = 0
+
+	local newerMusic = origMusic:Clone()
+	newerMusic.Name = "SeekMusicCustom"
+	newerMusic.Volume = 1
+	newerMusic.Parent = parent
+
+	task.spawn(function()
+		local soundAsset = GetCustomAsset("https://github.com/eoyoustme/Impossible/blob/main/SeekMusic.mp3?raw=true", "SeekMusic")
+		newerMusic.SoundId = soundAsset
+	end)
+
+	origMusic:GetPropertyChangedSignal("Playing"):Connect(function()
+		if origMusic.Playing then
+			if not newerMusic.Playing then
+				newerMusic.TimePosition = 2
+				newerMusic:Play()
 			end
-
-			local SeekMusic = game.Workspace.SeekMovingNewclone.SeekMusic
-
-			local Seekga = GetGitSound("https://github.com/eoyoustme/Impossible/blob/main/SeekMusic.mp3?raw=true", "SeekMusicSeek")
-
-			SeekMusic.SoundId = Seekga.SoundId
-			SeekMusic.PlaybackSpeed = 1.1
-			SeekMusic.TimePosition = 2
-
-			Seekga:Destroy()
-
+		else
+			newerMusic:Stop()
 		end
 	end)
-end)()
---
-
---
-
---
-
---
+end
