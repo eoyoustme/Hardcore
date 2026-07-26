@@ -95,7 +95,7 @@ if not modelTemplate then
 end
 
 -- 🔁 Vòng lặp 8 đợt tấn công
-for i = 1, 8 do
+for i = 1, Random.new():NextInteger(4 , 10) do
 	local currentRoom = GetRoom()
 	if not currentRoom then break end
 
@@ -131,17 +131,17 @@ for i = 1, 8 do
 
 	camera.CameraType = Enum.CameraType.Custom
 
-task.spawn(function()
+	task.spawn(function()
 
-			local CameraShaker = game.ReplicatedStorage:FindFirstChild("CameraShaker") or (game.ReplicatedStorage:FindFirstChild("Modules") and game.ReplicatedStorage.Modules:FindFirstChild("CameraShaker"))
-			if CameraShaker then
-				local CameraShakerModule = require(CameraShaker)
-				local camShake = CameraShakerModule.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-					camera.CFrame = camera.CFrame * shakeCf
-				end)
-				camShake:Start()
-				camShake:ShakeOnce(10, 10, 0.5, 5, 2, 0.5)
-			end
+		local CameraShaker = game.ReplicatedStorage:FindFirstChild("CameraShaker") or (game.ReplicatedStorage:FindFirstChild("Modules") and game.ReplicatedStorage.Modules:FindFirstChild("CameraShaker"))
+		if CameraShaker then
+			local CameraShakerModule = require(CameraShaker)
+			local camShake = CameraShakerModule.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+				camera.CFrame = camera.CFrame * shakeCf
+			end)
+			camShake:Start()
+			camShake:ShakeOnce(10, 10, 0.5, 5, 2, 0.5)
+		end
 	end)
 
 	-- Bật Particle
@@ -202,7 +202,7 @@ task.spawn(function()
 			blur.Enabled = true
 		end
 
-local damage = 2
+		local damage = 2
 
 		while attacking and entity and entity.Parent do
 			task.wait(1)
@@ -253,26 +253,32 @@ local damage = 2
 	until not attacking
 end
 
+local TweenService = game:GetService("TweenService")
+
+local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
+local camera = game.Workspace.CurrentCamera
+local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+	camera.CFrame = camera.CFrame * shakeCf
+end)
+camShake:Start()
+camShake:ShakeOnce(10, 3, 0.1, 6)
 
 -- 🧹 Dọn dẹp hiệu ứng an toàn sau khi kết thúc 8 đợt
 local TweenService = game:GetService("TweenService")
 
 -- 🌈 Hoàn tác hiệu ứng màn hình lạnh
 local frost4 = game.Lighting:FindFirstChild("frost4")
-if frost4 then
-	TweenService:Create(frost4, TweenInfo.new(5), {
-		TintColor = Color3.fromRGB(255, 255, 255),
-		Saturation = 0,
-		Contrast = 0
-	}):Play()
-end
 
 task.wait(1)
 
 -- 🧹 Xóa âm thanh Jumpscare
 local soundObj = workspace:FindFirstChild("Frostyman67")
 if soundObj then 
-	soundObj:Destroy() 
+	TweenService:Create(
+		soundObj,
+		TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
 end
 
 -- 🧹 Xóa hiệu ứng Blur
@@ -292,9 +298,93 @@ if player and player:FindFirstChild("PlayerGui") then
 	end
 end
 
-task.wait(4)
+task.wait(3)
 
--- 🧹 Xóa hiệu ứng frost4 hoàn toàn
+local Lighting = game:GetService("Lighting")
+Lighting.Ambient = Color3.new(1, 0, 0)
+Lighting.Brightness = 3
+Lighting.FogEnd = 240
+Lighting.FogStart = 240
+Lighting.FogColor = Color3.new(0, 0, 0)
+game:GetService("TweenService"):Create(Lighting, TweenInfo.new(1,Enum.EasingStyle.Quad), {FogEnd = 0}):Play()
+game.Debris:AddItem(Lighting, 6)
+
+task.wait(1)
+
+
+local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
+local camera = game.Workspace.CurrentCamera
+local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+	camera.CFrame = camera.CFrame * shakeCf
+end)
+camShake:Start()
+camShake:ShakeOnce(10, 3, 0.1, 6)
+
+local Lighting = game:GetService("Lighting")
+Lighting.Ambient = Color3.new(1, 0, 0)
+Lighting.Brightness = 3
+Lighting.FogEnd = 240
+Lighting.FogStart = 240
+Lighting.FogColor = Color3.new(0, 0, 0)
+
 if frost4 and frost4.Parent then
 	frost4:Destroy()
 end
+
+local cac = Instance.new("Sound")
+cac.SoundId = "rbxassetid://9125402735"
+cac.Looped = false
+cac.Volume = 10
+cac.Parent = workspace
+cac.PlaybackSpeed = 0.7
+cac:Play()
+game:GetService("Debris"):AddItem(cac, 3.6)
+
+local des = Instance.new("Sound")
+des.SoundId = "rbxassetid://111715441853991"
+des.Looped = false
+des.Volume = 10
+des.Parent = workspace
+des:Play()
+
+local Evil = Instance.new("ColorCorrectionEffect")
+Evil.Parent = game.Lighting
+Evil.Name = "frost65"
+tweenservice:Create(Evil, TweenInfo.new(1), {
+	TintColor = Color3.fromRGB(255, 255, 255),
+	Saturation = -0.7,
+	Contrast = 1
+}):Play()
+
+wait(1)
+
+local frost65 = game.Lighting:FindFirstChild("frost65")
+
+tweenservice:Create(frost65, TweenInfo.new(1), {
+	TintColor = Color3.fromRGB(255, 255, 255),
+	Saturation = 0,
+	Contrast = 0
+}):Play()
+game:GetService("Debris"):AddItem(des, 4)
+soundObj:Destroy()
+
+wait(1)
+
+if frost65 and frost65.Parent then
+	frost65:Destroy()
+end
+
+des:Destroy()
+cac:Destroy()
+
+
+---====== Load achievement giver ======---
+local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
+
+---====== Display achievement ======---
+achievementGiver({
+	Title = "Reason of Cold",
+	Desc = "Cold so cold...",
+	Reason = "Survive Frostbite / Blizzard",
+	Image = "rbxassetid://0"
+})
