@@ -368,7 +368,7 @@ tweenservice:Create(frost65, TweenInfo.new(1), {
 game:GetService("Debris"):AddItem(des, 4)
 soundObj:Destroy()
 
-wait(1)
+wait(5)
 
 if frost65 and frost65.Parent then
 	frost65:Destroy()
