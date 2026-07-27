@@ -18,7 +18,7 @@ local caption = mainUI and mainUI:FindFirstChild("MainFrame") and mainUI.MainFra
 -- Tìm phòng hiện tại an toàn
 local lastroom = ReplicatedStorage:WaitForChild("GameData"):WaitForChild("LatestRoom")
 local notlastest = game.ReplicatedStorage.GameData.LatestRoom
-local currentRoom = Workspace:WaitForChild("CurrentRooms"):FindFirstChild(tostring(notlastest.Value - 1))
+local currentRoom = Workspace:WaitForChild("CurrentRooms"):FindFirstChild(tostring(notlastest.Value - 3))
 local RoomEntrance = currentRoom and (currentRoom:FindFirstChild("RoomEntrance") or currentRoom:FindFirstChild("RoomStart") or currentRoom.PrimaryPart)
 
 -- Hàm tải Âm thanh từ Github
