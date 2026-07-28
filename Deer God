@@ -1,4 +1,4 @@
-local Speed = 12
+local Speed = 13
 local shuold = true
 
 local Players = game:GetService("Players")
@@ -171,8 +171,8 @@ task.spawn(function()
 						if not attacking then
 							attacking = true
 							hum:TakeDamage(0)
-			
-								PlayJumpscare1()
+
+							PlayJumpscare1()
 
 							if hum.Health <= 0 then
 								local stats = ReplicatedStorage:FindFirstChild("GameStats")
@@ -263,7 +263,7 @@ task.spawn(function()
 	end
 end)
 
-local roomCount = Random.new():NextInteger(4, 5)
+local roomCount = Random.new():NextInteger(5, 10)
 
 for i = 1, roomCount do
 	lastroom.Changed:Wait()
