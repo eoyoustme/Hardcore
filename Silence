@@ -1,55 +1,187 @@
-
+-- Services
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService") 
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local Debris = game:GetService("Debris")
 
 local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local HRP = Character:WaitForChild("HumanoidRootPart")
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
-local Debris = game:GetService("Debris")
-local UserInputService = game:GetService("UserInputService")
+--------------------------------------------------------------------------------
+-- 1. T?O UI & HI?U ?NG "YOU WERE HEARD" (MONOCHROME TINT & TEXT)
+--------------------------------------------------------------------------------
+local oldGui = PlayerGui:FindFirstChild("SilenceHeardGui")
+if oldGui then oldGui:Destroy() end
 
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
+local SilenceHeardGui = Instance.new("ScreenGui")
+SilenceHeardGui.Name = "SilenceHeardGui"
+SilenceHeardGui.IgnoreGuiInset = true
+SilenceHeardGui.ResetOnSpawn = false
+SilenceHeardGui.DisplayOrder = 1000
+SilenceHeardGui.Parent = PlayerGui
 
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local HeardText = Instance.new("TextLabel")
+HeardText.Name = "HeardText"
+HeardText.AnchorPoint = Vector2.new(0.5, 0.5)
+HeardText.Position = UDim2.fromScale(0.5, 0.42)
+HeardText.Size = UDim2.fromOffset(700, 100)
+HeardText.BackgroundTransparency = 1
+HeardText.Text = "You were heard."
+HeardText.TextColor3 = Color3.fromRGB(255, 255, 255)
+HeardText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+HeardText.TextStrokeTransparency = 0.8
+HeardText.TextScaled = true
+HeardText.Font = Enum.Font.Oswald
+HeardText.Visible = false
+HeardText.ZIndex = 10
+HeardText.Parent = SilenceHeardGui
 
-local player = Players.LocalPlayer
+local defaultTextPos = UDim2.fromScale(0.5, 0.42)
+local shakeConnection = nil
+local activeTweens = {}
+local textCounter = 0
+local tintCounter = 0
+local tintTween = nil
 
-local thread = nil
-
-local function GetRoom()
-	return workspace.CurrentRooms:FindFirstChild(ReplicatedStorage.GameData.LatestRoom.Value)
+local SilenceMonochromeTint = Lighting:FindFirstChild("SilenceMonochromeTint")
+if not SilenceMonochromeTint then
+	SilenceMonochromeTint = Instance.new("ColorCorrectionEffect")
+	SilenceMonochromeTint.Name = "SilenceMonochromeTint"
+	SilenceMonochromeTint.Saturation = 0
+	SilenceMonochromeTint.Contrast = 0
+	SilenceMonochromeTint.Brightness = 0
+	SilenceMonochromeTint.TintColor = Color3.fromRGB(255, 255, 255)
+	SilenceMonochromeTint.Enabled = false
+	SilenceMonochromeTint.Parent = Lighting
 end
 
-local old = workspace:FindFirstChild("Silence")
-if old then
-	old:Destroy()
+local function StartMonochromeTint(isRed)
+	tintCounter = tintCounter + 1
+	if tintTween then tintTween:Cancel() tintTween = nil end
+
+	SilenceMonochromeTint.Enabled = true
+	SilenceMonochromeTint.TintColor = isRed and Color3.fromRGB(255, 110, 110) or Color3.fromRGB(255, 255, 255)
+
+	local t1 = TweenService:Create(SilenceMonochromeTint, TweenInfo.new(0.01, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+		Saturation = 0.2, Contrast = 0.15, Brightness = 0.25
+	})
+	t1:Play()
+	t1.Completed:Wait()
+
+	tintTween = TweenService:Create(SilenceMonochromeTint, TweenInfo.new(5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
+		Saturation = -1, Contrast = 0.15, Brightness = -0.05
+	})
+	tintTween:Play()
 end
+
+local function StopMonochromeTint()
+	tintCounter = tintCounter + 1
+	if tintTween then tintTween:Cancel() tintTween = nil end
+
+	SilenceMonochromeTint.Saturation = 0
+	SilenceMonochromeTint.Contrast = 0
+	SilenceMonochromeTint.Brightness = 0
+	SilenceMonochromeTint.TintColor = Color3.fromRGB(255, 255, 255)
+	SilenceMonochromeTint.Enabled = false
+end
+
+local function StartText(duration)
+	textCounter = textCounter + 1
+	if shakeConnection then shakeConnection:Disconnect() shakeConnection = nil end
+	for _, tw in ipairs(activeTweens) do tw:Cancel() end
+	table.clear(activeTweens)
+
+	HeardText.Visible = true
+	HeardText.Position = defaultTextPos
+	HeardText.Rotation = 0
+	HeardText.TextTransparency = 0.8
+	HeardText.TextStrokeTransparency = 0.8
+	HeardText.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+	local startTime = os.clock()
+	local currentId = textCounter
+
+	shakeConnection = RunService.RenderStepped:Connect(function()
+		if currentId == textCounter then
+			local progress = math.clamp((os.clock() - startTime) / math.max(duration, 0.01), 0, 1)
+			local shakeX = progress ^ 2 * 32 + 2
+			local shakeRot = progress ^ 2 * 10 + 1
+
+			HeardText.Position = UDim2.new(
+				defaultTextPos.X.Scale, defaultTextPos.X.Offset + math.random(-math.floor(shakeX), math.floor(shakeX)),
+				defaultTextPos.Y.Scale, defaultTextPos.Y.Offset + math.random(-math.floor(shakeX), math.floor(shakeX))
+			)
+			HeardText.Rotation = math.random(-math.floor(shakeRot), math.floor(shakeRot))
+		end
+	end)
+end
+
+local function LaunchText(isRed)
+	textCounter = textCounter + 1
+	local currentId = textCounter
+
+	if shakeConnection then shakeConnection:Disconnect() shakeConnection = nil end
+	for _, tw in ipairs(activeTweens) do tw:Cancel() end
+	table.clear(activeTweens)
+
+	if not HeardText.Visible then return end
+
+	HeardText.Position = defaultTextPos
+	HeardText.Rotation = 0
+	HeardText.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+	local rotDir = if math.random(1, 2) == 1 then -360 else 360
+	local tw1 = TweenService:Create(HeardText, TweenInfo.new(0.25, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
+		Position = UDim2.fromScale(0.5, 0.32)
+	})
+	table.insert(activeTweens, tw1)
+	tw1:Play()
+
+	local targetColor = isRed and Color3.fromRGB(255, 70, 70) or Color3.fromRGB(205, 170, 255)
+	local tw2 = TweenService:Create(HeardText, TweenInfo.new(2.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+		Rotation = rotDir, TextColor3 = targetColor
+	})
+	table.insert(activeTweens, tw2)
+	tw2:Play()
+
+	task.spawn(function()
+		tw1.Completed:Wait()
+		if currentId ~= textCounter then return end
+
+		local tw3 = TweenService:Create(HeardText, TweenInfo.new(0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.In), {
+			Position = UDim2.fromScale(0.5, 1.2)
+		})
+		table.insert(activeTweens, tw3)
+		tw3:Play()
+		tw3.Completed:Wait()
+
+		if currentId == textCounter then
+			HeardText.Visible = false
+		end
+	end)
+end
+
+--------------------------------------------------------------------------------
+-- 2. KH?I T?O MODEL SILENCE & AUDIO H? TH?NG
+--------------------------------------------------------------------------------
+local oldModel = workspace:FindFirstChild("Silence")
+if oldModel then oldModel:Destroy() end
 
 local Silence5 = game:GetObjects("rbxassetid://75200967024105")[1]
 Silence5.Name = "Silence"
 Silence5.Parent = workspace
 
 local Silence = Silence5:FindFirstChild("RushNew") or Silence5:FindFirstChildWhichIsA("BasePart")
-assert(Silence,"Not dind")
-
-local room = GetRoom()
-local entrance = room:WaitForChild("RoomEntrance")
-
+assert(Silence, "Không tìm th?y BasePart cho Silence!")
 Silence.Anchored = true
 
-local startCF = entrance.CFrame * CFrame.new(0,30,-35)
-local spaw5n = entrance.CFrame * CFrame.new(0,0,-35)
-local endCF = entrance.CFrame * CFrame.new(0,2,-35)
+local light = Silence:WaitForChild("PointLight", 2) or Instance.new("PointLight", Silence)
 
 local function GetGitSound(GithubSnd, SoundName)
 	local url = GithubSnd
@@ -60,49 +192,82 @@ local function GetGitSound(GithubSnd, SoundName)
 	sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".ogg")
 	return sound
 end
-local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/sound.ogg?raw=true","sound")
-Jumpscare.Parent = workspace
-Jumpscare.Volume = 5
-Jumpscare.PlaybackSpeed = 1
-Jumpscare:Play()
 
-Silence.CFrame = startCF
+local githubSound = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/sound.ogg?raw=true", "SilenceGithubSound")
+githubSound.Volume = 7
+githubSound.RollOffMinDistance = 50
+githubSound.RollOffMaxDistance = 100
+githubSound.RollOffMode = Enum.RollOffMode.Linear
+githubSound.Parent = Silence
 
-TweenService:Create(
-	Silence,
-	TweenInfo.new(1.5,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),
-	{
-		CFrame = endCF
-	}
-):Play()
+local distantSound = Instance.new("Sound")
+distantSound.Name = "SilenceDistantSound"
+distantSound.SoundId = "rbxassetid://9125402735"
+distantSound.Volume = 6
+distantSound.Parent = workspace
 
-local light = Silence:WaitForChild("PointLight")
+--------------------------------------------------------------------------------
+-- 3. HÀM T?O TEXTURE TÍM T?I UU & KI?M TRA PHÒNG
+--------------------------------------------------------------------------------
+local activeRoom = nil
 
-TweenService:Create(
-	light,
-	TweenInfo.new(1,Enum.EasingStyle.Linear),
-	{
-		Range = 0
-	}
-):Play()
+local function ApplyPurpleTextureToRoom(roomObj)
+	if not roomObj then return end
+	local createdTextures = {}
 
-task.spawn(function()
-	local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
-	local camara = game.Workspace.CurrentCamera
-	local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-		camara.CFrame = camara.CFrame * shakeCf
+	for _, part in ipairs(roomObj:GetDescendants()) do
+		if part:IsA("BasePart") and part.Name ~= "Silence" and part.Transparency < 0.9 then
+			if part.Size.Magnitude > 8 then
+				for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
+					local tex = Instance.new("Texture")
+					tex.Texture = "rbxassetid://11306695974"
+					tex.Color3 = Color3.fromRGB(170, 85, 255)
+					tex.Face = face
+					tex.StudsPerTileU = 15
+					tex.StudsPerTileV = 15
+					tex.Transparency = 0.5
+					tex.Parent = part
+					table.insert(createdTextures, tex)
+				end
+			end
+		end
+	end
+
+	task.delay(0.2, function()
+		for _, tex in ipairs(createdTextures) do
+			if tex and tex.Parent then
+				local tw = TweenService:Create(tex, TweenInfo.new(1, Enum.EasingStyle.Linear), {Transparency = 1})
+				tw:Play()
+				tw.Completed:Connect(function()
+					tex:Destroy()
+				end)
+			end
+		end
 	end)
-	camShake:Start()
-	camShake:ShakeOnce(20,10,0,4,2,12)
-	local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
-	local camara = game.Workspace.CurrentCamera
+end
 
-	-- 1. Tạo ScreenGui và ImageLabel
+local function IsPlayerInRoom(roomObj)
+	if not roomObj or not HRP then return false end
+	local success, cf, size = pcall(function()
+		return roomObj:GetBoundingBox()
+	end)
+	if not success or not cf or not size then return false end
+
+	local localPos = cf:PointToObjectSpace(HRP.Position)
+	return math.abs(localPos.X) <= (size.X / 2 + 5)
+		and math.abs(localPos.Y) <= (size.Y / 2 + 10)
+		and math.abs(localPos.Z) <= (size.Z / 2 + 5)
+end
+
+--------------------------------------------------------------------------------
+-- 4. HI?U ?NG STATIC JUMPSCARE
+--------------------------------------------------------------------------------
+local function PlayStaticJumpscareUI()
 	local screenGui = Instance.new("ScreenGui")
 	screenGui.Name = "JumpscareOverlay"
 	screenGui.IgnoreGuiInset = true
 	screenGui.DisplayOrder = 999999
-	screenGui.Parent = playerGui
+	screenGui.Parent = PlayerGui
 
 	local imageLabel = Instance.new("ImageLabel")
 	imageLabel.BackgroundTransparency = 1
@@ -110,12 +275,11 @@ task.spawn(function()
 	imageLabel.Position = UDim2.new(0, 0, 0, 0)
 	imageLabel.Size = UDim2.new(1, 0, 1, 0)
 	imageLabel.ScaleType = Enum.ScaleType.Stretch
-	imageLabel.ImageTransparency = 0 -- Bắt đầu từ độ mờ 0.25
+	imageLabel.ImageTransparency = 0
 	imageLabel.Visible = true
 	imageLabel.Parent = screenGui
 	imageLabel.ImageColor3 = Color3.fromRGB(85, 0, 127)
 
-	-- Danh sách ảnh jumpscare nhấp nháy
 	local jumpscareImages = {
 		"rbxassetid://134346506410955",
 		"rbxassetid://7578853379",
@@ -123,53 +287,130 @@ task.spawn(function()
 		"rbxassetid://78199392475572"
 	}
 
-	local duration = 1.5 -- Thời gian diễn ra hiệu ứng (3 giây)
+	local duration = 1.5
 	local start = os.clock()
 	local imageIndex = 1
 
-	-- 2. Khởi tạo Tween mờ dần (từ 0.25 về 1 trong vòng 3 giây)
 	local info = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 	local tween = TweenService:Create(imageLabel, info, {ImageTransparency = 1})
-
-	-- 3. CHẠY TWEEN NGAY TẠI ĐÂY (Tween sẽ chạy ngầm song song)
 	tween:Play()
 
-	-- 4. Vòng lặp đổi ảnh chạy đồng thời với Tween
 	while os.clock() - start < duration do
 		imageLabel.Image = jumpscareImages[imageIndex]
 		imageIndex = (imageIndex % #jumpscareImages) + 1
-		task.wait(0.03) -- Tốc độ chớp ảnh
+		task.wait(0.03)
 	end
 
-	-- 5. Đợi Tween hoàn thành 100% rồi dọn dẹp GUI
 	tween.Completed:Wait()
 	screenGui:Destroy()
+end
+
+local function TriggerCameraShake()
+	pcall(function()
+		local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
+		local camera = game.Workspace.CurrentCamera
+		local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+			camera.CFrame = camera.CFrame * shakeCf
+		end)
+		camShake:Start()
+		camShake:ShakeOnce(20, 10, 0, 4, 2, 12)
+	end)
+end
+
+--------------------------------------------------------------------------------
+-- 5. CHU?I TELEPORT QUA PHÒNG & T? XÓA KHI ÐI H?T PHÒNG
+--------------------------------------------------------------------------------
+local Kill = true
+local isChasing = false
+local currentRooms = workspace:WaitForChild("CurrentRooms")
+local RemoveSilence -- Khai báo tru?c hàm RemoveSilence
+
+task.spawn(function()
+	local latestVal = ReplicatedStorage.GameData.LatestRoom.Value
+	local currentRoomIndex = math.max(0, latestVal - 4)
+	local isFirstSpawn = true
+
+	while Kill do
+		if isChasing then break end
+
+		local roomObj = currentRooms:FindFirstChild(tostring(currentRoomIndex)) or currentRooms:FindFirstChild(currentRoomIndex)
+
+		if roomObj then
+			activeRoom = roomObj
+			local entrance = roomObj:WaitForChild("RoomEntrance", 2) or roomObj.PrimaryPart
+
+			if entrance then
+				Silence.CFrame = entrance.CFrame * CFrame.new(0, 30, -35)
+				ApplyPurpleTextureToRoom(roomObj)
+				githubSound:Play()
+				distantSound:Play()
+
+				local tweenDown = TweenService:Create(
+					Silence,
+					TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+					{ CFrame = entrance.CFrame * CFrame.new(0, 2, -35) }
+				)
+				tweenDown:Play()
+				
+				task.spawn(function()
+					light.Range = 150
+					TweenService:Create(light, TweenInfo.new(1, Enum.EasingStyle.Linear), { Range = 0 }):Play()
+				end)
+
+				if isFirstSpawn then
+					isFirstSpawn = false
+					task.spawn(TriggerCameraShake)
+					task.spawn(PlayStaticJumpscareUI)
+				else
+					task.spawn(TriggerCameraShake)
+				end
+
+				local targetMaxRoom = ReplicatedStorage.GameData.LatestRoom.Value
+				local stayTime = (currentRoomIndex >= targetMaxRoom) and 6 or 3
+
+				local elapsed = 0
+				while elapsed < stayTime and Kill and not isChasing do
+					task.wait(0.5)
+					elapsed = elapsed + 0.5
+					targetMaxRoom = ReplicatedStorage.GameData.LatestRoom.Value
+				end
+
+				targetMaxRoom = ReplicatedStorage.GameData.LatestRoom.Value
+				if currentRoomIndex < targetMaxRoom and Kill and not isChasing then
+					local tweenUp = TweenService:Create(
+						Silence,
+						TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+						{ CFrame = entrance.CFrame * CFrame.new(0, 30, -35) }
+					)
+					tweenUp:Play()
+					tweenUp.Completed:Wait()
+					currentRoomIndex = currentRoomIndex + 1
+				else
+					break
+				end
+			else
+				break
+			end
+		else
+			task.wait(0.5)
+			if currentRoomIndex > ReplicatedStorage.GameData.LatestRoom.Value then
+				break
+			end
+		end
+	end
+
+	if RemoveSilence and not isChasing then
+		RemoveSilence()
+	end
 end)
 
-local sound = Instance.new("Sound")
-sound.SoundId = "rbxassetid://7861818231"
-sound.Volume = 5
-sound.PlaybackSpeed = 0.85
-sound.Parent = workspace
-sound:Play()
+--------------------------------------------------------------------------------
+-- 6. LOGIC HEARTBEAT MINIGAME KHI NÚP
+--------------------------------------------------------------------------------
+local inMinigame = false
 
-local sound5 = Instance.new("Sound")
-sound5.SoundId = "rbxassetid://139784048116231"
-sound5.PlaybackSpeed = 0.8
-sound5.Volume = 2
-sound5.Parent = workspace
-sound5:Play()
-
-task.wait(3)
-
-local lastPos = HRP.Position
-local Kill = true
-local damageInterval = 0.054
-local inMinigame = false 
-
--- Hàm xử lý Heartbeat Minigame khi trốn
 local function StartHeartbeatMinigame()
-	if inMinigame then return end
+	if inMinigame or not isChasing then return end
 	inMinigame = true
 
 	local isPC = UserInputService.KeyboardEnabled
@@ -188,8 +429,8 @@ local function StartHeartbeatMinigame()
 	mainButton.Name = "HeartLabel"
 	mainButton.Image = "rbxassetid://8419306829"
 	mainButton.Size = UDim2.new(0, 100, 0, 100)
-	mainButton.Position = UDim2.new(0.5, 0, 0.949999988, 0)
-	mainButton.AnchorPoint = Vector2.new(0.5, 0.949999988)
+	mainButton.Position = UDim2.new(0.5, 0, 0.95, 0)
+	mainButton.AnchorPoint = Vector2.new(0.5, 0.95)
 	mainButton.BackgroundTransparency = 1
 	mainButton.Parent = heartbeatGui
 
@@ -199,34 +440,31 @@ local function StartHeartbeatMinigame()
 			Humanoid.Health = 0
 			heartbeatGui:Destroy()
 			if hidingCheck then hidingCheck:Disconnect() end
+			if RemoveSilence then RemoveSilence() end
 		end
 	end)
 
-	-- ĐỢI 2 GIÂY TRƯỚC KHI BẮT ĐẦU VÒNG LẶP MINIGAME
 	task.wait(2)
 
 	if not Kill or Humanoid.Health <= 0 or not Character:GetAttribute("Hiding") then
 		if hidingCheck then hidingCheck:Disconnect() end
 		heartbeatGui:Destroy()
 		inMinigame = false
+		if RemoveSilence then RemoveSilence() end
 		return
 	end
 
 	local successClicks = 0
 	local targetClicks = 5
-	local lives = 2 -- KHỞI TẠO CƠ CHẾ 2 MẠNG CHO PLAYER
+	local lives = 2
 
 	for i = 1, targetClicks do
-		if not Kill or Humanoid.Health <= 0 or not Character:GetAttribute("Hiding") then 
-			break 
-		end
+		if not Kill or Humanoid.Health <= 0 or not Character:GetAttribute("Hiding") then break end
 
-		-- [ĐÃ SỬA THÊM VÀO] Khai báo lại các biến logic cho mỗi lượt chơi mới
 		local clickedCorrectly = false
 		local hasClickedThisRound = false
 		local roundFinished = false
 
-		-- [ĐÃ SỬA THÊM VÀO] Tạo lại vòng tròn mờ dùng để thu nhỏ làm nhịp đập hình ảnh
 		local ring = Instance.new("ImageLabel")
 		ring.Name = "ShrinkingRing"
 		ring.Image = "rbxassetid://8419306829"
@@ -234,68 +472,52 @@ local function StartHeartbeatMinigame()
 		ring.BackgroundTransparency = 1
 		ring.AnchorPoint = Vector2.new(0.5, 0.5)
 		ring.Position = UDim2.new(0.5, 0, 0.5, 0)
-		ring.Size = UDim2.new(2.5, 0, 2.5, 0) -- Lớn gấp 2.5 lần nút chính lúc đầu
+		ring.Size = UDim2.new(2.5, 0, 2.5, 0)
 		ring.Parent = mainButton
 
-		-- Vòng tròn thu nhỏ về kích thước gốc (1) trong 0.5 giây
-		local shrinkTween = TweenService:Create(
-			ring,
-			TweenInfo.new(0.5, Enum.EasingStyle.Linear),
-			{Size = UDim2.new(1, 0, 1, 0)}
-		)
+		local shrinkTween = TweenService:Create(ring, TweenInfo.new(0.5, Enum.EasingStyle.Linear), {Size = UDim2.new(1, 0, 1, 0)})
 		shrinkTween:Play()
 
 		local startTime = os.clock()
-		local clickConnection
-		local keyConnection
+		local clickConn, keyConn
 
 		local function registerInput()
 			if hasClickedThisRound or roundFinished then return end
 			hasClickedThisRound = true
 
 			local timeElapsed = os.clock() - startTime
-
-			-- Kéo dài thời gian bấm hợp lệ lên 0.8s (0.5s thu nhỏ + 0.3s chờ delay khớp size)
 			if timeElapsed >= 0.35 and timeElapsed <= 0.8 then
 				clickedCorrectly = true
 				roundFinished = true
 			else
-				-- Nhập sai nhịp (quá sớm) -> Bị trừ 1 mạng thay vì chết ngay
 				lives = lives - 1
-				if lives <= 0 then
-					Humanoid.Health = 0
-				end
+				if lives <= 0 then Humanoid.Health = 0 end
 				roundFinished = true
 			end
 		end
 
-		clickConnection = mainButton.MouseButton1Click:Connect(registerInput)
+		clickConn = mainButton.MouseButton1Click:Connect(registerInput)
 
 		if isPC then
-			keyConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+			keyConn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
 				if input.KeyCode == Enum.KeyCode.Space and not gameProcessed then
 					registerInput()
 				end
 			end)
 		end
 
-		-- Vòng lặp chờ tối đa 0.8s (0.5s thu nhỏ + 0.3s hoãn lại cho player bấm)
-		local totalRoundTime = 0.8
 		local elapsed = 0
-		while elapsed < totalRoundTime and not roundFinished and Humanoid.Health > 0 and Character:GetAttribute("Hiding") do
+		while elapsed < 0.8 and not roundFinished and Humanoid.Health > 0 and Character:GetAttribute("Hiding") do
 			task.wait(0.02)
 			elapsed = elapsed + 0.02
 		end
 
-		if clickConnection then clickConnection:Disconnect() end
-		if keyConnection then keyConnection:Disconnect() end
+		if clickConn then clickConn:Disconnect() end
+		if keyConn then keyConn:Disconnect() end
 		if ring then ring:Destroy() end
 
-		if Humanoid.Health <= 0 or not Character:GetAttribute("Hiding") then
-			break
-		end
+		if Humanoid.Health <= 0 or not Character:GetAttribute("Hiding") then break end
 
-		-- Nếu hết 0.8s hoàn toàn bỏ lỡ không bấm -> Trừ 1 mạng
 		if not hasClickedThisRound then
 			lives = lives - 1
 			if lives <= 0 then
@@ -304,12 +526,7 @@ local function StartHeartbeatMinigame()
 			end
 		end
 
-		-- Chỉ cộng điểm tích lũy nếu vượt qua lượt đó thành công
-		if clickedCorrectly then
-			successClicks = successClicks + 1
-		end
-
-		-- Tạo khoảng nghỉ ngắn 0.1s giữa các lần xuất hiện trái tim tiếp theo
+		if clickedCorrectly then successClicks = successClicks + 1 end
 		task.wait(0.1)
 	end
 
@@ -317,100 +534,134 @@ local function StartHeartbeatMinigame()
 	heartbeatGui:Destroy()
 
 	if successClicks == targetClicks and Humanoid.Health > 0 then
-		Kill = false 
-		if Silence5 and Silence5.Parent then
-			Silence5:Destroy()
-		end
+		if RemoveSilence then RemoveSilence() end
+	else
+		Humanoid.Health = 0
+		if RemoveSilence then RemoveSilence() end
 	end
 
 	inMinigame = false
 end
 
-thread = task.spawn(function()
+--------------------------------------------------------------------------------
+-- 7. CHU?I TRUY ÐU?I (TWEEN ÐU?I THEO PLAYER & D?NG KHI NÚP)
+--------------------------------------------------------------------------------
+local lastPos = HRP.Position
+local damageInterval = 0.054
+local thread = nil
+
+local function StartChaseSequence()
+	if isChasing then return end
+	isChasing = true
+
+	StartText(3)
+	LaunchText(true)
+	StartMonochromeTint(true)
+
+	task.wait(3)
+
+	local currentChaseTween = nil
+
 	while Kill do
 		task.wait(damageInterval)
 
-		-- KIỂM TRA TRẠNG THÁI HIDING ĐỂ BẮT ĐẦU MINIGAME
-		if Character:GetAttribute("Hiding") and not inMinigame then
-			task.spawn(StartHeartbeatMinigame)
+		-- N?U PLAYER NÚP: D?ng Tween di chuy?n c?a Silence và m? Minigame
+		if Character:GetAttribute("Hiding") then
+			if currentChaseTween then
+				currentChaseTween:Cancel()
+				currentChaseTween = nil
+			end
+			
+			if Silence and Silence.Parent then
+				Silence.Anchored = true
+			end
+
+			if not inMinigame then
+				StartHeartbeatMinigame()
+			end
 		end
 
-		-- Chỉ kiểm tra di chuyển gây chết nếu KHÔNG ở trong Minigame
-		if not inMinigame then
+		-- CH? ÐU?I THEO VÀ T?N CÔNG KHI KHÔNG TRONG MINIGAME VÀ KHÔNG NÚP
+		if not inMinigame and not Character:GetAttribute("Hiding") then
 			local currentPos = HRP.Position
 
-			if (currentPos-lastPos).Magnitude > 0.3 then
+			pcall(function()
+				require(LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("", true)
+			end)
 
-				require(LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("",true)
+			if Humanoid.Health > 0 then
+				Silence.Anchored = true
 
-				if Humanoid.Health > 0 and not Character:GetAttribute("Crouching") then
-					while true do
+				-- Âm thanh du?i
+				local s = Instance.new("Sound")
+				s.SoundId = "rbxassetid://7861818231"
+				s.Volume = 0.5
+				s.Parent = workspace
+				s:Play()
+				Debris:AddItem(s, 2)
 
-						local s = Instance.new("Sound")
-						s.SoundId = "rbxassetid://7861818231"
-						s.Volume = 0.5
-						s.Parent = workspace
-						s:Play()
+				-- T?c d? và Tween Silence d?n v? trí ngu?i choi
+				local SPEED_STUDS_PER_SECOND = 28
+				local targetCFrame = HRP.CFrame
+				local distance = (targetCFrame.Position - Silence.Position).Magnitude
+				local duration = distance / SPEED_STUDS_PER_SECOND
 
-						local model = workspace:WaitForChild("Silence")
-						local part = model:FindFirstChild("RushNew") or model:FindFirstChildWhichIsA("BasePart")
-						if not part then return end
+				if duration <= 0 then duration = 0.05 end
 
-						local chr = player.Character or player.CharacterAdded:Wait()
-						local hrp = chr:WaitForChild("HumanoidRootPart")
+				currentChaseTween = TweenService:Create(
+					Silence,
+					TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+					{CFrame = targetCFrame}
+				)
+				currentChaseTween:Play()
 
-						part.Anchored = true
+				-- ÐI?U KI?N TIÊU DI?T: L?i g?n player (<= 9 studs) HO?C di chuy?n trong phòng mà không cúi
+				local movedUncrouchedInRoom = IsPlayerInRoom(activeRoom) and not Character:GetAttribute("Crouching") and (currentPos - lastPos).Magnitude > 0.3
+				
+				if distance <= 9 or movedUncrouchedInRoom then
+					Humanoid.Health = 0
 
-						local SPEED_STUDS_PER_SECOND = 25
-						local targetCFrame = hrp.CFrame
-						local distance = (targetCFrame.Position - part.Position).Magnitude
-						local duration = distance / SPEED_STUDS_PER_SECOND
+					local sound = Instance.new("Sound")
+					sound.SoundId = "rbxassetid://4988621968"
+					sound.Volume = 10
+					sound.PlaybackSpeed = 0.7
+					sound.Parent = workspace
+					sound:Play()
+					Debris:AddItem(sound, 3)
 
-						if duration <= 0 then
-							duration = 0.05
-						end
-
-						local tween = TweenService:Create(
-							part,
-							TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
-							{CFrame = targetCFrame}
-						)
-
-						tween:Play()
-						wait(0.75)
-
-						local player = game.Players.LocalPlayer
-						local char = player.Character
-						local hum = char and char:FindFirstChildOfClass("Humanoid")
-						local hrp = char and char:FindFirstChild("HumanoidRootPart")
-
-						if hum and hrp and (hrp.Position - part.Position).Magnitude <= 9 then
-							Humanoid.Health = 0
-							local sound = Instance.new("Sound")
-							sound.SoundId = "rbxassetid://4988621968"
-							sound.Volume = 10
-							sound.PlaybackSpeed = 0.7
-							sound.Parent = workspace
-							sound:Play()
-							break
-						end
-					end
+					if RemoveSilence then RemoveSilence() end
+					break
 				end
 			end
 			lastPos = currentPos
 		end
 	end
+end
+
+-- THREAD PHÁT HI?N DI CHUY?N BAN Ð?U Ð? KÍCH HO?T CHASE
+thread = task.spawn(function()
+	while Kill and not isChasing do
+		task.wait(0.1)
+		local currentPos = HRP.Position
+		if IsPlayerInRoom(activeRoom) and (currentPos - lastPos).Magnitude > 0.3 then
+			StartChaseSequence()
+			break
+		end
+		lastPos = currentPos
+	end
 end)
 
+--------------------------------------------------------------------------------
+-- 8. D?N D?P VÀ XÓA SILENCE
+--------------------------------------------------------------------------------
 local Removed = false
 
-local function RemoveSilence()
-	if Removed then
-		return
-	end
-
+RemoveSilence = function()
+	if Removed then return end
 	Removed = true
 	Kill = false
+
+	StopMonochromeTint()
 
 	if thread then
 		task.cancel(thread)
@@ -421,14 +672,3 @@ local function RemoveSilence()
 		Silence5:Destroy()
 	end
 end
-
-task.delay(7, RemoveSilence)
-
-local connection
-connection = workspace.CurrentRooms.ChildAdded:Connect(function()
-	RemoveSilence()
-
-	if connection then
-		connection:Disconnect()
-	end
-end)
