@@ -44,12 +44,11 @@ task.spawn(function()
 	TextLabel.BackgroundTransparency = 1
 	TextLabel.Font = Enum.Font.Oswald
 	TextLabel.TextSize = targetTextSize
-	TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- Changes default text color to pure white
+	TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 	TextLabel.TextXAlignment = Enum.TextXAlignment.Center 
 	TextLabel.TextYAlignment = Enum.TextYAlignment.Center
 	TextLabel.RichText = true
 
-	-- Updated RichText format with the new text and white text overrides for brackets/labels
 	TextLabel.Text = [[
 <font color="rgb(255,255,255)">DOORS Hardcore: Reiginited Recreate  </font><font color="rgb(255,255,255)">by Phongreal662 (Og Hunger (new)</font>
 <u><font color="rgb(255, 255, 255)">Credits to:</font></u>
@@ -58,6 +57,7 @@ task.spawn(function()
 <font color="rgb(255,255,255)">Noonie </font><font color="rgb(255,255,255)">[Creator of OG Hardcore, Entity, THE LOREEEEEE]</font>
 <font color="rgb(255,255,255)">Ping </font><font color="rgb(255,255,255)">[Creator of OG Hardcore, Music]</font>
 <font color="rgb(255,255,255)">Ostah </font><font color="rgb(255,255,255)">[For Shocker Model And Script Break Things]</font>
+<font color="rgb(255,255,255)">Ripper </font><font color="rgb(255,0,0)">[First Beta Completed]</font>
 <font color="rgb(255,255,255)">Vynixu </font><font color="rgb(255,255,255)">[Entity Spawner]</font>
 <font color="rgb(255,255,255)">You! [For Playing!]</font>
 ]]
@@ -124,20 +124,20 @@ task.spawn(function()
 	if Entity() then
 		Jumpscare:Destroy()
 
-	local function GetGitSound(GithubSnd, SoundName)
-		local url = GithubSnd
-		if not isfile(SoundName .. ".mp3") then
-			writefile(SoundName .. ".mp3", game:HttpGet(url))
+		local function GetGitSound(GithubSnd, SoundName)
+			local url = GithubSnd
+			if not isfile(SoundName .. ".mp3") then
+				writefile(SoundName .. ".mp3", game:HttpGet(url))
+			end
+			local sound = Instance.new("Sound")
+			sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+			return sound
 		end
-		local sound = Instance.new("Sound")
-		sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
-		return sound
-	end
-	local Ahoi = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/hotel%20prelude%20end.mp3?raw=true","Hotel")
-	Ahoi.Parent = workspace
-	Ahoi.Volume = 3
-	Ahoi.PlaybackSpeed = 1
-	Ahoi:Play()
+		local Ahoi = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/hotel%20prelude%20end.mp3?raw=true","Hotel")
+		Ahoi.Parent = workspace
+		Ahoi.Volume = 3
+		Ahoi.PlaybackSpeed = 1
+		Ahoi:Play()
 
 		local a1 = ({
 			"Who tf is joe?!?!",
