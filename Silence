@@ -260,7 +260,7 @@ local function LaunchText(isRed)
 			HeardText.Visible = false
 		end
 	end)
-	end
+end
 
 local function CleanupAll()
 	ResetText()
@@ -796,6 +796,13 @@ local function StartChaseSequence()
 
 				if distance <= 9 or movedUncrouchedInRoom then
 					Humanoid.Health = 0
+					
+					firesignal(ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {
+						"You died to Silence",
+						" Silence cannot hear you when you walk so I recommend you to run away"
+					}, "Blue")
+					
+					ReplicatedStorage.GameStats["Player_".. player.Name].Total.DeathCause.Value = "Silence"
 
 					local sound = Instance.new("Sound")
 					sound.SoundId = "rbxassetid://4988621968"
