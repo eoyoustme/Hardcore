@@ -71,7 +71,7 @@ time2.TimePosition = 0
 local time3 = entity:FindFirstChild("ScreamingInPublicBathroomsPrank")
 time3.TimePosition = 0
 
-task.wait(3)
+task.wait(5)
 
 local player = game.Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
