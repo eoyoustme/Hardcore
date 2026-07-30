@@ -4,6 +4,7 @@ local Tweenservice = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remotes = ReplicatedStorage:WaitForChild("RemotesFolder")
 
 local rng = Random.new()
 local raycastLoop = nil -- Khai báo toàn cục để OnDespawning có thể ngắt kết nối
@@ -129,17 +130,8 @@ entity:SetCallback("OnSpawned", function()
 
 						print(player.Name .. " bị Cease giết vì di chuyển!")
 
-						local statsFolder = ReplicatedStorage:FindFirstChild("GameStats")
-						if statsFolder then
-							local playerStats = statsFolder:FindFirstChild("Player_" .. player.Name)
-							if playerStats and playerStats:FindFirstChild("Total") and playerStats.Total:FindFirstChild("DeathCause") then
-								playerStats.Total.DeathCause.Value = "Cease"
-							end
-							firesignal(ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {
-								"You died to who you call Cease...",
-								" Cease is capable of hearing you for miles so I recommend you to run away"
-							}, "Blue")
-						end
+						ReplicatedStorage.GameStats["Player_".. player.Name].Total.DeathCause.Value = "Cease"
+						firesignal(Remotes.DeathHint.OnClientEvent, "You died to who you call Cease"," Cease is capable of hearing you for miles so I recommend you to run away", "Blue")
 					end
 				end
 			end
