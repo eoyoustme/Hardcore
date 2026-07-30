@@ -64,6 +64,13 @@ playSound("Scare")
 playSound("caught")
 playSound("ScreamingInPublicBathroomsPrank")
 
+local time = entity:FindFirstChild("caught")
+time.TimePosition = 0
+local time2 = entity:FindFirstChild("Scare")
+time2.TimePosition = 0
+local time3 = entity:FindFirstChild("ScreamingInPublicBathroomsPrank")
+time3.TimePosition = 0
+
 task.wait(3)
 
 local player = game.Players.LocalPlayer
@@ -155,7 +162,7 @@ if hum and hrp then
 			end
 		end)
 
-wait(0.9)
+		wait(0.9)
 
 		local chain = Instance.new("ColorCorrectionEffect", game.Lighting) 
 		game.Debris:AddItem(chain, 24)
@@ -187,6 +194,10 @@ wait(0.9)
 		if entity:FindFirstChild("gore1") then entity.gore1.Volume = 3 end
 		if entity:FindFirstChild("gore2") then entity.gore2.Volume = 3 end
 		if entity:FindFirstChild("gore3") then entity.gore3.Volume = 3 end
+		
+		entity.Blood.Enabled = true
+		wait(0.9)
+		entity.Blood.Enabled = false
 
 	elseif distance <= 25 then
 		if entity:IsA("Model") then
@@ -230,10 +241,13 @@ wait(0.9)
 		playSound("gore2")
 		playSound("gore3")
 		hum.Health -= 60
+		entity.Blood.Enabled = true
+		wait(0.9)
+		entity.Blood.Enabled = false
 	else
 		task.wait(0.9)
 	end
 end
 
-	task.wait(3)
+task.wait(3)
 s:Destroy()
