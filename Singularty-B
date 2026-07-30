@@ -232,6 +232,10 @@ if hum and hrp and entity and entity.Parent then
 		if entity:FindFirstChild("gore3") then 
 			entity.gore3.Volume = 3 
 		end
+		
+		entity.Blood.Enabled = true
+		wait(0.9)
+		entity.Blood.Enabled = false
 
 	elseif distance <= 25 then
 		-- Chế độ vồ lấy player khi ở gần tủ đồ
