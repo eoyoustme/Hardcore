@@ -105,7 +105,7 @@ local time3 = entity:FindFirstChild("ScreamingInPublicBathroomsPrank")
 time3.TimePosition = 0
 
 
-task.wait(3)
+task.wait(5)
 
 if hum and hrp and entity and entity.Parent then
 	local entityPos = entity:IsA("Model") and entity:GetPivot().Position or entity.Position
