@@ -97,6 +97,14 @@ playSound("Scare")
 playSound("caught")
 playSound("ScreamingInPublicBathroomsPrank")
 
+local time = entity:FindFirstChild("caught")
+time.TimePosition = 0
+local time2 = entity:FindFirstChild("Scare")
+time2.TimePosition = 0
+local time3 = entity:FindFirstChild("ScreamingInPublicBathroomsPrank")
+time3.TimePosition = 0
+
+
 task.wait(3)
 
 if hum and hrp and entity and entity.Parent then
@@ -212,10 +220,18 @@ if hum and hrp and entity and entity.Parent then
 		playSound("gore2")
 		playSound("gore3")
 
-		if entity:FindFirstChild("gore0") then entity.gore0.Volume = 3 end
-		if entity:FindFirstChild("gore1") then entity.gore1.Volume = 3 end
-		if entity:FindFirstChild("gore2") then entity.gore2.Volume = 3 end
-		if entity:FindFirstChild("gore3") then entity.gore3.Volume = 3 end
+		if entity:FindFirstChild("gore0") then 
+			entity.gore0.Volume = 3
+		end
+		if entity:FindFirstChild("gore1") then 
+			entity.gore1.Volume = 3 
+		end
+		if entity:FindFirstChild("gore2") then 
+			entity.gore2.Volume = 3 
+		end
+		if entity:FindFirstChild("gore3") then 
+			entity.gore3.Volume = 3 
+		end
 
 	elseif distance <= 25 then
 		-- Chế độ vồ lấy player khi ở gần tủ đồ
@@ -260,6 +276,9 @@ if hum and hrp and entity and entity.Parent then
 		playSound("gore2")
 		playSound("gore3")
 		hum.Health -= 60
+		entity.Blood.Enabled = true
+		wait(0.9)
+		entity.Blood.Enabled = false
 	else
 		task.wait(0.9)
 	end
