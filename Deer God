@@ -1,4 +1,5 @@
-local Speed = 13
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+local Speed = 12
 local shuold = true
 
 local Players = game:GetService("Players")
