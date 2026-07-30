@@ -95,7 +95,7 @@ if not modelTemplate then
 end
 
 -- 🔁 Vòng lặp 8 đợt tấn công
-for i = 1, Random.new():NextInteger(1 , 1) do
+for i = 1, Random.new():NextInteger(4 , 10) do
 	local currentRoom = GetRoom()
 	if not currentRoom then break end
 
@@ -202,7 +202,7 @@ for i = 1, Random.new():NextInteger(1 , 1) do
 			blur.Enabled = true
 		end
 
-		local damage = 0
+		local damage = 2
 
 		while attacking and entity and entity.Parent do
 			task.wait(1)
