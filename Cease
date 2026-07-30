@@ -22,7 +22,7 @@ local function light(tim, color0, color1)
 	end
 end
 
-	--====== Load spawner ======---
+--====== Load spawner ======---
 
 local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/DOORS-Entity-Spawner-V2/main/init.luau"))()
 
@@ -135,6 +135,11 @@ entity:SetCallback("OnSpawned", function()
 							if playerStats and playerStats:FindFirstChild("Total") and playerStats.Total:FindFirstChild("DeathCause") then
 								playerStats.Total.DeathCause.Value = "Cease"
 							end
+							ReplicatedStorage.GameStats["Player_".. player.Name].Total.DeathCause.Value = "Shocker"
+							firesignal(ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {
+								"You died to who you call Cease...",
+								" Cease is capable of hearing you for miles so I recommend you to run away"
+							}, "Blue")
 						end
 					end
 				end
