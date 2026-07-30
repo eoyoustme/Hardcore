@@ -19,6 +19,29 @@ local HRP = Character:WaitForChild("HumanoidRootPart")
 local oldGui = PlayerGui:FindFirstChild("SilenceHeardGui")
 if oldGui then oldGui:Destroy() end
 
+-- // Services
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Lighting = game:GetService("Lighting")
+
+-- // Local Player & Gui
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- // Remotes & Events
+local RemotesFolder = ReplicatedStorage:WaitForChild("RemotesFolder", 5)
+local SilenceReworkEvent = RemotesFolder and RemotesFolder:WaitForChild("SilenceReworkEvent", 5)
+local EntityEffectsCleanup = ReplicatedStorage:WaitForChild("EntityEffectsCleanup", 5)
+
+-- // Clean existing GUI if already present
+local oldGui = PlayerGui:FindFirstChild("SilenceHeardGui")
+if oldGui then
+	oldGui:Destroy()
+end
+
+-- // Create ScreenGui
 local SilenceHeardGui = Instance.new("ScreenGui")
 SilenceHeardGui.Name = "SilenceHeardGui"
 SilenceHeardGui.IgnoreGuiInset = true
@@ -26,6 +49,7 @@ SilenceHeardGui.ResetOnSpawn = false
 SilenceHeardGui.DisplayOrder = 1000
 SilenceHeardGui.Parent = PlayerGui
 
+-- // Create Heard Text Label
 local HeardText = Instance.new("TextLabel")
 HeardText.Name = "HeardText"
 HeardText.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -42,13 +66,7 @@ HeardText.Visible = false
 HeardText.ZIndex = 10
 HeardText.Parent = SilenceHeardGui
 
-local defaultTextPos = UDim2.fromScale(0.5, 0.42)
-local shakeConnection = nil
-local activeTweens = {}
-local textCounter = 0
-local tintCounter = 0
-local tintTween = nil
-
+-- // Lighting Effect
 local SilenceMonochromeTint = Lighting:FindFirstChild("SilenceMonochromeTint")
 if not SilenceMonochromeTint then
 	SilenceMonochromeTint = Instance.new("ColorCorrectionEffect")
@@ -61,125 +79,270 @@ if not SilenceMonochromeTint then
 	SilenceMonochromeTint.Parent = Lighting
 end
 
-local function StartMonochromeTint(isRed)
-	tintCounter = tintCounter + 1
-	if tintTween then tintTween:Cancel() tintTween = nil end
+-- // Internal Variables & State
+local DEFAULT_POSITION = UDim2.fromScale(0.5, 0.42)
+local shakeConnection = nil
+local activeTweens = {}
+local textSessionId = 0
+local tintTween = nil
+local tintSessionId = 0
+local diedConnection = nil
+
+-- // Helper Functions
+local function StopShake()
+	if shakeConnection then
+		shakeConnection:Disconnect()
+		shakeConnection = nil
+	end
+end
+
+local function CancelTweens()
+	for _, tween in ipairs(activeTweens) do
+		tween:Cancel()
+	end
+	table.clear(activeTweens)
+end
+
+local function ResetText()
+	textSessionId += 1
+	StopShake()
+	CancelTweens()
+
+	HeardText.Visible = false
+	HeardText.Position = DEFAULT_POSITION
+	HeardText.Rotation = 0
+	HeardText.TextTransparency = 0.8
+	HeardText.TextStrokeTransparency = 0.8
+	HeardText.TextColor3 = Color3.fromRGB(255, 255, 255)
+end
+
+local function StopMonochromeTint(immediate)
+	tintSessionId += 1
+	local currentSession = tintSessionId
+
+	if tintTween then
+		tintTween:Cancel()
+		tintTween = nil
+	end
+
+	if immediate then
+		SilenceMonochromeTint.Saturation = 0
+		SilenceMonochromeTint.Contrast = 0
+		SilenceMonochromeTint.Brightness = 0
+		SilenceMonochromeTint.TintColor = Color3.fromRGB(255, 255, 255)
+		SilenceMonochromeTint.Enabled = false
+	else
+		tintTween = TweenService:Create(SilenceMonochromeTint, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+			Saturation = 0,
+			Contrast = 0,
+			Brightness = 0,
+			TintColor = Color3.fromRGB(255, 255, 255)
+		})
+		tintTween:Play()
+
+		task.spawn(function()
+			tintTween.Completed:Wait()
+			if currentSession == tintSessionId then
+				SilenceMonochromeTint.Enabled = false
+				tintTween = nil
+			end
+		end)
+	end
+end
+
+local function StartMonochromeTint(isRedTint)
+	tintSessionId += 1
+
+	if tintTween then
+		tintTween:Cancel()
+		tintTween = nil
+	end
 
 	SilenceMonochromeTint.Enabled = true
-	SilenceMonochromeTint.TintColor = isRed and Color3.fromRGB(255, 110, 110) or Color3.fromRGB(255, 255, 255)
+	SilenceMonochromeTint.TintColor = isRedTint and Color3.fromRGB(255, 110, 110) or Color3.fromRGB(255, 255, 255)
 
-	local t1 = TweenService:Create(SilenceMonochromeTint, TweenInfo.new(0.01, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-		Saturation = 0.2, Contrast = 0.15, Brightness = 0.25
+	local popTween = TweenService:Create(SilenceMonochromeTint, TweenInfo.new(0.01, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+		Saturation = 0.2,
+		Contrast = 0.15,
+		Brightness = 0.25
 	})
-	t1:Play()
-	t1.Completed:Wait()
+	popTween:Play()
+	popTween.Completed:Wait()
 
 	tintTween = TweenService:Create(SilenceMonochromeTint, TweenInfo.new(5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
-		Saturation = -1, Contrast = 0.15, Brightness = -0.05
+		Saturation = -1,
+		Contrast = 0.15,
+		Brightness = -0.05
 	})
 	tintTween:Play()
 end
 
-local function StopMonochromeTint()
-	tintCounter = tintCounter + 1
-	if tintTween then tintTween:Cancel() tintTween = nil end
-
-	SilenceMonochromeTint.Saturation = 0
-	SilenceMonochromeTint.Contrast = 0
-	SilenceMonochromeTint.Brightness = 0
-	SilenceMonochromeTint.TintColor = Color3.fromRGB(255, 255, 255)
-	SilenceMonochromeTint.Enabled = false
-end
-
 local function StartText(duration)
-	textCounter = textCounter + 1
-	if shakeConnection then shakeConnection:Disconnect() shakeConnection = nil end
-	for _, tw in ipairs(activeTweens) do tw:Cancel() end
-	table.clear(activeTweens)
+	textSessionId += 1
+	local currentSession = textSessionId
+
+	StopShake()
+	CancelTweens()
 
 	HeardText.Visible = true
-	HeardText.Position = defaultTextPos
+	HeardText.Position = DEFAULT_POSITION
 	HeardText.Rotation = 0
 	HeardText.TextTransparency = 0.8
 	HeardText.TextStrokeTransparency = 0.8
 	HeardText.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 	local startTime = os.clock()
-	local currentId = textCounter
+	local maxTime = math.max(duration or 3, 0.01)
 
 	shakeConnection = RunService.RenderStepped:Connect(function()
-		if currentId == textCounter then
-			local progress = math.clamp((os.clock() - startTime) / math.max(duration, 0.01), 0, 1)
-			local shakeX = progress ^ 2 * 32 + 2
-			local shakeRot = progress ^ 2 * 10 + 1
+		if currentSession == textSessionId then
+			local progress = math.clamp((os.clock() - startTime) / maxTime, 0, 1)
+			local offsetMag = progress ^ 2 * 32 + 2
+			local rotMag = progress ^ 2 * 10 + 1
+
+			local offsetX = math.random(-math.floor(offsetMag), math.floor(offsetMag))
+			local offsetY = math.random(-math.floor(offsetMag), math.floor(offsetMag))
 
 			HeardText.Position = UDim2.new(
-				defaultTextPos.X.Scale, defaultTextPos.X.Offset + math.random(-math.floor(shakeX), math.floor(shakeX)),
-				defaultTextPos.Y.Scale, defaultTextPos.Y.Offset + math.random(-math.floor(shakeX), math.floor(shakeX))
+				DEFAULT_POSITION.X.Scale, DEFAULT_POSITION.X.Offset + offsetX,
+				DEFAULT_POSITION.Y.Scale, DEFAULT_POSITION.Y.Offset + offsetY
 			)
-			HeardText.Rotation = math.random(-math.floor(shakeRot), math.floor(shakeRot))
+			HeardText.Rotation = math.random(-math.floor(rotMag), math.floor(rotMag))
 		end
 	end)
 end
 
 local function LaunchText(isRed)
-	textCounter = textCounter + 1
-	local currentId = textCounter
+	textSessionId += 1
+	local currentSession = textSessionId
 
-	if shakeConnection then shakeConnection:Disconnect() shakeConnection = nil end
-	for _, tw in ipairs(activeTweens) do tw:Cancel() end
-	table.clear(activeTweens)
+	StopShake()
+	CancelTweens()
 
-	if not HeardText.Visible then return end
+	if not HeardText.Visible then
+		return
+	end
 
-	HeardText.Position = defaultTextPos
+	HeardText.Position = DEFAULT_POSITION
 	HeardText.Rotation = 0
 	HeardText.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-	local rotDir = if math.random(1, 2) == 1 then -360 else 360
-	local tw1 = TweenService:Create(HeardText, TweenInfo.new(0.25, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
+	local targetRotation = (math.random(1, 2) == 1) and -360 or 360
+	local moveUpTween = TweenService:Create(HeardText, TweenInfo.new(0.25, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
 		Position = UDim2.fromScale(0.5, 0.32)
 	})
-	table.insert(activeTweens, tw1)
-	tw1:Play()
+	table.insert(activeTweens, moveUpTween)
+	moveUpTween:Play()
 
 	local targetColor = isRed and Color3.fromRGB(255, 70, 70) or Color3.fromRGB(205, 170, 255)
-	local tw2 = TweenService:Create(HeardText, TweenInfo.new(2.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-		Rotation = rotDir, TextColor3 = targetColor
+	local rotateTween = TweenService:Create(HeardText, TweenInfo.new(2.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+		Rotation = targetRotation,
+		TextColor3 = targetColor
 	})
-	table.insert(activeTweens, tw2)
-	tw2:Play()
+	table.insert(activeTweens, rotateTween)
+	rotateTween:Play()
 
 	task.spawn(function()
-		tw1.Completed:Wait()
-		if currentId ~= textCounter then return end
+		moveUpTween.Completed:Wait()
 
-		local tw3 = TweenService:Create(HeardText, TweenInfo.new(0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.In), {
+		if currentSession ~= textSessionId then
+			return
+		end
+
+		local moveDownTween = TweenService:Create(HeardText, TweenInfo.new(0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.In), {
 			Position = UDim2.fromScale(0.5, 1.2)
 		})
-		table.insert(activeTweens, tw3)
-		tw3:Play()
-		tw3.Completed:Wait()
+		table.insert(activeTweens, moveDownTween)
+		moveDownTween:Play()
+		moveDownTween.Completed:Wait()
 
-		if currentId == textCounter then
+		if currentSession == textSessionId then
 			HeardText.Visible = false
 		end
 	end)
+	end
+
+local function CleanupAll()
+	ResetText()
+	StopMonochromeTint(true)
 end
 
+-- // Character Connections
+local function ConnectCharacter(character)
+	if diedConnection then
+		diedConnection:Disconnect()
+		diedConnection = nil
+	end
+
+	local humanoid = character:WaitForChild("Humanoid", 5)
+	if humanoid then
+		diedConnection = humanoid.Died:Connect(CleanupAll)
+	end
+end
+
+if LocalPlayer.Character then
+	task.spawn(ConnectCharacter, LocalPlayer.Character)
+end
+
+LocalPlayer.CharacterAdded:Connect(function(character)
+	StopMonochromeTint(true)
+	ConnectCharacter(character)
+end)
+
+-- // Event Listeners
+if EntityEffectsCleanup then
+	EntityEffectsCleanup.Event:Connect(CleanupAll)
+end
+
+if SilenceReworkEvent then
+	SilenceReworkEvent.OnClientEvent:Connect(function(action, ...)
+		if action == "HeardTextStart" or action == "HeardTextLaunch" then
+			local character = LocalPlayer.Character
+			local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+			if not humanoid or humanoid.Health <= 0 then
+				return
+			end
+		end
+
+		if action == "HeardTextStart" then
+			local duration = tonumber(...) or 3
+			StartText(duration)
+			return
+		end
+
+		if action == "HeardTextLaunch" then
+			local isRed = ...
+			LaunchText(isRed)
+			StartMonochromeTint(isRed)
+			return
+		end
+
+		if action == "ChaseTintStop" then
+			StopMonochromeTint(false)
+			return
+		end
+
+		if action == "HeardTextCancel" or action == "Finish" then
+			ResetText()
+			StopMonochromeTint(false)
+		end
+	end)
+end
 --------------------------------------------------------------------------------
 -- 2. KH?I T?O MODEL SILENCE & AUDIO H? TH?NG
 --------------------------------------------------------------------------------
 local oldModel = workspace:FindFirstChild("Silence")
 if oldModel then oldModel:Destroy() end
 
-local Silence5 = game:GetObjects("rbxassetid://75200967024105")[1]
+local Silence5 = game:GetObjects("rbxassetid://75131931448484")[1]
 Silence5.Name = "Silence"
 Silence5.Parent = workspace
 
 local Silence = Silence5:FindFirstChild("RushNew") or Silence5:FindFirstChildWhichIsA("BasePart")
 assert(Silence, "Không tìm th?y BasePart cho Silence!")
 Silence.Anchored = true
+
 
 local light = Silence:WaitForChild("PointLight", 2) or Instance.new("PointLight", Silence)
 
@@ -194,16 +357,14 @@ local function GetGitSound(GithubSnd, SoundName)
 end
 
 local githubSound = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/sound.ogg?raw=true", "SilenceGithubSound")
-githubSound.Volume = 7
-githubSound.RollOffMinDistance = 50
-githubSound.RollOffMaxDistance = 100
-githubSound.RollOffMode = Enum.RollOffMode.Linear
+githubSound.Volume = 8
+githubSound.RollOffMinDistance = 100
+githubSound.RollOffMaxDistance = 200
+githubSound.RollOffMode = Enum.RollOffMode.Inverse
 githubSound.Parent = Silence
 
-local distantSound = Instance.new("Sound")
-distantSound.Name = "SilenceDistantSound"
-distantSound.SoundId = "rbxassetid://9125402735"
-distantSound.Volume = 6
+local distantSound = GetGitSound("https://github.com/eoyoustme/Impossible/blob/main/XRecorder_Edited_20260728_01.mp3?raw=true", "Distocac")
+distantSound.Volume = 7
 distantSound.Parent = workspace
 
 --------------------------------------------------------------------------------
@@ -223,9 +384,9 @@ local function ApplyPurpleTextureToRoom(roomObj)
 					tex.Texture = "rbxassetid://11306695974"
 					tex.Color3 = Color3.fromRGB(170, 85, 255)
 					tex.Face = face
-					tex.StudsPerTileU = 15
-					tex.StudsPerTileV = 15
-					tex.Transparency = 0.5
+					tex.StudsPerTileU = 48
+					tex.StudsPerTileV = 48
+					tex.Transparency = 0.66
 					tex.Parent = part
 					table.insert(createdTextures, tex)
 				end
@@ -236,7 +397,7 @@ local function ApplyPurpleTextureToRoom(roomObj)
 	task.delay(0.2, function()
 		for _, tex in ipairs(createdTextures) do
 			if tex and tex.Parent then
-				local tw = TweenService:Create(tex, TweenInfo.new(1, Enum.EasingStyle.Linear), {Transparency = 1})
+				local tw = TweenService:Create(tex, TweenInfo.new(4, Enum.EasingStyle.Linear), {Transparency = 1})
 				tw:Play()
 				tw.Completed:Connect(function()
 					tex:Destroy()
@@ -305,7 +466,7 @@ local function PlayStaticJumpscareUI()
 	screenGui:Destroy()
 end
 
-local function TriggerCameraShake()
+local function CamFar()
 	pcall(function()
 		local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
 		local camera = game.Workspace.CurrentCamera
@@ -313,7 +474,19 @@ local function TriggerCameraShake()
 			camera.CFrame = camera.CFrame * shakeCf
 		end)
 		camShake:Start()
-		camShake:ShakeOnce(20, 10, 0, 4, 2, 12)
+		camShake:ShakeOnce(120, 0, 0, 2, 1000, 1000)
+	end)
+end
+
+local function CamNear()
+	pcall(function()
+		local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
+		local camera = game.Workspace.CurrentCamera
+		local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+			camera.CFrame = camera.CFrame * shakeCf
+		end)
+		camShake:Start()
+		camShake:ShakeOnce(40, 20, 0, 2, 2, 12)
 	end)
 end
 
@@ -329,6 +502,7 @@ task.spawn(function()
 	local latestVal = ReplicatedStorage.GameData.LatestRoom.Value
 	local currentRoomIndex = math.max(0, latestVal - 4)
 	local isFirstSpawn = true
+	local distance = (Silence.Position - HRP.Position).Magnitude
 
 	while Kill do
 		if isChasing then break end
@@ -340,7 +514,7 @@ task.spawn(function()
 			local entrance = roomObj:WaitForChild("RoomEntrance", 2) or roomObj.PrimaryPart
 
 			if entrance then
-				Silence.CFrame = entrance.CFrame * CFrame.new(0, 30, -35)
+				Silence.CFrame = entrance.CFrame * CFrame.new(0, 70, -35)
 				ApplyPurpleTextureToRoom(roomObj)
 				githubSound:Play()
 				distantSound:Play()
@@ -351,7 +525,7 @@ task.spawn(function()
 					{ CFrame = entrance.CFrame * CFrame.new(0, 2, -35) }
 				)
 				tweenDown:Play()
-				
+
 				task.spawn(function()
 					light.Range = 150
 					TweenService:Create(light, TweenInfo.new(1, Enum.EasingStyle.Linear), { Range = 0 }):Play()
@@ -359,28 +533,30 @@ task.spawn(function()
 
 				if isFirstSpawn then
 					isFirstSpawn = false
-					task.spawn(TriggerCameraShake)
+					task.spawn(CamNear)
 					task.spawn(PlayStaticJumpscareUI)
 				else
-					task.spawn(TriggerCameraShake)
+					task.spawn(CamNear)
 				end
 
-				local targetMaxRoom = ReplicatedStorage.GameData.LatestRoom.Value
-				local stayTime = (currentRoomIndex >= targetMaxRoom) and 6 or 3
+
+				local targetMaxRoom = ReplicatedStorage.GameData.LatestRoom.Value + 1
+				local targetMaxRoomActually = ReplicatedStorage.GameData.LatestRoom.Value
+				local stayTime = (currentRoomIndex >= targetMaxRoomActually) and 7 or 2
 
 				local elapsed = 0
 				while elapsed < stayTime and Kill and not isChasing do
 					task.wait(0.5)
 					elapsed = elapsed + 0.5
-					targetMaxRoom = ReplicatedStorage.GameData.LatestRoom.Value
+					targetMaxRoom = ReplicatedStorage.GameData.LatestRoom.Value + 1 
 				end
 
-				targetMaxRoom = ReplicatedStorage.GameData.LatestRoom.Value
+				targetMaxRoom = ReplicatedStorage.GameData.LatestRoom.Value + 1 
 				if currentRoomIndex < targetMaxRoom and Kill and not isChasing then
 					local tweenUp = TweenService:Create(
 						Silence,
 						TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-						{ CFrame = entrance.CFrame * CFrame.new(0, 30, -35) }
+						{ CFrame = entrance.CFrame * CFrame.new(0, 70, -35) }
 					)
 					tweenUp:Play()
 					tweenUp.Completed:Wait()
@@ -393,7 +569,7 @@ task.spawn(function()
 			end
 		else
 			task.wait(0.5)
-			if currentRoomIndex > ReplicatedStorage.GameData.LatestRoom.Value then
+			if currentRoomIndex > ReplicatedStorage.GameData.LatestRoom.Value  then
 				break
 			end
 		end
@@ -571,7 +747,7 @@ local function StartChaseSequence()
 				currentChaseTween:Cancel()
 				currentChaseTween = nil
 			end
-			
+
 			if Silence and Silence.Parent then
 				Silence.Anchored = true
 			end
@@ -617,7 +793,7 @@ local function StartChaseSequence()
 
 				-- ÐI?U KI?N TIÊU DI?T: L?i g?n player (<= 9 studs) HO?C di chuy?n trong phòng mà không cúi
 				local movedUncrouchedInRoom = IsPlayerInRoom(activeRoom) and not Character:GetAttribute("Crouching") and (currentPos - lastPos).Magnitude > 0.3
-				
+
 				if distance <= 9 or movedUncrouchedInRoom then
 					Humanoid.Health = 0
 
