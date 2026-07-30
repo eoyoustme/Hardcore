@@ -75,8 +75,8 @@ darkScreen.Parent = screenGui
 local sprinting = false
 local maxStamina = 100
 local currentStamina = maxStamina
-local staminaRegenRate = 20
-local staminaDrainRate = 18
+local staminaRegenRate = 7
+local staminaDrainRate = 10
 local canSprint = true
 
 local function updateSprintBar()
