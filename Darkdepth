@@ -1,86 +1,88 @@
 task.spawn(function()
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
-local Debris = game:GetService("Debris")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local Players = game:GetService("Players")
+	local RunService = game:GetService("RunService")
+	local TweenService = game:GetService("TweenService")
+	local Lighting = game:GetService("Lighting")
+	local Debris = game:GetService("Debris")
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local LocalPlayer = Players.LocalPlayer
+	local LocalPlayer = Players.LocalPlayer
 
--- ==========================================
--- 1. TẠO GIAO DIỆN HÌNH ẢNH (UI EFFECT)
--- ==========================================
-task.spawn(function()
-	local screenGui = Instance.new("ScreenGui")
-	screenGui.Name = "Aihoi"
-	screenGui.IgnoreGuiInset = true
-	screenGui.DisplayOrder = 999999
-	screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+	-- ==========================================
+	-- 1. TẠO GIAO DIỆN HÌNH ẢNH (UI EFFECT)
+	-- ==========================================
+	task.spawn(function()
+		local screenGui = Instance.new("ScreenGui")
+		screenGui.Name = "Aihoi"
+		screenGui.IgnoreGuiInset = true
+		screenGui.DisplayOrder = 999999
+		screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
-	local imageLabel = Instance.new("ImageLabel")
-	imageLabel.BackgroundTransparency = 1
-	imageLabel.BorderSizePixel = 0
-	imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-	imageLabel.Position = UDim2.new(0.5, 0, 0.206, 0)
-	imageLabel.Size = UDim2.new(0, 300, 0, 300)
-	imageLabel.ScaleType = Enum.ScaleType.Stretch
-	imageLabel.ImageTransparency = 1
-	imageLabel.Image = "rbxassetid://97049603586965"
-	imageLabel.Visible = true
-	imageLabel.Parent = screenGui
+		local imageLabel = Instance.new("ImageLabel")
+		imageLabel.BackgroundTransparency = 1
+		imageLabel.BorderSizePixel = 0
+		imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+		imageLabel.Position = UDim2.new(0.5, 0, 0.206, 0)
+		imageLabel.Size = UDim2.new(0, 300, 0, 300)
+		imageLabel.ScaleType = Enum.ScaleType.Stretch
+		imageLabel.ImageTransparency = 1
+		imageLabel.Image = "rbxassetid://97049603586965"
+		imageLabel.Visible = true
+		imageLabel.Parent = screenGui
 
-	-- Hiện hình ảnh
-	TweenService:Create(imageLabel, TweenInfo.new(1), {ImageTransparency = 0}):Play()
-	task.wait(14)
+		-- Hiện hình ảnh
+		TweenService:Create(imageLabel, TweenInfo.new(1), {ImageTransparency = 0}):Play()
+		task.wait(14)
 
-	-- Ẩn hình ảnh và hủy UI
-	TweenService:Create(imageLabel, TweenInfo.new(1), {ImageTransparency = 1}):Play()
-	task.wait(1)
-	screenGui:Destroy()
-end)
+		-- Ẩn hình ảnh và hủy UI
+		TweenService:Create(imageLabel, TweenInfo.new(1), {ImageTransparency = 1}):Play()
+		task.wait(1)
+		screenGui:Destroy()
+	end)
 
-local function shatterRoomLights(targetFolder)
-	targetFolder = targetFolder or workspace
+	-- ==========================================
+	-- 2. HỆ THỐNG ĐÈN VỠ KHI VÀO PHÒNG MỚI
+	-- ==========================================
+	local function shatterRoomLights(targetFolder)
+		targetFolder = targetFolder or workspace
 
-	-- 1. Cho đèn nhấp nháy trước khi vỡ
-	for i = 1, 8 do
-		Lighting.Brightness = math.random(-2, 1)
-		task.wait(math.random(3, 10) / 1000)
+		-- 1. Cho đèn nhấp nháy trước khi vỡ
+		for i = 1, 8 do
+			Lighting.Brightness = math.random(-2, 1)
+			task.wait(math.random(3, 10) / 1000)
+		end
+
+		-- 2. Tối đen Lighting
+		TweenService:Create(Lighting, TweenInfo.new(0.5), {
+			Ambient = Color3.new(0, 0, 0),
+			Brightness = -2,
+			FogStart = 20,
+			FogEnd = 50,
+			FogColor = Color3.new(0, 0, 0)
+		}):Play()
+
+		-- 3. Phát âm thanh vỡ bóng đèn
+		local glassBreakSound = Instance.new("Sound")
+		glassBreakSound.SoundId = "rbxassetid://9114223179"
+		glassBreakSound.Volume = 2.5
+		glassBreakSound.PlaybackSpeed = math.random(90, 110) / 100
+		glassBreakSound.Parent = workspace
+		glassBreakSound:Play()
+		Debris:AddItem(glassBreakSound, 3)
+
+		-- 4. Tắt toàn bộ nguồn sáng trong phòng
+		for _, obj in ipairs(targetFolder:GetDescendants()) do
+			if obj:IsA("Light") then
+				obj.Enabled = false
+			end
+			if obj:IsA("BasePart") and obj.Material == Enum.Material.Neon then
+				obj.Material = Enum.Material.SmoothPlastic
+				obj.Color = Color3.fromRGB(7, 7, 7)
+			end
+		end
 	end
 
-	-- 2. Tối đen Lighting
-	TweenService:Create(Lighting, TweenInfo.new(0.5), {
-		Ambient = Color3.new(0, 0, 0),
-		Brightness = -2,
-		FogStart = 20,
-		FogEnd = 50,
-		FogColor = Color3.new(0, 0, 0)
-	}):Play()
-
-	-- 3. Phát âm thanh vỡ bóng đèn
-	local glassBreakSound = Instance.new("Sound")
-	glassBreakSound.SoundId = "rbxassetid://9114223179"
-	glassBreakSound.Volume = 2.5
-	glassBreakSound.PlaybackSpeed = math.random(90, 110) / 100
-	glassBreakSound.Parent = workspace
-	glassBreakSound:Play()
-	Debris:AddItem(glassBreakSound, 3)
-
-	-- 4. Tắt toàn bộ nguồn sáng trong phòng
-	for _, obj in ipairs(targetFolder:GetDescendants()) do
-		if obj:IsA("Light") then
-			obj.Enabled = false
-		end
-		if obj:IsA("BasePart") and obj.Material == Enum.Material.Neon then
-			obj.Material = Enum.Material.SmoothPlastic
-			obj.Color = Color3.fromRGB(7, 7, 7)
-		end
-	end
-end
-
--- Lắng nghe sự kiện mở phòng mới
-task.spawn(function()
+	-- Lắng nghe sự kiện mở phòng mới để vỡ đèn
 	local gameData = ReplicatedStorage:WaitForChild("GameData", 15)
 	if gameData then
 		local latestRoom = gameData:WaitForChild("LatestRoom", 15)
@@ -92,74 +94,100 @@ task.spawn(function()
 			end)
 		end
 	end
-end)
 
--- ==========================================
--- 3. HỆ THỐNG SPAWN ENTITY (A-90, Dread, A-200)
--- ==========================================
-local entityList = {
-	{
-		name = "A-90",
-		url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/A901",
-		chance = 9
-	},
-	{
-		name = "Dread",
-		url = "https://raw.githubusercontent.com/eoyoustme/Impossible/refs/heads/main/Dread",
-		chance = 6
-	},
-	{
-		name = "A-200",
-		url = "https://raw.githubusercontent.com/eoyoustme/Impossible/refs/heads/main/A-200",
-		chance = 2
-	}
-}
-
-local function rollChance(percent)
-	return math.random(1, 100) <= percent
-end
-
-local function spawnEntity(entityData)
-	pcall(function()
-		loadstring(game:HttpGet(entityData.url))()
-	end)
-end
-
--- Kiểm tra xem Seek có đang xuất hiện không (Đã tối ưu tránh lag)
-local function IsSeekActive()
-	local currentRooms = workspace:FindFirstChild("CurrentRooms")
-	local namesToCheck = { "Seek", "SeekMoving", "SeekMovingNewClone", "SeekEntity", "SeekDoor" }
-
-	for _, name in ipairs(namesToCheck) do
-		if workspace:FindFirstChild(name) or (currentRooms and currentRooms:FindFirstChild(name, true)) then
-			return true
+	-- ==========================================
+	-- 3. HỆ THỐNG SPAWN ENTITY MULTIPLAYER (SEED-BASED)
+	-- ==========================================
+	local seed = 12345
+	if gameData then
+		local seedVal = gameData:FindFirstChild("GameSeed")
+		if seedVal and seedVal:IsA("ValueBase") then
+			seed = seedVal.Value
+		elseif gameData:GetAttribute("GameSeed") then
+			seed = gameData:GetAttribute("GameSeed")
 		end
 	end
 
-	if currentRooms then
-		for _, room in ipairs(currentRooms:GetChildren()) do
-			if room:FindFirstChild("SeekTrigger") or room:FindFirstChild("Seek_Rig") then
+	local entityList = {
+		{
+			name = "A-90",
+			url = "https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/A901",
+			chance = 9
+		},
+		{
+			name = "Dread",
+			url = "https://raw.githubusercontent.com/eoyoustme/Impossible/refs/heads/main/Dread",
+			chance = 6
+		},
+		{
+			name = "A-200",
+			url = "https://raw.githubusercontent.com/eoyoustme/Impossible/refs/heads/main/A-200",
+			chance = 2
+		}
+	}
+
+	-- Kiểm tra xem Seek có đang xuất hiện không
+	local function IsSeekActive()
+		local currentRooms = workspace:FindFirstChild("CurrentRooms")
+		local namesToCheck = { "Seek", "SeekMoving", "SeekMovingNewClone", "SeekEntity", "SeekDoor" }
+
+		for _, name in ipairs(namesToCheck) do
+			if workspace:FindFirstChild(name) or (currentRooms and currentRooms:FindFirstChild(name, true)) then
 				return true
 			end
 		end
-	end
 
-	return false
-end
-
-task.spawn(function()
-	while true do
-		task.wait(10)
-
-		if not IsSeekActive() then
-			for _, entityData in ipairs(entityList) do
-				if rollChance(entityData.chance) then
-					task.spawn(function()
-						spawnEntity(entityData)
-					end)
+		if currentRooms then
+			for _, room in ipairs(currentRooms:GetChildren()) do
+				if room:FindFirstChild("SeekTrigger") or room:FindFirstChild("Seek_Rig") then
+					return true
 				end
 			end
 		end
+
+		return false
 	end
-end)
+
+	local checkedRooms = {}
+
+	local function checkAndSpawnEntity(roomNum)
+		if IsSeekActive() then return end
+		if checkedRooms[roomNum] then return end
+		checkedRooms[roomNum] = true
+
+		for idx, entity in ipairs(entityList) do
+			task.wait(3) -- Khoảng chờ giữa các lượt check để tránh spawn đè lên nhau cùng lúc
+			if IsSeekActive() then break end
+
+			-- Tạo Seed RNG đồng bộ cho mọi người chơi trong phòng này
+			local roomRNG = Random.new(seed + (roomNum * 1000) + (idx * 50))
+			local roll = roomRNG:NextNumber(0, 100)
+
+			if roll <= entity.chance then
+				task.spawn(function()
+					pcall(function()
+						loadstring(game:HttpGet(entity.url))()
+					end)
+				end)
+			end
+		end
+	end
+
+	-- Lắng nghe chuyển phòng để tính toán spawn Entity theo Seed
+	if gameData then
+		local latestRoom = gameData:WaitForChild("LatestRoom", 15)
+		if latestRoom then
+			latestRoom.Changed:Connect(function(newRoom)
+				task.spawn(function()
+					checkAndSpawnEntity(newRoom)
+				end)
+			end)
+
+			if latestRoom.Value > 0 then
+				task.spawn(function()
+					checkAndSpawnEntity(latestRoom.Value)
+				end)
+			end
+		end
+	end
 end)
