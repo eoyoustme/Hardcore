@@ -358,8 +358,8 @@ end
 
 local githubSound = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/sound.ogg?raw=true", "SilenceGithubSound")
 githubSound.Volume = 8
-githubSound.RollOffMinDistance = 100
-githubSound.RollOffMaxDistance = 200
+githubSound.RollOffMinDistance = 50
+githubSound.RollOffMaxDistance = 100
 githubSound.RollOffMode = Enum.RollOffMode.Inverse
 githubSound.Parent = Silence
 
