@@ -1,4 +1,4 @@
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
 local Speed = 12
 local shuold = true
 
@@ -103,7 +103,7 @@ local hrp = Character:WaitForChild("HumanoidRootPart", 5)
 if RoomEntrance then
 	s:PivotTo(RoomEntrance.CFrame)
 elseif hrp then
-	s:PivotTo(hrp.CFrame * CFrame.new(0, 0, -20))
+	s:PivotTo(hrp.CFrame * CFrame.new(0, 0, 100))
 end
 
 -- Vòng lặp di chuyển đuổi theo Player
@@ -215,18 +215,15 @@ task.spawn(function()
 	imageLabel.Parent = screenGui
 
 	local jumpscareImages = {
-		"rbxassetid://134346506410955",
-		"rbxassetid://7578853379",
-		"rbxassetid://103846711769666",
-		"rbxassetid://78199392475572"
-	}
-
+	 "rbxassetid://15813725670", "rbxassetid://15813727511" ,"rbxassetid://15813727319","rbxassetid://15813727319","rbxassetid://15813726972", "rbxassetid://15813726866","rbxassetid://15813726700","rbxassetid://15813726584",
+	"rbxassetid://15813726463",	"rbxassetid://15813726313" }
+	
 	while shuold and screenGui and screenGui.Parent do
 		for _, img in ipairs(jumpscareImages) do
 			if not shuold or not screenGui.Parent then break end
 			imageLabel.Image = img
 			imageLabel.ImageTransparency = math.random(60, 90) / 100
-			task.wait(0.07)
+			task.wait(0.06)
 		end
 	end
 end)
