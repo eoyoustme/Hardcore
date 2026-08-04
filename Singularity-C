@@ -1,0 +1,407 @@
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Debris = game:GetService("Debris")
+local Players = game:GetService("Players")
+
+local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
+local camara = game.Workspace.CurrentCamera
+local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+	camara.CFrame = camara.CFrame * shakeCf
+end)
+
+local function GetRoom()
+	local currentRooms = workspace:FindFirstChild("CurrentRooms")
+	if not currentRooms then return nil end
+
+	local gameData = game.ReplicatedStorage:FindFirstChild("GameData")
+	local latestRoom = gameData and gameData:FindFirstChild("LatestRoom")
+
+	if latestRoom then
+		return currentRooms:FindFirstChild(tostring(latestRoom.Value))
+	end
+	return nil
+end
+
+local singularitysay = "https://github.com/eoyoustme/Impossible/raw/main/Singularity.rbxm"
+
+-- TỰ ĐỘNG TƯƠNG THÍCH HÀM REQUEST CỦA MỖI EXECUTOR
+local httpRequest = (syn and syn.request) or http_request or request or (fluxus and fluxus.request)
+
+function getgithubmodeL(url)
+	if not (writefile and getcustomasset and httpRequest) then return nil end
+	local fileName = string.match(url, "([^/]+)$") or "temp_model.rbxm"
+	local response = httpRequest({Url = url, Method = "GET"})
+	if not response or response.StatusCode ~= 200 then return nil end
+	writefile(fileName, response.Body)
+	local assetId = getcustomasset(fileName)
+
+	local success, result = pcall(function() return game:GetObjects(assetId) end)
+	return success and result or nil
+end
+
+-- Tải Asset an toàn
+local success, assets = pcall(function()
+	return getgithubmodeL(singularitysay)
+end)
+
+if not success or not assets or #assets == 0 then
+	warn("⚠️ Không thể tải được Asset! Kiểm tra lại ID hoặc Executor.")
+	return
+end
+
+local s = assets[1]
+s.Name = "Singularity"
+s.Parent = workspace
+
+local entity = s:FindFirstChild("Singu") or s
+if not entity then
+	warn("⚠️ Không tìm thấy 'Singu' trong Asset!")
+	s:Destroy()
+	return
+end
+
+local room = GetRoom()
+if not room then
+	warn("⚠️ Không tìm thấy phòng hiện tại!")
+	s:Destroy()
+	return
+end
+
+-- Tìm vị trí Wardrobe/Door
+local wardrobe = room and room:WaitForChild("DoorNormal", 5)
+local wardrobeMain = wardrobe and wardrobe:WaitForChild("Door", 5)
+
+if not wardrobeMain then
+	warn("⚠️ Không tìm thấy vị trí 'Door'!")
+	s:Destroy()
+	return
+end
+
+-- Dịch chuyển Entity đến vị trí cửa/tủ
+-- Nhân thêm CFrame.new(0, 0, -6) để tạo khoảng cách offset 6 studs
+local spawnCFrame = wardrobeMain.CFrame * CFrame.new(0, 0, -6)
+
+if entity:IsA("Model") then
+	entity:PivotTo(spawnCFrame)
+else
+	entity.CFrame = spawnCFrame
+end
+
+-- Hàm phát âm thanh
+local function playSound(soundName)
+	local sound = entity:FindFirstChild(soundName, true) or s:FindFirstChild(soundName, true)
+	if sound and sound:IsA("Sound") then
+		sound:Play()
+	end
+end
+
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hum = char:WaitForChild("Humanoid", 5)
+local hrp = char:WaitForChild("HumanoidRootPart", 5)
+local camera = workspace.CurrentCamera
+
+if not hrp or not hum then
+	warn("⚠️ Không tìm thấy nhân vật!")
+	s:Destroy()
+	return
+end
+
+-- TẢI ÂM THANH TỪ GITHUB
+task.spawn(function()
+	local function GetGitSound(GithubSnd, SoundName)
+		if not isfile(SoundName .. ".mp3") then
+			writefile(SoundName .. ".mp3", game:HttpGet(GithubSnd))
+		end
+		local sound = Instance.new("Sound")
+		sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+		return sound
+	end
+
+	-- Sound 1
+	local blueSound = entity:FindFirstChild("evil scream", true)
+	if blueSound then
+		local gitSoundTemp = GetGitSound("https://github.com/eoyoustme/Impossible/blob/main/singulingi%20scream%203.mp3?raw=true", "singularityentived")
+		blueSound.SoundId = gitSoundTemp.SoundId
+	end
+
+	-- Sound 2
+	local blueSound5 = entity:FindFirstChild("roa", true)
+	if blueSound5 then
+		local gitSoundTemp5 = GetGitSound("https://github.com/eoyoustme/Impossible/blob/main/singularity%20activated.mp3?raw=true", "Singularitycrykid")
+		blueSound5.SoundId = gitSoundTemp5.SoundId
+	end
+end)
+
+-- HÀM TẠO CHỮ ĐỎ GLITCH
+local function createRedGlitchText(textString)
+	local playerGui = player:FindFirstChild("PlayerGui")
+	if not playerGui then return end
+
+	local sg = Instance.new("ScreenGui")
+	sg.Name = "SingularityTextEffect"
+	sg.ResetOnSpawn = false
+	sg.Parent = playerGui
+
+	local txt = Instance.new("TextLabel")
+	txt.Size = UDim2.new(1, 0, 0.25, 0)
+	txt.Position = UDim2.new(0, 0, 0.38, 0)
+	txt.BackgroundTransparency = 1
+	txt.Text = textString or "INSERT YOUR FLASHING TEXT HERE"
+	txt.TextColor3 = Color3.fromRGB(255, 255, 255)
+	txt.TextStrokeColor3 = Color3.fromRGB(80, 0, 0)
+	txt.TextStrokeTransparency = 0
+	txt.TextScaled = true
+	txt.Font = Enum.Font.SourceSansBold
+	txt.Parent = sg
+
+	task.spawn(function()
+		for i = 1, 15 do
+			txt.Position = UDim2.new(0, math.random(-8, 8), 0.38, math.random(-4, 4))
+			txt.TextTransparency = math.random(0, 2) / 10
+			task.wait(0.04)
+		end
+		txt.Position = UDim2.new(0, 0, 0.38, 0)
+		txt.TextTransparency = 0
+	end)
+
+	Debris:AddItem(sg, 2.5)
+end
+
+-- VÒNG LẶP KIỂM TRA MỞ CỬA
+while true do
+	if not hrp or not hrp.Parent or not entity or not entity.Parent or not wardrobe or not wardrobe.Parent then
+		s:Destroy()
+		return
+	end
+
+	if wardrobe:GetAttribute("IsOpenDoor") == true then
+		break
+	end
+
+	task.wait(0.05)
+end
+
+-- KÍCH HOẠT CHẾ ĐỘ TẤN CÔNG
+playSound("Scare")
+playSound("caught")
+playSound("ScreamingInPublicBathroomsPrank")
+playSound("roa")
+playSound("evil scream")
+
+local function resetSoundTime(soundName)
+	local snd = entity:FindFirstChild(soundName, true) or s:FindFirstChild(soundName, true)
+	if snd and snd:IsA("Sound") then
+		snd.TimePosition = 0
+	end
+end
+
+resetSoundTime("caught")
+resetSoundTime("Scare")
+resetSoundTime("ScreamingInPublicBathroomsPrank")
+
+task.wait(1.5)
+
+if hum and hrp and entity and entity.Parent then
+	local entityPos = entity:IsA("Model") and entity:GetPivot().Position or entity.Position
+	local targetCFrame = entity:IsA("Model") and entity:GetPivot() or entity.CFrame
+
+	local targets = {}
+	local processedModels = {}
+	local processedParts = {}
+
+	local playerDistance = (hrp.Position - entityPos).Magnitude
+
+	-- CHỈ XUẤT HIỆN KHI Ở TRONG VÙNG 25 STUDS
+	if playerDistance <= 25 then
+		createRedGlitchText("")
+	end
+
+	-- 1. QUÉT PLAYER TRONG BÁN KÍNH 35 STUDS
+	if playerDistance <= 35 then
+		table.insert(targets, {
+			instance = hrp,
+			distance = playerDistance,
+			isModel = false,
+			isPlayer = true
+		})
+	end
+
+	-- 2. QUÉT ĐỒ VẬT XUNG QUANH
+	local overlapParams = OverlapParams.new()
+	overlapParams.FilterType = Enum.RaycastFilterType.Exclude
+	overlapParams.FilterDescendantsInstances = {s, char}
+
+	local nearbyParts = workspace:GetPartBoundsInRadius(entityPos, 60, overlapParams)
+
+	for _, part in ipairs(nearbyParts) do
+		local nameLower = string.lower(part.Name)
+		if nameLower:find("floor") or nameLower:find("wall") or nameLower:find("keyhitbox") or nameLower:find("door") or part.Locked then
+			continue
+		end
+
+		local parent = part.Parent
+		if parent and parent:IsA("Model") and parent ~= workspace then
+			if not processedModels[parent] then
+				processedModels[parent] = true
+				local modelPos = parent:GetPivot().Position
+				local dist = (modelPos - entityPos).Magnitude
+				table.insert(targets, {instance = parent, distance = dist, isModel = true, isPlayer = false})
+			end
+		else
+			if not processedParts[part] then
+				processedParts[part] = true
+				local dist = (part.Position - entityPos).Magnitude
+				table.insert(targets, {instance = part, distance = dist, isModel = false, isPlayer = false})
+			end
+		end
+	end
+
+	table.sort(targets, function(a, b) return a.distance < b.distance end)
+
+	local maxPull = math.min(#targets, 6)
+	local instancesToDestroy = {}
+
+	local chainStart1 = entity:FindFirstChild("ChainStart", true) or s:FindFirstChild("ChainStart", true)
+
+	local templateChains = {}
+	if chainStart1 and chainStart1:FindFirstChild("SingularityChain") then
+		table.insert(templateChains, {origin = chainStart1, beam = chainStart1.SingularityChain})
+	end
+
+	local createdBeams = {}
+	local createdAttachments = {}
+	local playerChained = false
+
+	-- 3. BẮN MỖI DÂY XÍCH CÁCH NHAU 0.5 GIÂY
+	for i = 1, maxPull do
+		local target = targets[i]
+		local targetPart = nil
+
+		if target.isPlayer then
+			playerChained = true
+			targetPart = target.instance
+			targetPart.Anchored = true
+		elseif target.isModel then
+			targetPart = target.instance.PrimaryPart or target.instance:FindFirstChildWhichIsA("BasePart", true)
+			table.insert(instancesToDestroy, target.instance)
+		else
+			targetPart = target.instance
+			table.insert(instancesToDestroy, target.instance)
+		end
+
+		if targetPart and #templateChains > 0 then
+			camShake:Start()
+			camShake:ShakeOnce(10, 3, 0.1, 0.5, 2, 0.5)
+			local targetAtt = Instance.new("Attachment")
+			targetAtt.Name = "SingularityChainTargetAtt"
+			targetAtt.Parent = targetPart
+			table.insert(createdAttachments, targetAtt)
+
+			local template = templateChains[((i - 1) % #templateChains) + 1]
+			local originAtt = template.origin:IsA("Attachment") and template.origin or template.origin:FindFirstChildWhichIsA("Attachment")
+
+			if not originAtt then
+				originAtt = Instance.new("Attachment")
+				originAtt.Name = "SingularityChainOriginAtt"
+				originAtt.Parent = template.origin
+				table.insert(createdAttachments, originAtt)
+			end
+
+			local beamToUse
+			if i <= #templateChains then
+				beamToUse = template.beam
+			else
+				beamToUse = template.beam:Clone()
+				beamToUse.Parent = template.origin
+				table.insert(createdBeams, beamToUse)
+			end
+
+			beamToUse.Attachment0 = originAtt
+			beamToUse.Attachment1 = targetAtt
+			beamToUse.Transparency = NumberSequence.new(0)
+			beamToUse.Enabled = true
+
+			playSound("Chained")
+		end
+
+		task.wait(0.5)
+	end
+
+	task.wait(0.3)
+
+	-- 4. TWEEN KÉO VỀ VỊ TRÍ
+	local pullTweenInfo = TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+
+	for i = 1, maxPull do
+		local target = targets[i]
+		if target.isPlayer then
+			local pullCFrame = targetCFrame * CFrame.new(0, 0, -1)
+			TweenService:Create(hrp, pullTweenInfo, {CFrame = pullCFrame}):Play()
+		elseif target.isModel then
+			for _, p in ipairs(target.instance:GetDescendants()) do
+				if p:IsA("BasePart") then
+					p.Anchored = true
+					p.CanCollide = false
+					TweenService:Create(p, pullTweenInfo, {CFrame = targetCFrame}):Play()
+				end
+			end
+		else
+			target.instance.Anchored = true
+			target.instance.CanCollide = false
+			TweenService:Create(target.instance, pullTweenInfo, {CFrame = targetCFrame}):Play()
+		end
+	end
+
+	task.wait(0.6)
+
+	-- 5. TRỪ MÁU VÀ DỌN DẸP
+	if playerChained and hum then
+		hum.Health -= 60
+	end
+
+	for _, beam in ipairs(createdBeams) do if beam then beam:Destroy() end end
+	for _, att in ipairs(createdAttachments) do if att then att:Destroy() end end
+	for _, inst in ipairs(instancesToDestroy) do if inst then inst:Destroy() end end
+
+	if playerChained and hrp then
+		hrp.Anchored = false
+	end
+
+	-- MÀN HÌNH ĐỎ ĐỎM
+	local cc = Instance.new("ColorCorrectionEffect", game.Lighting)
+	Debris:AddItem(cc, 8)
+	cc.Name = "Warn"
+	cc.TintColor = Color3.fromRGB(255, 20, 20)
+	cc.Saturation = -0.5
+	cc.Contrast = 0.5
+
+	TweenService:Create(cc, TweenInfo.new(5), {TintColor = Color3.fromRGB(255, 255, 255), Saturation = 0, Contrast = 0}):Play()
+
+	local CameraShakerModule = require(game.ReplicatedStorage:WaitForChild("CameraShaker", 2))
+	if CameraShakerModule and camera then
+		local camShakeInst = CameraShakerModule.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+			camera.CFrame = camera.CFrame * shakeCf
+		end)
+		camShakeInst:Start()
+		camShakeInst:ShakeOnce(35, 8, 0.05, 1.2)
+	end
+
+	playSound("bloood")
+	playSound("gore0")
+	playSound("gore1")
+	playSound("gore2")
+	playSound("gore3")
+
+	local blood = entity:FindFirstChild("Blood", true) or s:FindFirstChild("Blood", true)
+	if blood and blood:IsA("ParticleEmitter") then
+		blood.Enabled = true
+		task.wait(0.9)
+		blood.Enabled = false
+	end
+end
+
+task.wait(2)
+if s and s.Parent then
+	s:Destroy()
+end
