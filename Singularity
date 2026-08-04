@@ -1,4 +1,3 @@
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 local rng = Random.new()
 
 for i = 1, 1 do
