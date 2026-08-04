@@ -366,7 +366,7 @@ if hum and hrp then
 	task.wait(0.5)
 
 	if playerChained and hum then
-		hum.Health = math.max(0, hum.Health - 0)
+		hum.Health = math.max(0, hum.Health - 60)
 	end
 
 	-- Dọn dẹp xích và các Part/Model phụ
