@@ -1,3 +1,4 @@
+
 local function GetRoom()
 	local currentRooms = workspace:FindFirstChild("CurrentRooms")
 	if not currentRooms then return nil end
@@ -6,7 +7,7 @@ local function GetRoom()
 	local latestRoom = gameData and gameData:FindFirstChild("LatestRoom")
 
 	if latestRoom then
-		return currentRooms:FindFirstChild(tostring(latestRoom.Value + 1))
+		return currentRooms:FindFirstChild(tostring(latestRoom.Value +1 ))
 	end
 	return nil
 end
@@ -72,6 +73,21 @@ end
 
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
+local gentity = s.Main
+
+local light = Instance.new("PointLight")
+light.Color = Color3.fromRGB(155, 0, 0)
+light.Range = 0
+light.Brightness = 10
+light.Enabled = true
+light.Parent = gentity
+
+local eyto = entity:FindFirstChild("Scare", true)
+local eyto2 = entity:FindFirstChild("caught", true)
+local eyto3 = entity:FindFirstChild("ScreamingInPublicBathroomsPrank", true)
+local eyto4 = entity:FindFirstChild("roa", true)
+local eyto5 = entity:FindFirstChild("evil scream", true)
+
 local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
 local camara = game.Workspace.CurrentCamera
 local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
@@ -119,6 +135,13 @@ playSound("ScreamingInPublicBathroomsPrank")
 playSound("roa")
 playSound("evil scream")
 
+local TweenService = game:GetService("TweenService")
+
+local tweenInfo = TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+local lightTween = TweenService:Create(light, tweenInfo, { Range = 25 })
+
+lightTween:Play()
+
 local time = entity:FindFirstChild("caught", true)
 if time then time.TimePosition = 0 end
 local time2 = entity:FindFirstChild("Scare", true)
@@ -126,7 +149,9 @@ if time2 then time2.TimePosition = 0 end
 local time3 = entity:FindFirstChild("ScreamingInPublicBathroomsPrank", true)
 if time3 then time3.TimePosition = 0 end
 
-task.wait(1.5)
+wait(1.5)
+
+local TweenService = game:GetService("TweenService")
 
 local player = game.Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
@@ -145,7 +170,7 @@ if hum and hrp then
 
 	-- 1. KIỂM TRA NẾU PLAYER Ở TRONG BÁN KÍNH 25 STUDS -> TÍNH LÀ 1 MỤC TIÊU
 	local playerDistance = (hrp.Position - entityPos).Magnitude
-	if playerDistance <= 25 then
+	if playerDistance <= 15 then
 		table.insert(targets, {
 			instance = hrp,
 			distance = playerDistance,
@@ -261,11 +286,48 @@ if hum and hrp then
 			playSound("Chained")
 		end
 
-		task.wait(0.5)
+		task.wait(0.6)
 	end
+
 
 	-- 4. ĐỜI 1.2 GIÂY SAU KHI ĐỦ XÍCH RỒI MỚI BẮT ĐẦU KÉO VỀ
 	task.wait(0.8)
+	
+	TweenService:Create(
+		eyto,
+		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
+
+	TweenService:Create(
+		eyto2,
+		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
+
+	TweenService:Create(
+		eyto3,
+		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
+
+	TweenService:Create(
+		eyto4,
+		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
+
+	TweenService:Create(
+		eyto5,
+		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
+	
+	local tweenInfo5 = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+	local lightTween5 = TweenService:Create(light, tweenInfo5, { Range = 25 })
+
+	lightTween5:Play()
+	
 
 	-- Kéo tất cả mục tiêu về phía Entity
 	for i = 1, maxPull do
@@ -273,7 +335,7 @@ if hum and hrp then
 		if target.isPlayer then
 			local tween = TweenService:Create(
 				hrp,
-				TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+				TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
 				{CFrame = targetCFrame}
 			)
 			tween:Play()
@@ -284,7 +346,7 @@ if hum and hrp then
 					p.CanCollide = false
 					TweenService:Create(
 						p, 
-						TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), 
+						TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), 
 						{CFrame = targetCFrame}
 					):Play()
 				end
@@ -294,17 +356,17 @@ if hum and hrp then
 			target.instance.CanCollide = false
 			TweenService:Create(
 				target.instance, 
-				TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), 
+				TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), 
 				{CFrame = targetCFrame}
 			):Play()
 		end
 	end
 
 	-- 5. CHỜ BAY VỀ TỚI MẶT ENTITY (1.2S) RỒI MỚI TRỪ MÁU
-	task.wait(0.45)
+	task.wait(0.5)
 
 	if playerChained and hum then
-		hum.Health = math.max(0, hum.Health - 60)
+		hum.Health = math.max(0, hum.Health - 0)
 	end
 
 	-- Dọn dẹp xích và các Part/Model phụ
@@ -349,15 +411,15 @@ if hum and hrp then
 	camShake:ShakeOnce(30, 6.5, 0.1, 1, 0.1, 0.5)
 
 	playSound("bloood")
-	playSound("gore0")
-	playSound("gore1")
-	playSound("gore2")
-	playSound("gore3")
 
 	if workspace.Singularity.Main.Blood then
 		workspace.Singularity.Main.Blood.Enabled = true
 		task.wait(0.9)
 		workspace.Singularity.Main.Blood.Enabled = false
+		playSound("gore0")
+		playSound("gore1")
+		playSound("gore2")
+		playSound("gore3")
 	end
 end
 
