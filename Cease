@@ -1,4 +1,13 @@
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+function GetGitSound(GithubSnd,SoundName)
+	local url=GithubSnd
+	if not isfile(SoundName..".mp3") then
+		writefile(SoundName..".mp3", game:HttpGet(url))
+	end
+	local sound=Instance.new("Sound")
+	sound.SoundId=(getcustomasset or getsynasset)(SoundName..".mp3")
+	return sound
+end
 
 local Tweenservice = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -119,14 +128,8 @@ entity:SetCallback("OnSpawned", function()
 					-- Xử lý khi người chơi di chuyển trong tầm nhìn
 					if isMovingByInput and isMovingByVelocity and humanoid.Health > 0 then
 						humanoid.Health = 0
-
-						local sound = Instance.new("Sound")
-						sound.SoundId = "rbxassetid://4988621968"
-						sound.Volume = 10
-						sound.PlaybackSpeed = 0.7
-						sound.Parent = workspace
-						sound:Play()
-						game:GetService("Debris"):AddItem(sound, 5)
+						
+						ceaseModel.HSUR.Kill:Play()
 
 						print(player.Name .. " bị Cease giết vì di chuyển!")
 
@@ -158,11 +161,12 @@ entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 		local entityRoot = entityModel and (entityModel:FindFirstChild("HumanoidRootPart") or entityModel:FindFirstChildWhichIsA("BasePart"))
 
 		if entityModel then
-			local repentSound = entityModel:FindFirstChild("Repent", true)
-			if repentSound and repentSound:IsA("Sound") then
-				repentSound:Play()
-				repentSound.Volume = 1
-			end
+			local move = GetGitSound("https://github.com/eoyoustme/Custom-Entity/blob/main/TAILOC.mp3?raw=true","tailocdeolon")
+			move.Parent = workspace
+			move.Name = "tailoc"
+			move.Volume = 3
+			move:Play()
+			move.Ended:Connect(function() move:Destroy() end)
 		end
 
 		if entityModel and entityModel.Parent and entityRoot then
@@ -178,7 +182,7 @@ entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 				end
 			end)
 
-			task.wait(5)
+			task.wait(3)
 
 			if freezeConnection then
 				freezeConnection:Disconnect()
