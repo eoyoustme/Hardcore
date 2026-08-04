@@ -78,13 +78,20 @@ local currentStamina = maxStamina
 local staminaRegenRate
 local staminaDrainRate
 
-if LocalPlayer:GetAttributes("Charm") == "PureLaziness" then
-	staminaDrainRate = 4
-	staminaRegenRate = 10
-elseif not (LocalPlayer:GetAttributes("Charm") == "PureLaziness") then
-	staminaDrainRate = 10
-	staminaRegenRate = 7
+local function updateStaminaRates()
+	if LocalPlayer:GetAttribute("Charm") == "PureLaziness" then
+		staminaDrainRate = 4
+		staminaRegenRate = 10
+	else
+		staminaDrainRate = 10
+		staminaRegenRate = 7
+	end
 end
+
+updateStaminaRates()
+
+LocalPlayer:GetAttributeChangedSignal("Charm"):Connect(updateStaminaRates)
+
 local canSprint = true
 
 local function updateSprintBar()
