@@ -2,18 +2,19 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
+local hrp = character:WaitForChild("HumanoidRootPart")
 
 local function spawnShocker()
 	local shockerModel = game:GetObjects("rbxassetid://90250291645240")[1]
 	local camera = Workspace.CurrentCamera
 
-	local rootPart = shockerModel:FindFirstChild("HumanoidRootPart") or shockerModel:FindFirstChildWhichIsA("Part")
+	local rootPart = shockerModel:FindFirstChild("HumanoidRootPart") or shockerModel:FindFirstChildWhichIsA("BasePart")
 	shockerModel.PrimaryPart = rootPart
-	shockerModel:SetPrimaryPartCFrame(camera.CFrame * CFrame.new(0, -1, -11))
 	shockerModel.Parent = Workspace
 
 	local oogaBoogaaPart = shockerModel:WaitForChild("Base")
@@ -21,88 +22,82 @@ local function spawnShocker()
 	local sb = oogaBoogaaPart:WaitForChild("PlaySound")
 	local sb2 = oogaBoogaaPart:WaitForChild("Repent")
 
-	local lookDuration = 2
-	local lookStart = nil
-	local hasTriggered = false
-	local hasFallen = false
+	sb.Volume = 1.5
+	sb:Play()
+	sb2:Play()
 
-	local function fallToGround()
-		if hasFallen then return end
-		hasFallen = true
+	local followConnection
+	local startTime = tick()
 
-		oogaBoogaaPart.Anchored = false
-		oogaBoogaaPart.CanCollide = false
-
-		task.delay(1.2, function()
-			if shockerModel then
-				shockerModel:Destroy()
+	followConnection = RunService.RenderStepped:Connect(function()
+		if tick() - startTime < 2 then
+			local targetCFrame = camera.CFrame * CFrame.new(0, 0, -20)
+			shockerModel:PivotTo(CFrame.lookAt(targetCFrame.Position, camera.CFrame.Position))
+		else
+			if followConnection then
+				followConnection:Disconnect()
 			end
-		end)
-	end
+		end
+	end)
 
-	local connection
-	connection = game:GetService("RunService").RenderStepped:Connect(function()
-		if not character or not character:FindFirstChild("HumanoidRootPart") then return end
-		if hasTriggered then connection:Disconnect() return end
+	task.wait(2)
 
-		local directionToShocker = (oogaBoogaaPart.Position - camera.CFrame.Position).Unit
-		local playerLookVector = camera.CFrame.LookVector
-		local dot = directionToShocker:Dot(playerLookVector)
-		sb.Volume = 1.5
-		sb:Play()
-		sb2:Play()
+	sb:Stop()
+	sb2:Stop()
+	horrorScream:Play()
 
-		if dot > 0.05 then
-			-- Đang nhìn
-			if not lookStart then
-				lookStart = tick()
-			elseif tick() - lookStart >= lookDuration then
-				hasTriggered = true
-				connection:Disconnect()
+	local startPos = rootPart.Position
+	local targetDirection = (hrp.Position - startPos).Unit
+	local endPos = startPos + (targetDirection * 70)
 
-				horrorScream:Play()
-				humanoid:TakeDamage(30)
+	local dashInfo = TweenInfo.new(1.8, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+	local dashTween = TweenService:Create(rootPart, dashInfo, {
+		CFrame = CFrame.lookAt(endPos, endPos + targetDirection)
+	})
 
-				-- Tween lao tới player
-				local targetPos = character.HumanoidRootPart.Position + Vector3.new(0, 0, 0)
-				local tweenInfo = TweenInfo.new(1.2, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
-				local tween = TweenService:Create(oogaBoogaaPart, tweenInfo, {Position = targetPos})
-				tween:Play()
+	local hitConnection
+	local hasHit = false
 
-				tween.Completed:Connect(function()
-					wait(1)
-					fallToGround()
-				end)
+	hitConnection = RunService.RenderStepped:Connect(function()
+		if hasHit or not hrp then return end
 
-				-- Death message
+		local distance = (rootPart.Position - hrp.Position).Magnitude
+		if distance <= 4.5 then 
+			hasHit = true
+			humanoid:TakeDamage(30)
+
+			pcall(function()
 				ReplicatedStorage.GameStats["Player_".. player.Name].Total.DeathCause.Value = "Shocker"
 				firesignal(ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {
-					"You died to who you call Shocker...",
-					"Don't look at it or it stuns you!"
+					"You encountered Shocker...",
+					"Dodge out of its path when it charges!"
 				}, "Blue")
-			end
-		else
-			-- Không nhìn → ngã luôn
-			connection:Disconnect()
-			fallToGround()
+			end)
 		end
 	end)
 
-	-- Dự phòng
+	dashTween:Play()
+
+	dashTween.Completed:Connect(function()
+		if hitConnection then hitConnection:Disconnect() end
+	end)
+
 	task.delay(5, function()
-		if not hasTriggered and not hasFallen then
-			fallToGround()
+		if hitConnection then hitConnection:Disconnect() end
+		if shockerModel and shockerModel.Parent then
+			shockerModel:Destroy()
 		end
 	end)
 
-	-- Achievement
-	local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
-	achievementGiver({
-		Title = "Shocking Experience",
-		Desc = "Look at me.",
-		Reason = "Encounter Shocker.",
-		Image = "rbxassetid://17857830685"
-	})
+	pcall(function()
+		local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
+		achievementGiver({
+			Title = "Shocking Experience",
+			Desc = "Look at me.",
+			Reason = "Encounter Shocker.",
+			Image = "rbxassetid://17857830685"
+		})
+	end)
 end
 
 spawnShocker()
