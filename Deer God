@@ -2,6 +2,7 @@
 local Speed = 12
 local shuold = true
 
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -62,12 +63,35 @@ if Lord then
 	Lord:Play()
 end
 
+local caption5 = nil
+local caption2 = nil
+
 -- Hiện Caption thông báo
 if caption then
 	caption.TextColor3 = Color3.fromRGB(117, 0, 175)
-	task.spawn(function()
+	caption5 = task.spawn(function()
 		caption.TextTransparency = 0
 		caption.Visible = true
+		local RunService = game:GetService("RunService")
+
+		local validFonts = {}
+		for _, fontEnum in Enum.Font:GetEnumItems() do
+			if fontEnum ~= Enum.Font.Unknown then
+				table.insert(validFonts, fontEnum)
+			end
+		end
+
+		local connection
+		connection = RunService.RenderStepped:Connect(function()
+			if not (caption and caption.Parent) then
+				connection:Disconnect()
+				return
+			end
+
+			local randomFont = validFonts[math.random(1, #validFonts)]
+			caption.Font = randomFont
+			wait(0.05)
+		end)
 		caption.Text = "You Being Followed..."
 
 		local info = TweenInfo.new(5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
@@ -215,9 +239,9 @@ task.spawn(function()
 	imageLabel.Parent = screenGui
 
 	local jumpscareImages = {
-	 "rbxassetid://15813725670", "rbxassetid://15813727511" ,"rbxassetid://15813727319","rbxassetid://15813727319","rbxassetid://15813726972", "rbxassetid://15813726866","rbxassetid://15813726700","rbxassetid://15813726584",
-	"rbxassetid://15813726463",	"rbxassetid://15813726313" }
-	
+		"rbxassetid://15813725670", "rbxassetid://15813727511" ,"rbxassetid://15813727319","rbxassetid://15813727319","rbxassetid://15813726972", "rbxassetid://15813726866","rbxassetid://15813726700","rbxassetid://15813726584",
+		"rbxassetid://15813726463",	"rbxassetid://15813726313" }
+
 	while shuold and screenGui and screenGui.Parent do
 		for _, img in ipairs(jumpscareImages) do
 			if not shuold or not screenGui.Parent then break end
@@ -244,10 +268,32 @@ task.spawn(function()
 		local chosen = dialogs[math.random(#dialogs)]
 
 		if caption then
+			caption2 = task.spawn(function()
+			local RunService = game:GetService("RunService")
+
+			local validFonts = {}
+			for _, fontEnum in Enum.Font:GetEnumItems() do
+				if fontEnum ~= Enum.Font.Unknown then
+					table.insert(validFonts, fontEnum)
+				end
+			end
+
+			local connection
+			connection = RunService.RenderStepped:Connect(function()
+				if not (caption and caption.Parent) then
+					connection:Disconnect()
+					return
+				end
+
+				local randomFont = validFonts[math.random(1, #validFonts)]
+				caption.Font = randomFont
+				wait(0.05)
+			end)
+			end)
 			caption.TextTransparency = 0
 			caption.Visible = true
 			caption.Text = chosen.text
-		end
+				end
 
 		local snd = Instance.new("Sound")
 		snd.Volume = 6
@@ -265,6 +311,16 @@ local roomCount = Random.new():NextInteger(5, 10)
 
 for i = 1, roomCount do
 	lastroom.Changed:Wait()
+end
+
+if caption2 then
+	task.cancel(caption2)
+	caption2 = nil
+end
+
+if caption5 then
+	task.cancel(caption5)
+	caption5 = nil
 end
 
 cleanup()
