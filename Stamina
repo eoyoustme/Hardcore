@@ -75,8 +75,16 @@ darkScreen.Parent = screenGui
 local sprinting = false
 local maxStamina = 100
 local currentStamina = maxStamina
-local staminaRegenRate = 7
-local staminaDrainRate = 10
+local staminaRegenRate
+local staminaDrainRate
+
+if LocalPlayer:GetAttributes("Charm") == "PureLaziness" then
+	staminaDrainRate = 4
+	staminaRegenRate = 10
+elseif not (LocalPlayer:GetAttributes("Charm") == "PureLaziness") then
+	staminaDrainRate = 10
+	staminaRegenRate = 7
+end
 local canSprint = true
 
 local function updateSprintBar()
