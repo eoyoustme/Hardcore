@@ -189,6 +189,29 @@ playSound("ScreamingInPublicBathroomsPrank")
 playSound("roa")
 playSound("evil scream")
 
+local gentity = s.Main
+
+local light = Instance.new("PointLight")
+light.Color = Color3.fromRGB(155, 0, 0)
+light.Range = 0
+light.Brightness = 10
+light.Enabled = true
+light.Parent = gentity
+
+local eyto = entity:FindFirstChild("Scare", true)
+local eyto2 = entity:FindFirstChild("caught", true)
+local eyto3 = entity:FindFirstChild("ScreamingInPublicBathroomsPrank", true)
+local eyto4 = entity:FindFirstChild("roa", true)
+local eyto5 = entity:FindFirstChild("evil scream", true)
+
+local TweenService = game:GetService("TweenService")
+
+local tweenInfo = TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+local lightTween = TweenService:Create(light, tweenInfo, { Range = 25 })
+
+lightTween:Play()
+
+
 local function resetSoundTime(soundName)
 	local snd = entity:FindFirstChild(soundName, true) or s:FindFirstChild(soundName, true)
 	if snd and snd:IsA("Sound") then
@@ -328,10 +351,40 @@ if hum and hrp and entity and entity.Parent then
 		task.wait(0.5)
 	end
 
-	task.wait(0.3)
+	task.wait(0.6)
+	
+	TweenService:Create(
+		eyto,
+		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
+
+	TweenService:Create(
+		eyto2,
+		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
+
+	TweenService:Create(
+		eyto3,
+		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
+
+	TweenService:Create(
+		eyto4,
+		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
+
+	TweenService:Create(
+		eyto5,
+		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
 
 	-- 4. TWEEN KÉO VỀ VỊ TRÍ
-	local pullTweenInfo = TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+	local pullTweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
 
 	for i = 1, maxPull do
 		local target = targets[i]
@@ -388,15 +441,15 @@ if hum and hrp and entity and entity.Parent then
 	end
 
 	playSound("bloood")
-	playSound("gore0")
-	playSound("gore1")
-	playSound("gore2")
-	playSound("gore3")
 
 	local blood = entity:FindFirstChild("Blood", true) or s:FindFirstChild("Blood", true)
 	if blood and blood:IsA("ParticleEmitter") then
 		blood.Enabled = true
 		task.wait(0.9)
+		playSound("gore0")
+		playSound("gore1")
+		playSound("gore2")
+		playSound("gore3")
 		blood.Enabled = false
 	end
 end
