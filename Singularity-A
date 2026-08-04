@@ -6,16 +6,11 @@ local function GetRoom()
 	local latestRoom = gameData and gameData:FindFirstChild("LatestRoom")
 
 	if latestRoom then
-		return currentRooms:FindFirstChild(tostring(latestRoom.Value))
+		return currentRooms:FindFirstChild(tostring(latestRoom.Value + 1))
 	end
 	return nil
 end
 
-local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
-local camara = game.Workspace.CurrentCamera
-local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-	camara.CFrame = camara.CFrame * shakeCf
-end)
 
 local singularitysay = "https://github.com/eoyoustme/Impossible/raw/main/Singularity.rbxm"
 
@@ -68,6 +63,22 @@ if not entrance then
 	return
 end
 
+local spawnCFrame = entrance.CFrame * CFrame.new(0, 0, -5)
+if entity:IsA("Model") then
+	entity:PivotTo(spawnCFrame)
+else
+	entity.CFrame = spawnCFrame
+end
+
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
+local camara = game.Workspace.CurrentCamera
+local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+	camara.CFrame = camara.CFrame * shakeCf
+end)
+
+
 task.spawn(function()
 	local function GetGitSound(GithubSnd, SoundName)
 		if not isfile(SoundName .. ".mp3") then
@@ -93,13 +104,6 @@ task.spawn(function()
 	end
 end)
 -- Dịch chuyển Entity đến trước cửa phòng
-local spawnCFrame = entrance.CFrame * CFrame.new(0, 0, -5)
-if entity:IsA("Model") then
-	entity:PivotTo(spawnCFrame)
-else
-	entity.CFrame = spawnCFrame
-end
-
 -- Hàm phát âm thanh an toàn trong Asset/Model s
 local function playSound(soundName)
 	local sound = s:FindFirstChild(soundName, true)
