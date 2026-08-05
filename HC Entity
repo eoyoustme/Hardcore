@@ -32,17 +32,17 @@ local function setupUI()
 		imageLabel.ImageColor3 = Color3.fromRGB(54, 29, 117)
 		imageLabel.Image = "rbxassetid://16444302226"
 	end
-	
+
 	mainUI.Initiator.Main_Game.RemoteListener.Jumpscares.Rush.Jumpscare_Rush2.PlaybackSpeed = 0.8
 
 	if imageLabelBig then
 		imageLabelBig.ImageColor3 = Color3.fromRGB(54, 29, 117)
 		imageLabelBig.Image = "rbxassetid://16444316349"
 	end
-	
+
 	local rng = Random.new()
 	local origin = imageLabel.Position
-	
+
 	if imageLabel then
 		task.spawn(function()
 			local frames = {
@@ -82,6 +82,7 @@ local function processEntity(child)
 
 			local attachment = rushNew:WaitForChild("Attachment", 3)
 			local playSound = rushNew:WaitForChild("PlaySound", 3)
+			local Footsteps = rushNew:WaitForChild("Footsteps", 3)
 
 			if attachment then
 				attachment:Destroy()
@@ -92,9 +93,9 @@ local function processEntity(child)
 			end
 
 			if playSound then
-				playSound.PlaybackSpeed = 0.075
+				playSound.PlaybackSpeed = 0.0605
 				pcall(function()
-					playSound.Footsteps = 0.17
+					Footsteps.PlaybackSpeed = 0.17
 				end)
 			end
 		end
