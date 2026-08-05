@@ -14,7 +14,7 @@ local Humanoid = Character:WaitForChild("Humanoid")
 local HRP = Character:WaitForChild("HumanoidRootPart")
 
 --------------------------------------------------------------------------------
--- 1. T?O UI & HI?U ?NG "YOU WERE HEARD" (MONOCHROME TINT & TEXT)
+-- 1. TẠO UI & HIỆU ỨNG "YOU WERE HEARD" (MONOCHROME TINT & TEXT)
 --------------------------------------------------------------------------------
 local oldGui = PlayerGui:FindFirstChild("SilenceHeardGui")
 if oldGui then oldGui:Destroy() end
@@ -330,17 +330,17 @@ if SilenceReworkEvent then
 	end)
 end
 --------------------------------------------------------------------------------
--- 2. KH?I T?O MODEL SILENCE & AUDIO H? TH?NG
+-- 2. KHỞI TẠO MODEL SILENCE & AUDIO HỆ THỐNG
 --------------------------------------------------------------------------------
 local oldModel = workspace:FindFirstChild("Silence")
 if oldModel then oldModel:Destroy() end
 
-local Silence5 = game:GetObjects("rbxassetid://75131931448484")[1]
+local Silence5 = game:GetObjects("rbxassetid://75200967024105")[1]
 Silence5.Name = "Silence"
 Silence5.Parent = workspace
 
 local Silence = Silence5:FindFirstChild("RushNew") or Silence5:FindFirstChildWhichIsA("BasePart")
-assert(Silence, "Không tìm th?y BasePart cho Silence!")
+assert(Silence, "Không tìm thấy BasePart cho Silence!")
 Silence.Anchored = true
 
 
@@ -368,7 +368,7 @@ distantSound.Volume = 7
 distantSound.Parent = workspace
 
 --------------------------------------------------------------------------------
--- 3. HÀM T?O TEXTURE TÍM T?I UU & KI?M TRA PHÒNG
+-- 3. HÀM TẠO TEXTURE TÍM TỐI ƯU & KIỂM TRA PHÒNG
 --------------------------------------------------------------------------------
 local activeRoom = nil
 
@@ -421,7 +421,7 @@ local function IsPlayerInRoom(roomObj)
 end
 
 --------------------------------------------------------------------------------
--- 4. HI?U ?NG STATIC JUMPSCARE
+-- 4. HIỆU ỨNG STATIC JUMPSCARE
 --------------------------------------------------------------------------------
 local function PlayStaticJumpscareUI()
 	local screenGui = Instance.new("ScreenGui")
@@ -490,19 +490,35 @@ local function CamNear()
 	end)
 end
 
+-- ĐÃ SỬA: Hàm FovKit chuyển sang Tween mượt mà và chạy không hoãn script
+local function FovKit(time, Fov, normalfov)
+	task.spawn(function()
+		local camera = workspace.CurrentCamera
+		if not camera then return end
+
+		local tweenIn = TweenService:Create(camera, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {FieldOfView = Fov})
+		tweenIn:Play()
+		tweenIn.Completed:Wait()
+
+		task.wait(time)
+
+		local tweenOut = TweenService:Create(camera, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {FieldOfView = normalfov})
+		tweenOut:Play()
+	end)
+end
+
 --------------------------------------------------------------------------------
--- 5. CHU?I TELEPORT QUA PHÒNG & T? XÓA KHI ÐI H?T PHÒNG
+-- 5. CHUỖI TELEPORT QUA PHÒNG & TỰ XÓA KHI ĐI HẾT PHÒNG
 --------------------------------------------------------------------------------
 local Kill = true
 local isChasing = false
 local currentRooms = workspace:WaitForChild("CurrentRooms")
-local RemoveSilence -- Khai báo tru?c hàm RemoveSilence
+local RemoveSilence -- Khai báo trước hàm RemoveSilence
 
 task.spawn(function()
 	local latestVal = ReplicatedStorage.GameData.LatestRoom.Value
 	local currentRoomIndex = math.max(0, latestVal - 4)
 	local isFirstSpawn = true
-	local distance = (Silence.Position - HRP.Position).Magnitude
 
 	while Kill do
 		if isChasing then break end
@@ -537,6 +553,12 @@ task.spawn(function()
 					task.spawn(PlayStaticJumpscareUI)
 				else
 					task.spawn(CamNear)
+				end
+
+				-- ĐÃ SỬA: Tính khoảng cách liên tục tại đây sau khi Silence xuất hiện
+				local distance = (Silence.Position - HRP.Position).Magnitude
+				if distance < 50 then
+					FovKit(1, 120, 70)
 				end
 
 
@@ -713,14 +735,14 @@ local function StartHeartbeatMinigame()
 		if RemoveSilence then RemoveSilence() end
 	else
 		Humanoid.Health = 0
-		if RemoveSilence then RemoveSilence() end
+		if RemoveSilence() then RemoveSilence() end
 	end
 
 	inMinigame = false
 end
 
 --------------------------------------------------------------------------------
--- 7. CHU?I TRUY ÐU?I (TWEEN ÐU?I THEO PLAYER & D?NG KHI NÚP)
+-- 7. CHUỖI TRUY ĐUỔI (TWEEN ĐUỔI THEO PLAYER & DỪNG KHI NÚP)
 --------------------------------------------------------------------------------
 local lastPos = HRP.Position
 local damageInterval = 0.054
@@ -741,7 +763,7 @@ local function StartChaseSequence()
 	while Kill do
 		task.wait(damageInterval)
 
-		-- N?U PLAYER NÚP: D?ng Tween di chuy?n c?a Silence và m? Minigame
+		-- NẾU PLAYER NÚP: Dừng Tween di chuyển của Silence và mở Minigame
 		if Character:GetAttribute("Hiding") then
 			if currentChaseTween then
 				currentChaseTween:Cancel()
@@ -757,7 +779,7 @@ local function StartChaseSequence()
 			end
 		end
 
-		-- CH? ÐU?I THEO VÀ T?N CÔNG KHI KHÔNG TRONG MINIGAME VÀ KHÔNG NÚP
+		-- CHỈ ĐUỔI THEO VÀ TẤN CÔNG KHI KHÔNG TRONG MINIGAME VÀ KHÔNG NÚP
 		if not inMinigame and not Character:GetAttribute("Hiding") then
 			local currentPos = HRP.Position
 
@@ -768,7 +790,7 @@ local function StartChaseSequence()
 			if Humanoid.Health > 0 then
 				Silence.Anchored = true
 
-				-- Âm thanh du?i
+				-- Âm thanh đuổi
 				local s = Instance.new("Sound")
 				s.SoundId = "rbxassetid://7861818231"
 				s.Volume = 0.5
@@ -776,7 +798,7 @@ local function StartChaseSequence()
 				s:Play()
 				Debris:AddItem(s, 2)
 
-				-- T?c d? và Tween Silence d?n v? trí ngu?i choi
+				-- Tốc độ và Tween Silence đến vị trí người chơi
 				local SPEED_STUDS_PER_SECOND = 28
 				local targetCFrame = HRP.CFrame
 				local distance = (targetCFrame.Position - Silence.Position).Magnitude
@@ -791,13 +813,13 @@ local function StartChaseSequence()
 				)
 				currentChaseTween:Play()
 
-				-- ÐI?U KI?N TIÊU DI?T: L?i g?n player (<= 9 studs) HO?C di chuy?n trong phòng mà không cúi
+				-- ĐIỀU KIỆN TIÊU DIỆT: Lại gần player (<= 9 studs) HOẶC di chuyển trong phòng mà không cúi
 				local movedUncrouchedInRoom = IsPlayerInRoom(activeRoom) and not Character:GetAttribute("Crouching") and (currentPos - lastPos).Magnitude > 0.3
 
 				if distance <= 9 or movedUncrouchedInRoom then
 					Humanoid.Health = 0
-					
-					ReplicatedStorage.GameStats["Player_".. player.Name].Total.DeathCause.Value = "Silence"
+
+					ReplicatedStorage.GameStats["Player_".. LocalPlayer.Name].Total.DeathCause.Value = "Silence"
 
 					local sound = Instance.new("Sound")
 					sound.SoundId = "rbxassetid://4988621968"
@@ -816,7 +838,7 @@ local function StartChaseSequence()
 	end
 end
 
--- THREAD PHÁT HI?N DI CHUY?N BAN Ð?U Ð? KÍCH HO?T CHASE
+-- THREAD PHÁT HIỆN DI CHUYỂN BAN ĐẦU ĐỂ KÍCH HOẠT CHASE
 thread = task.spawn(function()
 	while Kill and not isChasing do
 		task.wait(0.1)
@@ -830,7 +852,7 @@ thread = task.spawn(function()
 end)
 
 --------------------------------------------------------------------------------
--- 8. D?N D?P VÀ XÓA SILENCE
+-- 8. DỌN DẸP VÀ XÓA SILENCE
 --------------------------------------------------------------------------------
 local Removed = false
 
