@@ -215,7 +215,7 @@ if hum and hrp then
 		return a.distance < b.distance
 	end)
 
-	local maxPull = math.min(#targets, 6)
+	local maxPull = math.min(#targets,  Random.new():NextInteger(1 , 6))
 	local instancesToDestroy = {}
 
 	-- Tìm 2 Chain gốc trong Entity
@@ -292,7 +292,7 @@ if hum and hrp then
 
 	-- 4. ĐỜI 1.2 GIÂY SAU KHI ĐỦ XÍCH RỒI MỚI BẮT ĐẦU KÉO VỀ
 	task.wait(0.8)
-	
+
 	TweenService:Create(
 		eyto,
 		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
@@ -322,12 +322,12 @@ if hum and hrp then
 		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
 		{ PlaybackSpeed = 0.029 }
 	):Play()
-	
+
 	local tweenInfo5 = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
 	local lightTween5 = TweenService:Create(light, tweenInfo5, { Range = 25 })
 
 	lightTween5:Play()
-	
+
 
 	-- Kéo tất cả mục tiêu về phía Entity
 	for i = 1, maxPull do
@@ -366,7 +366,7 @@ if hum and hrp then
 	task.wait(0.5)
 
 	if playerChained and hum then
-		hum.Health = math.max(0, hum.Health - 60)
+		hum.Health = math.max(0, hum.Health -  Random.new():NextInteger(40 , 50))
 	end
 
 	-- Dọn dẹp xích và các Part/Model phụ
