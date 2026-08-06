@@ -88,7 +88,7 @@ local function GetRoom()
 end
 
 -- 📥 Tải Model 1 lần duy nhất ở ngoài vòng lặp
-local modelTemplate = GetGithubModel("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Frostbitefixlol.rbxm")
+local modelTemplate = GetGithubModel("https://github.com/eoyoustme/Hardcore/raw/main/Frostbitefi.rbxm")
 if not modelTemplate then
 	warn("[Frostbite]: Không thể khởi tạo Model, đã dừng script.")
 	return
