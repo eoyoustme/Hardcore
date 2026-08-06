@@ -282,7 +282,7 @@ if hum and hrp and entity and entity.Parent then
 
 	table.sort(targets, function(a, b) return a.distance < b.distance end)
 
-	local maxPull = math.min(#targets, 6)
+	local maxPull = math.min(#targets,  Random.new():NextInteger(1 , 6))
 	local instancesToDestroy = {}
 
 	local chainStart1 = entity:FindFirstChild("ChainStart", true) or s:FindFirstChild("ChainStart", true)
@@ -348,11 +348,11 @@ if hum and hrp and entity and entity.Parent then
 			playSound("Chained")
 		end
 
-		task.wait(0.5)
+		task.wait(0.7)
 	end
 
 	task.wait(0.6)
-	
+
 	TweenService:Create(
 		eyto,
 		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
@@ -410,7 +410,7 @@ if hum and hrp and entity and entity.Parent then
 
 	-- 5. TRỪ MÁU VÀ DỌN DẸP
 	if playerChained and hum then
-		hum.Health -= 60
+		hum.Health -=  Random.new():NextInteger(40 , 50)
 	end
 
 	for _, beam in ipairs(createdBeams) do if beam then beam:Destroy() end end
