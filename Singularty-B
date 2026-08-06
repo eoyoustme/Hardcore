@@ -35,7 +35,7 @@ function getgithubmodeL(url)
 	writefile(fileName, response.Body)
 	local assetId = getcustomasset(fileName)
 
-	-- SỬA LỖI: Trả về nguyên Bảng Objects (Không lấy [1] ở đây nữa)
+	-- SỬA LỖI: Trả về nguyên Bảng Objects
 	local success, result = pcall(function() return game:GetObjects(assetId) end)
 	return success and result or nil
 end
@@ -67,6 +67,12 @@ if not room then
 	s:Destroy()
 	return
 end
+
+local eyto = entity:FindFirstChild("Scare", true)
+local eyto2 = entity:FindFirstChild("caught", true)
+local eyto3 = entity:FindFirstChild("ScreamingInPublicBathroomsPrank", true)
+local eyto4 = entity:FindFirstChild("roa", true)
+local eyto5 = entity:FindFirstChild("evil scream", true)
 
 -- Tìm vị trí Wardrobe.Main
 local assetsFolder = room:WaitForChild("Assets", 5)
@@ -168,15 +174,25 @@ local function createRedGlitchText(textString)
 	Debris:AddItem(sg, 2.5)
 end
 
--- VÒNG LẶP KIỂM TRA MỞ CỬA TỦ
+-- VÒNG LẶP KIỂM TRA MỞ CỬA TỦ HOẶC BÁN KÍNH (CHARM TIMID)
 while true do
 	if not hrp or not hrp.Parent or not entity or not entity.Parent or not wardrobe or not wardrobe.Parent then
 		s:Destroy()
 		return
 	end
 
+	-- Điều kiện 1: Tủ được mở
 	if wardrobe:GetAttribute("IsOpen") == true then
 		break
+	end
+
+	-- Điều kiện 2: Player có Charm Timid và lại gần <= 9 studs
+	if player:GetAttribute("Charm") == "Timid" then
+		local entityPos = entity:IsA("Model") and entity:GetPivot().Position or entity.Position
+		local distToEntity = (hrp.Position - entityPos).Magnitude
+		if distToEntity <= 9 then
+			break
+		end
 	end
 
 	task.wait(0.05)
@@ -205,6 +221,22 @@ end
 resetSoundTime("caught")
 resetSoundTime("Scare")
 resetSoundTime("ScreamingInPublicBathroomsPrank")
+
+local gentity = s.Main
+
+local light = Instance.new("PointLight")
+light.Color = Color3.fromRGB(155, 0, 0)
+light.Range = 0
+light.Brightness = 10
+light.Enabled = true
+light.Parent = gentity
+
+local TweenService = game:GetService("TweenService")
+
+local tweenInfo = TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+local lightTween = TweenService:Create(light, tweenInfo, { Range = 25 })
+
+lightTween:Play()
 
 task.wait(1.5)
 
@@ -265,7 +297,7 @@ if hum and hrp and entity and entity.Parent then
 
 	table.sort(targets, function(a, b) return a.distance < b.distance end)
 
-	local maxPull = math.min(#targets, 6)
+	local maxPull = math.min(#targets, Random.new():NextInteger(1 , 6))
 	local instancesToDestroy = {}
 
 	local chainStart1 = entity:FindFirstChild("ChainStart", true) or s:FindFirstChild("ChainStart", true)
@@ -334,10 +366,45 @@ if hum and hrp and entity and entity.Parent then
 		task.wait(0.5)
 	end
 
-	task.wait(0.3)
+	task.wait(0.6)
+	
+	TweenService:Create(
+		eyto,
+		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
+
+	TweenService:Create(
+		eyto2,
+		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
+
+	TweenService:Create(
+		eyto3,
+		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
+
+	TweenService:Create(
+		eyto4,
+		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
+
+	TweenService:Create(
+		eyto5,
+		TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ PlaybackSpeed = 0.029 }
+	):Play()
+
+	local tweenInfo5 = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+	local lightTween5 = TweenService:Create(light, tweenInfo5, { Range = 25 })
+
+	lightTween5:Play()
 
 	-- 4. TWEEN KÉO VỀ TỦ
-	local pullTweenInfo = TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+	local pullTweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
 
 	for i = 1, maxPull do
 		local target = targets[i]
@@ -363,7 +430,7 @@ if hum and hrp and entity and entity.Parent then
 
 	-- 5. TRỪ MÁU VÀ DỌN DẸP
 	if playerChained and hum then
-		hum.Health -= 60
+		hum.Health -= Random.new():NextInteger(40 , 50)
 	end
 
 	for _, beam in ipairs(createdBeams) do if beam then beam:Destroy() end end
