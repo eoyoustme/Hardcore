@@ -337,8 +337,6 @@ local function CrucifixEntity(entity: any, Crucifix: Tool)
 		model:Destroy()
 		Crucifix:Destroy()
 	end)
-	
-	require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Thank for Free me ,Child,I remeber my children....", true)
 
 	-- Animation
 	TweenService:Create(pentagram.Circle, TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), { CFrame = pentagram.Circle.CFrame - Vector3.new(0, 25, 0) }):Play()
