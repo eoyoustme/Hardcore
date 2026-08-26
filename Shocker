@@ -3,68 +3,231 @@ local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+local Debris = game:GetService("Debris")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local hrp = character:WaitForChild("HumanoidRootPart")
+local camera = Workspace.CurrentCamera
+
+local CONFIG = {
+	UPTIME = 2,                   
+	DAMAGE = 25,                
+	SPAWN_OFFSET = 20,         
+	DASH_TIME = 1,               
+	HITBOX_RADIUS = 6,            
+	END_FADE_TIME = 0.65,     
+
+	MODEL_ID = "rbxassetid://90250291645240",
+	ATTACK_SOUND_ID = "rbxasset://7b36623932353737342d313137352d313165392d393531612d3830366536663665363936337d/yochatwtf.mp3",
+	END_SOUND_ID = "rbxassetid://91339787662755",
+	FACE_TEXTURE = "rbxassetid://16026109489"
+}
+
+local function EndShocker(shockerModel, basePart)
+	if not shockerModel or not shockerModel.Parent then return end
+
+	local endSound = Instance.new("Sound")
+	endSound.Name = "ShockerEnd"
+	endSound.SoundId = CONFIG.END_SOUND_ID
+	endSound.Volume = 1
+	endSound.PlaybackSpeed = 1
+	endSound.RollOffMinDistance = 10
+	endSound.RollOffMaxDistance = 100
+	endSound.RollOffMode = Enum.RollOffMode.InverseTapered
+	endSound.Parent = basePart
+	endSound:Play()
+
+	local soundsToFade = {}
+	local lightsToFade = {}
+
+	for _, v in ipairs(shockerModel:GetDescendants()) do
+		if v:IsA("ParticleEmitter") then
+			v.Rate = 0
+		elseif v:IsA("Light") then
+			v.Enabled = true
+			v.Range = 20
+			v.Brightness = 5
+			table.insert(lightsToFade, v)
+		elseif v:IsA("Sound") and v.Playing then
+			table.insert(soundsToFade, v)
+		end
+	end
+
+	task.wait(0.01)
+	if not shockerModel.Parent then return end
+
+	local fadeInfo = TweenInfo.new(CONFIG.END_FADE_TIME, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+
+	for _, light in ipairs(lightsToFade) do
+		if light.Parent then
+			TweenService:Create(light, fadeInfo, {Range = 0, Brightness = 0}):Play()
+		end
+	end
+
+	for _, sound in ipairs(soundsToFade) do
+		if sound.Parent then
+			TweenService:Create(sound, fadeInfo, {PlaybackSpeed = 0}):Play()
+		end
+	end
+
+	task.wait(CONFIG.END_FADE_TIME)
+
+	if shockerModel and shockerModel.Parent then
+		for _, k in ipairs(shockerModel:GetDescendants()) do
+			if k:IsA("Sound") then k:Stop()
+			elseif k:IsA("Light") then k.Enabled = false
+			elseif k:IsA("ParticleEmitter") then k.Enabled = false end
+		end
+		shockerModel:Destroy()
+	end
+end
 
 local function spawnShocker()
-	local shockerModel = game:GetObjects("rbxassetid://90250291645240")[1]
-	local camera = Workspace.CurrentCamera
+	local success, objects = pcall(function()
+		return game:GetObjects(CONFIG.MODEL_ID)
+	end)
 
+	if not success or not objects or #objects == 0 then
+		return
+	end
+
+	local shockerModel = objects[1]
 	local rootPart = shockerModel:FindFirstChild("HumanoidRootPart") or shockerModel:FindFirstChildWhichIsA("BasePart")
 	shockerModel.PrimaryPart = rootPart
 	shockerModel.Parent = Workspace
 
-	local oogaBoogaaPart = shockerModel:WaitForChild("Base")
-	local horrorScream = oogaBoogaaPart:WaitForChild("HORROR SCREAM 15")
-	local sb = oogaBoogaaPart:WaitForChild("PlaySound")
-	local sb2 = oogaBoogaaPart:WaitForChild("Repent")
+	local basePart = shockerModel:WaitForChild("Base", 5) or rootPart
+	basePart.Anchored = true
+	basePart.CanCollide = false
+	basePart.CanTouch = false
+	basePart.CanQuery = false
 
-	sb.Volume = 1.5
-	sb:Play()
-	sb2:Play()
+	local playSound = basePart:FindFirstChild("PlaySound") or Instance.new("Sound", basePart)
+	playSound:Play()
+	local horrorScream = basePart:FindFirstChild("HORROR SCREAM 15") or Instance.new("Sound", SoundService)
+	local repentSound = basePart:FindFirstChild("Repent")
 
-	local followConnection
-	local startTime = tick()
+	local attackSound = Instance.new("Sound")
+	attackSound.Name = "ShockerAttack"
+	attackSound.SoundId = CONFIG.ATTACK_SOUND_ID
+	attackSound.Volume = 1
+	attackSound.PlaybackSpeed = 1
+	attackSound.RollOffMinDistance = 10
+	attackSound.RollOffMaxDistance = 100
+	attackSound.RollOffMode = Enum.RollOffMode.InverseTapered
+	attackSound.Parent = basePart
 
-	followConnection = RunService.RenderStepped:Connect(function()
-		if tick() - startTime < 2 then
-			local targetCFrame = camera.CFrame * CFrame.new(0, 0, -20)
-			shockerModel:PivotTo(CFrame.lookAt(targetCFrame.Position, camera.CFrame.Position))
-		else
-			if followConnection then
-				followConnection:Disconnect()
+	playSound.PlaybackSpeed = 0.7
+	playSound:Play()
+	if repentSound then repentSound:Play() end
+
+	local pitchTween = TweenService:Create(playSound, TweenInfo.new(CONFIG.UPTIME, Enum.EasingStyle.Linear), {PlaybackSpeed = 2})
+	pitchTween:Play()
+
+	local lookDir = camera.CFrame.LookVector
+	local flatLook = Vector3.new(lookDir.X, 0, lookDir.Z)
+	flatLook = if flatLook.Magnitude >= 0.001 then flatLook.Unit else Vector3.new(0, 0, -1)
+	local currentPos = hrp.Position + (flatLook * CONFIG.SPAWN_OFFSET)
+
+	local elapsed = 0
+	while elapsed < CONFIG.UPTIME do
+		if not shockerModel.Parent or not character.Parent then
+			pitchTween:Cancel()
+			if shockerModel and shockerModel.Parent then shockerModel:Destroy() end
+			return
+		end
+
+		-- Check Hiding
+		if character:GetAttribute("Hiding") == true and character:GetAttribute("EquippedCharm") == "Accursed" then
+			pitchTween:Cancel()
+			shockerModel:Destroy()
+			return
+		end
+
+		local dt = RunService.RenderStepped:Wait()
+		elapsed = elapsed + dt
+
+		local camLook = camera.CFrame.LookVector
+		local camUnit = Vector3.new(camLook.X, 0, camLook.Z)
+		camUnit = if camUnit.Magnitude >= 0.001 then camUnit.Unit else Vector3.new(0, 0, -1)
+
+		local targetPos = hrp.Position + (camUnit * CONFIG.SPAWN_OFFSET)
+		currentPos = currentPos:Lerp(targetPos, 1 - math.exp(-5 * dt))
+
+		local faceDir = Vector3.new((hrp.Position - currentPos).X, 0, (hrp.Position - currentPos).Z)
+		faceDir = if faceDir.Magnitude >= 0.001 then faceDir.Unit else Vector3.new(0, 0, -1)
+
+		shockerModel:PivotTo(CFrame.lookAt(currentPos, currentPos + faceDir))
+	end
+
+	playSound.PlaybackSpeed = 2
+
+	if character:GetAttribute("Hiding") == true then
+		shockerModel:Destroy()
+		return
+	end
+
+	if character:FindFirstChild("Crucifix") then
+		pcall(function()
+			ReplicatedStorage.HardcoreRemotes.ShockerDamage:FireServer(0, shockerModel:GetPivot())
+		end)
+		shockerModel:Destroy()
+		return
+	end
+
+	local attachment = basePart:FindFirstChild("Attachment")
+	local faces = attachment and attachment:FindFirstChild("Faces")
+	if faces then
+		for _, particle in ipairs(faces:GetChildren()) do
+			if particle:IsA("ParticleEmitter") then
+				particle.Texture = CONFIG.FACE_TEXTURE
+				particle.Size = NumberSequence.new(3)
 			end
 		end
-	end)
+	end
 
-	task.wait(2)
+	local playerPos = hrp.Position
+	local shockerPos = shockerModel:GetPivot().Position
 
-	sb:Stop()
-	sb2:Stop()
+	local fromPlayerToShocker = (shockerPos - playerPos)
+	local dirToShocker = Vector3.new(fromPlayerToShocker.X, 0, fromPlayerToShocker.Z)
+	dirToShocker = if dirToShocker.Magnitude >= 0.001 then dirToShocker.Unit else Vector3.new(0, 0, -1)
+
+	local startDashPos = playerPos + (dirToShocker * 20)
+	local endDashPos = playerPos - (dirToShocker * 20)
+	local moveDir = (endDashPos - startDashPos).Unit
+
+	shockerModel:PivotTo(CFrame.lookAt(startDashPos, startDashPos + moveDir))
+
+	attackSound.TimePosition = 0
+	attackSound:Play()
+	TweenService:Create(attackSound, TweenInfo.new(CONFIG.DASH_TIME, Enum.EasingStyle.Circular, Enum.EasingDirection.Out), {PlaybackSpeed = 0.7}):Play()
+
+	horrorScream.Parent = SoundService
 	horrorScream:Play()
+	Debris:AddItem(horrorScream, math.max(horrorScream.TimeLength, 1) + 5)
 
-	local startPos = rootPart.Position
-	local targetDirection = (hrp.Position - startPos).Unit
-	local endPos = startPos + (targetDirection * 70)
-
-	local dashInfo = TweenInfo.new(1.8, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-	local dashTween = TweenService:Create(rootPart, dashInfo, {
-		CFrame = CFrame.lookAt(endPos, endPos + targetDirection)
-	})
-
-	local hitConnection
+	local dashProgress = 0
 	local hasHit = false
 
-	hitConnection = RunService.RenderStepped:Connect(function()
-		if hasHit or not hrp then return end
+	while dashProgress < CONFIG.DASH_TIME do
+		if not shockerModel.Parent or not hrp.Parent then break end
 
-		local distance = (rootPart.Position - hrp.Position).Magnitude
-		if distance <= 4.5 then 
+		local dt = RunService.RenderStepped:Wait()
+		dashProgress = dashProgress + dt
+
+		local alpha = math.clamp(dashProgress / CONFIG.DASH_TIME, 0, 1)
+		local easedAlpha = TweenService:GetValue(alpha, Enum.EasingStyle.Circular, Enum.EasingDirection.In)
+
+		local currentDashPos = startDashPos:Lerp(endDashPos, easedAlpha)
+		shockerModel:PivotTo(CFrame.lookAt(currentDashPos, currentDashPos + moveDir))
+
+		if not hasHit and (basePart.Position - hrp.Position).Magnitude <= CONFIG.HITBOX_RADIUS then
 			hasHit = true
-			humanoid:TakeDamage(30)
+			humanoid:TakeDamage(CONFIG.DAMAGE)
 
 			pcall(function()
 				ReplicatedStorage.GameStats["Player_".. player.Name].Total.DeathCause.Value = "Shocker"
@@ -74,20 +237,9 @@ local function spawnShocker()
 				}, "Blue")
 			end)
 		end
-	end)
+	end
 
-	dashTween:Play()
-
-	dashTween.Completed:Connect(function()
-		if hitConnection then hitConnection:Disconnect() end
-	end)
-
-	task.delay(5, function()
-		if hitConnection then hitConnection:Disconnect() end
-		if shockerModel and shockerModel.Parent then
-			shockerModel:Destroy()
-		end
-	end)
+	EndShocker(shockerModel, basePart)
 
 	pcall(function()
 		local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
