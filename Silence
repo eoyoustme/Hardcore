@@ -1001,7 +1001,7 @@ local function StartChaseSequence()
 
 				local movedUncrouchedInRoom = IsPlayerInRoom(activeRoom) and not Character:GetAttribute("Crouching") and (currentPos - lastPos).Magnitude > 0.3
 
-				if distance <= 9 or movedUncrouchedInRoom then
+				if distance <= 9 and movedUncrouchedInRoom then
 					Humanoid.Health = 0
 
 					if ReplicatedStorage:FindFirstChild("GameStats") and ReplicatedStorage.GameStats:FindFirstChild("Player_".. LocalPlayer.Name) then
