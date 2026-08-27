@@ -128,7 +128,7 @@ local entity = Spawner:Create({
 		FasterAndFaster = 1.2,
 
 		Fakeout = {
-			Enabled = true,
+			Enabled = false,
 			RandomFakeout = true,
 			EndSound = "rbxassetid://130994177179386",
 			EndDelay = 1,
