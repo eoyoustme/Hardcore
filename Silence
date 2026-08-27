@@ -315,7 +315,6 @@ distantSound.Volume = 7
 distantSound.Parent = workspace
 
 local activeRoom = nil
-
 local is = true
 
 local function ApplyPurpleTextureToRoom(roomObj)
@@ -536,6 +535,7 @@ end)
 
 local minigameActive = false
 local minigameCooldown = false
+local isImmune = false -- [THÊM MỚI] Trạng thái bất tử
 local soundList = {}
 
 local function setupHeartbeatUI()
@@ -590,7 +590,7 @@ local function runSilenceMinigame(beatInterval, beatTimings)
 	beatInterval = beatInterval or 0.6
 	beatTimings = (typeof(beatTimings) == "table" and #beatTimings > 0) and beatTimings or {beatInterval, beatInterval, beatInterval, beatInterval}
 
-	if minigameActive or minigameCooldown then return false end
+	if minigameActive or minigameCooldown or isImmune then return false end
 	cleanupMinigameSounds()
 	minigameActive = true
 
@@ -909,7 +909,7 @@ local damageInterval = 0.054
 local thread = nil
 
 local function StartChaseSequence()
-	if isChasing then return end
+	if isChasing or isImmune then return end
 	isChasing = true
 
 	StartText(3)
@@ -933,11 +933,14 @@ local function StartChaseSequence()
 				Silence.Anchored = true
 			end
 
-			if not minigameActive and not minigameCooldown then
+			if not minigameActive and not minigameCooldown and not isImmune then
 				local passed = runSilenceMinigame(0.6, {0.6, 0.6, 0.6, 0.6})
 
 				if passed then
 					isChasing = false
+					isImmune = true
+					minigameCooldown = true
+
 					StopMonochromeTint(false)
 					ResetText()
 
@@ -948,27 +951,30 @@ local function StartChaseSequence()
 						end
 					end
 
-					minigameCooldown = true
-					task.delay(5, function()
+					-- Kích hoạt đếm ngược 7 giây bất tử & cooldown minigame
+					task.delay(7, function()
+						isImmune = false
 						minigameCooldown = false
 					end)
 
 					break
 				else
-					Humanoid.Health = 0
-					if ReplicatedStorage:FindFirstChild("GameStats") and ReplicatedStorage.GameStats:FindFirstChild("Player_".. LocalPlayer.Name) then
-						ReplicatedStorage.GameStats["Player_".. LocalPlayer.Name].Total.DeathCause.Value = "Silence"
-					end
-					if RemoveSilence then 
-						RemoveSilence() 
+					if not isImmune then
+						Humanoid.Health = 0
+						if ReplicatedStorage:FindFirstChild("GameStats") and ReplicatedStorage.GameStats:FindFirstChild("Player_".. LocalPlayer.Name) then
+							ReplicatedStorage.GameStats["Player_".. LocalPlayer.Name].Total.DeathCause.Value = "Silence"
+						end
+						if RemoveSilence then 
+							RemoveSilence() 
+						end
 					end
 					break
 				end
 			end
 		end
-		
+
 		local yes = Character:GetAttribute("Crouching")
-		if not minigameActive and not Character:GetAttribute("Hiding") and not yes then
+		if not minigameActive and not Character:GetAttribute("Hiding") and not yes and not isImmune then
 			local currentPos = HRP.Position
 
 			pcall(function()
@@ -1001,7 +1007,7 @@ local function StartChaseSequence()
 
 				local movedUncrouchedInRoom = IsPlayerInRoom(activeRoom) and not Character:GetAttribute("Crouching") and (currentPos - lastPos).Magnitude > 0.3
 
-				if distance <= 9 and movedUncrouchedInRoom then
+				if distance <= 9 and movedUncrouchedInRoom and not isImmune then
 					Humanoid.Health = 0
 
 					if ReplicatedStorage:FindFirstChild("GameStats") and ReplicatedStorage.GameStats:FindFirstChild("Player_".. LocalPlayer.Name) then
@@ -1028,7 +1034,7 @@ end
 thread = task.spawn(function()
 	while Kill do
 		task.wait(0.1)
-		if not isChasing then
+		if not isChasing and not isImmune then
 			local currentPos = HRP.Position
 			if IsPlayerInRoom(activeRoom) and not Character:GetAttribute("Crouching") and (currentPos - lastPos).Magnitude > 0.3 then
 				StartChaseSequence()
