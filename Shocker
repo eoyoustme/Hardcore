@@ -13,15 +13,14 @@ local hrp = character:WaitForChild("HumanoidRootPart")
 local camera = Workspace.CurrentCamera
 
 local CONFIG = {
-	UPTIME = 2,                   
+	UPTIME = 2,                    
 	DAMAGE = 25,                
-	SPAWN_OFFSET = 20,         
-	DASH_TIME = 1,               
+	SPAWN_OFFSET = 20,          
+	DASH_TIME = 1,                
 	HITBOX_RADIUS = 6,            
-	END_FADE_TIME = 0.65,     
+	END_FADE_TIME = 0.65,      
 
 	MODEL_ID = "rbxassetid://90250291645240",
-	ATTACK_SOUND_ID = "rbxasset://7b36623932353737342d313137352d313165392d393531612d3830366536663665363936337d/yochatwtf.mp3",
 	END_SOUND_ID = "rbxassetid://91339787662755",
 	FACE_TEXTURE = "rbxassetid://16026109489"
 }
@@ -109,20 +108,28 @@ local function spawnShocker()
 	playSound:Play()
 	local horrorScream = basePart:FindFirstChild("HORROR SCREAM 15") or Instance.new("Sound", SoundService)
 	local repentSound = basePart:FindFirstChild("Repent")
+	repentSound:Destroy()
 
-	local attackSound = Instance.new("Sound")
-	attackSound.Name = "ShockerAttack"
-	attackSound.SoundId = CONFIG.ATTACK_SOUND_ID
-	attackSound.Volume = 1
-	attackSound.PlaybackSpeed = 1
-	attackSound.RollOffMinDistance = 10
-	attackSound.RollOffMaxDistance = 100
-	attackSound.RollOffMode = Enum.RollOffMode.InverseTapered
-	attackSound.Parent = basePart
+	local function GetGitSound(GithubSnd, SoundName)
+		local url = GithubSnd
+		if not isfile(SoundName .. ".mp3") then
+			writefile(SoundName .. ".mp3", game:HttpGet(url))
+		end
+		local sound = Instance.new("Sound")
+		sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+		return sound
+	end
+	local Jumpscare = GetGitSound("https://github.com/eoyoustme/Pressure-Skid-Gay-/blob/main/virtual_vibes-electric-shock-404227.mp3?raw=true","yooowtf")
+	Jumpscare.Volume = 1
+	Jumpscare.PlaybackSpeed = 1
+	Jumpscare.RollOffMinDistance = 10
+	Jumpscare.RollOffMaxDistance = 100
+	Jumpscare.RollOffMode = Enum.RollOffMode.InverseTapered
+	Jumpscare.Parent = basePart
 
 	playSound.PlaybackSpeed = 0.7
+	playSound.Volume = 1
 	playSound:Play()
-	if repentSound then repentSound:Play() end
 
 	local pitchTween = TweenService:Create(playSound, TweenInfo.new(CONFIG.UPTIME, Enum.EasingStyle.Linear), {PlaybackSpeed = 2})
 	pitchTween:Play()
@@ -140,7 +147,6 @@ local function spawnShocker()
 			return
 		end
 
-		-- Check Hiding
 		if character:GetAttribute("Hiding") == true and character:GetAttribute("EquippedCharm") == "Accursed" then
 			pitchTween:Cancel()
 			shockerModel:Destroy()
@@ -202,9 +208,10 @@ local function spawnShocker()
 
 	shockerModel:PivotTo(CFrame.lookAt(startDashPos, startDashPos + moveDir))
 
-	attackSound.TimePosition = 0
-	attackSound:Play()
-	TweenService:Create(attackSound, TweenInfo.new(CONFIG.DASH_TIME, Enum.EasingStyle.Circular, Enum.EasingDirection.Out), {PlaybackSpeed = 0.7}):Play()
+	-- ĐÃ SỬA: Thay attackSound thành Jumpscare
+	Jumpscare.TimePosition = 0
+	Jumpscare:Play()
+	TweenService:Create(Jumpscare, TweenInfo.new(CONFIG.DASH_TIME, Enum.EasingStyle.Circular, Enum.EasingDirection.Out), {PlaybackSpeed = 0.7}):Play()
 
 	horrorScream.Parent = SoundService
 	horrorScream:Play()
