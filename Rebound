@@ -1,4 +1,4 @@
-if workspace:FindFirstChild("ReboundChance") then
+if workspace:FindFirstChild("NightmareRebound") then
 	getgenv().OgHungerNewSpawner = nil 
 
 	function light(tim,color0,color1)
