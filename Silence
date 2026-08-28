@@ -1,3 +1,6 @@
+if workspace:FindFirstChild("IsM") then
+	return
+else
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -1061,4 +1064,5 @@ RemoveSilence = function()
 	if Silence5 and Silence5.Parent then
 		Silence5:Destroy()
 	end
+end
 end
