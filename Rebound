@@ -1,3 +1,6 @@
+if workspace:FindFirstChild("IsM") then
+	return
+else
 if workspace:FindFirstChild("NightmareRebound") then
 	getgenv().OgHungerNewSpawner = nil 
 
@@ -1045,4 +1048,5 @@ else
 	---====== Run Entity ======---
 
 	entity:Run(true)
+end
 end
