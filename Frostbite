@@ -1,261 +1,237 @@
-
-local http_request = (syn and syn.request) or (http and http.request) or http_request or request or (fluxus and fluxus.request)
-local getasset = getcustomasset or getsynasset
-
-if not (writefile and getasset and http_request) then
+if workspace:FindFirstChild("IsM") then
 	return
-end
+else
+	local http_request = (syn and syn.request) or (http and http.request) or http_request or request or (fluxus and fluxus.request)
+	local getasset = getcustomasset or getsynasset
 
-local gameData = game:GetService("ReplicatedStorage"):WaitForChild("GameData")
-local latestRoom = gameData:WaitForChild("LatestRoom")
-
-latestRoom.Changed:Wait()
-local tweenservice = game:GetService("TweenService")
-local Players = game:GetService("Players")
-local Lighting = game:GetService("Lighting")
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-
-local frost = Instance.new("ColorCorrectionEffect")
-frost.Parent = Lighting
-frost.Name = "frost4"
-tweenservice:Create(frost, TweenInfo.new(10), {
-	TintColor = Color3.fromRGB(0, 0, 255),
-	Saturation = -0.7,
-	Contrast = 0.2
-}):Play()
-
-local gui = Instance.new("ScreenGui")
-gui.Name = "FrostbiteColdBarGui"
-gui.ResetOnSpawn = false
-gui.DisplayOrder = 100000
-
-local container = Instance.new("CanvasGroup")
-container.Name = "BarContainer"
-container.Size = UDim2.new(0, 320, 0, 8)
-container.Position = UDim2.new(1, -340, 1, -40)
-container.BackgroundTransparency = 1
-container.Parent = gui
-
-local barFrame = Instance.new("Frame")
-barFrame.Name = "BarFrame"
-barFrame.Size = UDim2.new(1, 0, 1, 0)
-barFrame.BackgroundColor3 = Color3.fromRGB(20, 25, 35)
-barFrame.BorderSizePixel = 0
-barFrame.Parent = container
-
-local uiPadding = Instance.new("UIPadding")
-uiPadding.PaddingLeft = UDim.new(0, 4)
-uiPadding.PaddingRight = UDim.new(0, 4)
-uiPadding.PaddingTop = UDim.new(0, 4)
-uiPadding.PaddingBottom = UDim.new(0, 4)
-uiPadding.Parent = barFrame
-
-local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0.25, 0)
-uiCorner.Parent = barFrame
-
-local uiStroke = Instance.new("UIStroke")
-uiStroke.Color = Color3.fromRGB(150, 215, 245)
-uiStroke.Thickness = 4
-uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-uiStroke.Parent = barFrame
-
-local innerBg = Instance.new("Frame")
-innerBg.Name = "InnerBg"
-innerBg.Size = UDim2.new(1, -2, 1, -2)
-innerBg.Position = UDim2.new(0, 1, 0, 1)
-innerBg.BackgroundColor3 = Color3.fromRGB(50, 20, 30)
-innerBg.BorderSizePixel = 0
-innerBg.Parent = barFrame
-
-local innerCorner = Instance.new("UICorner")
-innerCorner.CornerRadius = UDim.new(0.25, 0)
-innerCorner.Parent = innerBg
-
-local bgGradient = Instance.new("UIGradient")
-bgGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 40, 50)),
-	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(100, 30, 40)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(220, 90, 50))
-})
-bgGradient.Parent = innerBg
-
-local fillBar = Instance.new("Frame")
-fillBar.Name = "FillBar"
-fillBar.Size = UDim2.new(1, 0, 1, 0)
-fillBar.Position = UDim2.new(0, 0, 0, 0)
-fillBar.BackgroundColor3 = Color3.fromRGB(170, 205, 225)
-fillBar.BorderSizePixel = 0
-fillBar.Parent = innerBg
-
-local fillCorner = Instance.new("UICorner")
-fillCorner.CornerRadius = UDim.new(0.25, 0)
-fillCorner.Parent = fillBar
-
-gui.Parent = playerGui
-
-local function GetGitSound(GithubSnd, SoundName)
-	local fileName = SoundName .. ".mp3"
-	if not isfile(fileName) then
-		local success, response = pcall(function()
-			return game:HttpGet(GithubSnd)
-		end)
-		if success and response then
-			writefile(fileName, response)
-		else
-			warn("[Frostbite]: Không thể tải âm thanh!")
-			return nil
-		end
+	if not (writefile and getasset and http_request) then
+		return
 	end
 
-	local sound = Instance.new("Sound")
-	sound.SoundId = getasset(fileName)
-	return sound
-end
+	local gameData = game:GetService("ReplicatedStorage"):WaitForChild("GameData")
+	local latestRoom = gameData:WaitForChild("LatestRoom")
 
-local function GetGithubModel(url)
-	local fileName = string.match(url, "([^/]+)$") or "temp_model.rbxm"
+	latestRoom.Changed:Wait()
+	local tweenservice = game:GetService("TweenService")
+	local Players = game:GetService("Players")
+	local Lighting = game:GetService("Lighting")
+	local player = Players.LocalPlayer
+	local playerGui = player:WaitForChild("PlayerGui")
 
-	if not isfile(fileName) then
-		local response = http_request({Url = url, Method = "GET"})
-		if response and response.StatusCode == 200 then
-			writefile(fileName, response.Body)
-		else
-			return nil
-		end
-	end
+	local frost = Instance.new("ColorCorrectionEffect")
+	frost.Parent = Lighting
+	frost.Name = "frost4"
+	tweenservice:Create(frost, TweenInfo.new(10), {
+		TintColor = Color3.fromRGB(0, 0, 255),
+		Saturation = -0.7,
+		Contrast = 0.2
+	}):Play()
 
-	local assetId = getasset(fileName)
-	local success, result = pcall(function() 
-		return game:GetObjects(assetId)[1] 
-	end)
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "FrostbiteColdBarGui"
+	gui.ResetOnSpawn = false
+	gui.DisplayOrder = 100000
 
-	return success and result or nil
-end
+	local container = Instance.new("CanvasGroup")
+	container.Name = "BarContainer"
+	container.Size = UDim2.new(0, 320, 0, 8)
+	container.Position = UDim2.new(1, -340, 1, -40)
+	container.BackgroundTransparency = 1
+	container.Parent = gui
 
-local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Frostbite.mp3?raw=true", "Frostyman")
-if Jumpscare then
-	Jumpscare.Parent = workspace
-	Jumpscare.Volume = 2
-	Jumpscare.PlaybackSpeed = 1
-	Jumpscare.Looped = true
-	Jumpscare.Name = "Frostyman67"
-	Jumpscare:Play()
-end
+	local barFrame = Instance.new("Frame")
+	barFrame.Name = "BarFrame"
+	barFrame.Size = UDim2.new(1, 0, 1, 0)
+	barFrame.BackgroundColor3 = Color3.fromRGB(20, 25, 35)
+	barFrame.BorderSizePixel = 0
+	barFrame.Parent = container
 
-local function GetRoom()
-	local rooms = workspace:FindFirstChild("CurrentRooms")
-	if rooms and latestRoom.Value then
-		return rooms:FindFirstChild(tostring(latestRoom.Value))
-	end
-	return nil
-end
+	local uiPadding = Instance.new("UIPadding")
+	uiPadding.PaddingLeft = UDim.new(0, 4)
+	uiPadding.PaddingRight = UDim.new(0, 4)
+	uiPadding.PaddingTop = UDim.new(0, 4)
+	uiPadding.PaddingBottom = UDim.new(0, 4)
+	uiPadding.Parent = barFrame
 
-local modelTemplate = GetGithubModel("https://github.com/eoyoustme/Pressure-Skid-Gay-/raw/main/OXford.rbxm")
-if not modelTemplate then
-	return
-end
+	local uiCorner = Instance.new("UICorner")
+	uiCorner.CornerRadius = UDim.new(0.25, 0)
+	uiCorner.Parent = barFrame
 
-local maxCold = 100
-local currentCold = maxCold
+	local uiStroke = Instance.new("UIStroke")
+	uiStroke.Color = Color3.fromRGB(150, 215, 245)
+	uiStroke.Thickness = 4
+	uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	uiStroke.Parent = barFrame
 
-for i = 1, 8 do
-	local currentRoom = GetRoom()
-	if not currentRoom then break end
+	local innerBg = Instance.new("Frame")
+	innerBg.Name = "InnerBg"
+	innerBg.Size = UDim2.new(1, -2, 1, -2)
+	innerBg.Position = UDim2.new(0, 1, 0, 1)
+	innerBg.BackgroundColor3 = Color3.fromRGB(50, 20, 30)
+	innerBg.BorderSizePixel = 0
+	innerBg.Parent = barFrame
 
-	local activeHeatFixture = nil
-	local assets = currentRoom:FindFirstChild("Assets")
-	local lightFixturesFolder = assets and (assets:FindFirstChild("Light_Fixtures") or assets:FindFirstChild("LightFixtures"))
+	local innerCorner = Instance.new("UICorner")
+	innerCorner.CornerRadius = UDim.new(0.25, 0)
+	innerCorner.Parent = innerBg
 
-	if lightFixturesFolder then
-		local fixtures = lightFixturesFolder:GetChildren()
-		if #fixtures > 0 then
-			activeHeatFixture = fixtures[math.random(1, #fixtures)]
+	local bgGradient = Instance.new("UIGradient")
+	bgGradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 40, 50)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(100, 30, 40)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(220, 90, 50))
+	})
+	bgGradient.Parent = innerBg
 
-			local heatSound = Instance.new("Sound")
-			heatSound.SoundId = "rbxassetid://92374626048858"
-			heatSound.Volume = 10
-			heatSound.Parent = activeHeatFixture
-			heatSound:Play()
+	local fillBar = Instance.new("Frame")
+	fillBar.Name = "FillBar"
+	fillBar.Size = UDim2.new(1, 0, 1, 0)
+	fillBar.Position = UDim2.new(0, 0, 0, 0)
+	fillBar.BackgroundColor3 = Color3.fromRGB(170, 205, 225)
+	fillBar.BorderSizePixel = 0
+	fillBar.Parent = innerBg
 
-			local neonPart = activeHeatFixture:FindFirstChild("Neon")  or activeHeatFixture:FindFirstChildWhichIsA("BasePart")
-			local fireEffect = Instance.new("Fire")
+	local fillCorner = Instance.new("UICorner")
+	fillCorner.CornerRadius = UDim.new(0.25, 0)
+	fillCorner.Parent = fillBar
 
-			if neonPart then
-				neonPart.Transparency = 1
-				fireEffect.Parent = neonPart
+	gui.Parent = playerGui
+
+	local function GetGitSound(GithubSnd, SoundName)
+		local fileName = SoundName .. ".mp3"
+		if not isfile(fileName) then
+			local success, response = pcall(function()
+				return game:HttpGet(GithubSnd)
+			end)
+			if success and response then
+				writefile(fileName, response)
 			else
-				fireEffect.Parent = activeHeatFixture
+				warn("[Frostbite]: Không thể tải âm thanh!")
+				return nil
 			end
+		end
 
-			local pointLight = activeHeatFixture:FindFirstChildWhichIsA("PointLight", true)
-			if not pointLight then
-				pointLight = Instance.new("PointLight")
-				pointLight.Parent = neonPart or activeHeatFixture
+		local sound = Instance.new("Sound")
+		sound.SoundId = getasset(fileName)
+		return sound
+	end
+
+	local function GetGithubModel(url)
+		local fileName = string.match(url, "([^/]+)$") or "temp_model.rbxm"
+
+		if not isfile(fileName) then
+			local response = http_request({Url = url, Method = "GET"})
+			if response and response.StatusCode == 200 then
+				writefile(fileName, response.Body)
+			else
+				return nil
 			end
-			pointLight.Range = 12
-			pointLight.Brightness = 3
-			pointLight.Enabled = true
-
-			task.spawn(function()
-				task.wait(15)
-				if fireEffect and fireEffect.Parent then fireEffect:Destroy() end
-				if pointLight and pointLight.Parent then pointLight.Enabled = false end
-				activeHeatFixture = nil
-			end)
 		end
+
+		local assetId = getasset(fileName)
+		local success, result = pcall(function() 
+			return game:GetObjects(assetId)[1] 
+		end)
+
+		return success and result or nil
 	end
 
-	local camera = workspace.CurrentCamera
-	local s = modelTemplate:Clone()
-	s.Parent = workspace
-	s.Name = "Frostyma5n"
-
-	local entity = s:FindFirstChildWhichIsA("BasePart") or s.PrimaryPart or s:FindFirstChild("FrostyNew")
-	if not entity then
-		s:Destroy()
-		break
+	local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Frostbite.mp3?raw=true", "Frostyman")
+	if Jumpscare then
+		Jumpscare.Parent = workspace
+		Jumpscare.Volume = 2
+		Jumpscare.PlaybackSpeed = 1
+		Jumpscare.Looped = true
+		Jumpscare.Name = "Frostyman67"
+		Jumpscare:Play()
 	end
 
-	entity.CanCollide = false
-
-	local entrance = currentRoom:FindFirstChild("RoomEntrance")
-	if entrance then
-		entity.CFrame = game.Workspace.CurrentRooms:GetChildren()[#game.Workspace.CurrentRooms:GetChildren() - 1].Parts.Floor.CFrame + Vector3.new(0,6,0)
-	end
-
-	task.wait(0.5)
-
-	camera.CameraType = Enum.CameraType.Custom
-
-	task.spawn(function()
-		local CameraShaker = game.ReplicatedStorage:FindFirstChild("CameraShaker") or (game.ReplicatedStorage:FindFirstChild("Modules") and game.ReplicatedStorage.Modules:FindFirstChild("CameraShaker"))
-		if CameraShaker then
-			local CameraShakerModule = require(CameraShaker)
-			local camShake = CameraShakerModule.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-				camera.CFrame = camera.CFrame * shakeCf
-			end)
-			camShake:Start()
-			camShake:ShakeOnce(10, 10, 0.5, 5, 2, 0.5)
+	local function GetRoom()
+		local rooms = workspace:FindFirstChild("CurrentRooms")
+		if rooms and latestRoom.Value then
+			return rooms:FindFirstChild(tostring(latestRoom.Value))
 		end
-	end)
+		return nil
+	end
 
-	local attacking = true
+	local modelTemplate = GetGithubModel("https://github.com/eoyoustme/Pressure-Skid-Gay-/raw/main/OXford.rbxm")
+	if not modelTemplate then
+		return
+	end
 
-	local roomConnection
-	roomConnection = workspace.CurrentRooms.ChildAdded:Connect(function(newRoom)
-		if not attacking then return end
+	local maxCold = 100
+	local currentCold = maxCold
 
-		task.wait(1)
-		local actuallynew = workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]
-		local nextEntrance = actuallynew:FindFirstChild("RoomEntrance")
-		if nextEntrance and entity and entity.Parent then
-			local targetCFrame = game.Workspace.CurrentRooms:GetChildren()[#game.Workspace.CurrentRooms:GetChildren() - 1].Parts.Floor.CFrame + Vector3.new(0,6,0)
-			local tween = tweenservice:Create(entity, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {CFrame = targetCFrame})
-			
-			tween:Play()
-			tween.Completed:Wait()
+	for i = 1, 8 do
+		local currentRoom = GetRoom()
+		if not currentRoom then break end
+
+		local activeHeatFixture = nil
+		local assets = currentRoom:FindFirstChild("Assets")
+		local lightFixturesFolder = assets and (assets:FindFirstChild("Light_Fixtures") or assets:FindFirstChild("LightFixtures"))
+
+		if lightFixturesFolder then
+			local fixtures = lightFixturesFolder:GetChildren()
+			if #fixtures > 0 then
+				activeHeatFixture = fixtures[math.random(1, #fixtures)]
+
+				local heatSound = Instance.new("Sound")
+				heatSound.SoundId = "rbxassetid://92374626048858"
+				heatSound.Volume = 10
+				heatSound.Parent = activeHeatFixture
+				heatSound:Play()
+
+				local neonPart = activeHeatFixture:FindFirstChild("Neon")  or activeHeatFixture:FindFirstChildWhichIsA("BasePart")
+				local fireEffect = Instance.new("Fire")
+
+				if neonPart then
+					neonPart.Transparency = 1
+					fireEffect.Parent = neonPart
+				else
+					fireEffect.Parent = activeHeatFixture
+				end
+
+				local pointLight = activeHeatFixture:FindFirstChildWhichIsA("PointLight", true)
+				if not pointLight then
+					pointLight = Instance.new("PointLight")
+					pointLight.Parent = neonPart or activeHeatFixture
+				end
+				pointLight.Range = 12
+				pointLight.Brightness = 3
+				pointLight.Enabled = true
+
+				task.spawn(function()
+					task.wait(15)
+					if fireEffect and fireEffect.Parent then fireEffect:Destroy() end
+					if pointLight and pointLight.Parent then pointLight.Enabled = false end
+					activeHeatFixture = nil
+				end)
+			end
+		end
+
+		local camera = workspace.CurrentCamera
+		local s = modelTemplate:Clone()
+		s.Parent = workspace
+		s.Name = "Frostyma5n"
+
+		local entity = s:FindFirstChildWhichIsA("BasePart") or s.PrimaryPart or s:FindFirstChild("FrostyNew")
+		if not entity then
+			s:Destroy()
+			break
+		end
+
+		entity.CanCollide = false
+
+		local entrance = currentRoom:FindFirstChild("RoomEntrance")
+		if entrance then
+			entity.CFrame = game.Workspace.CurrentRooms:GetChildren()[#game.Workspace.CurrentRooms:GetChildren() - 1].Parts.Floor.CFrame + Vector3.new(0,6,0)
+		end
+
+		task.wait(0.5)
+
+		camera.CameraType = Enum.CameraType.Custom
+
+		task.spawn(function()
 			local CameraShaker = game.ReplicatedStorage:FindFirstChild("CameraShaker") or (game.ReplicatedStorage:FindFirstChild("Modules") and game.ReplicatedStorage.Modules:FindFirstChild("CameraShaker"))
 			if CameraShaker then
 				local CameraShakerModule = require(CameraShaker)
@@ -263,194 +239,221 @@ for i = 1, 8 do
 					camera.CFrame = camera.CFrame * shakeCf
 				end)
 				camShake:Start()
-				camShake:ShakeOnce(20, 10, 0.5, 5, 2, 0.5)
+				camShake:ShakeOnce(10, 10, 0.5, 5, 2, 0.5)
 			end
-		end
+		end)
 
-		attacking = false
+		local attacking = true
 
-		if roomConnection then
-			roomConnection:Disconnect()
-		end
+		local roomConnection
+		roomConnection = workspace.CurrentRooms.ChildAdded:Connect(function(newRoom)
+			if not attacking then return end
 
-		if s and s.Parent then
-			s:Destroy()
-		end
-	end)
+			task.wait(1)
+			local actuallynew = workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]
+			local nextEntrance = actuallynew:FindFirstChild("RoomEntrance")
+			if nextEntrance and entity and entity.Parent then
+				local targetCFrame = game.Workspace.CurrentRooms:GetChildren()[#game.Workspace.CurrentRooms:GetChildren() - 1].Parts.Floor.CFrame + Vector3.new(0,6,0)
+				local tween = tweenservice:Create(entity, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {CFrame = targetCFrame})
 
-	task.spawn(function()
-		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = "Aihoi"
-		screenGui.IgnoreGuiInset = true
-		screenGui.DisplayOrder = 999999
-		screenGui.Parent = player:WaitForChild("PlayerGui")
-
-		local imageLabel = Instance.new("ImageLabel")
-		imageLabel.BackgroundTransparency = 1
-		imageLabel.BorderSizePixel = 0
-		imageLabel.Position = UDim2.new(0, 0, 0, 0)
-		imageLabel.Size = UDim2.new(1, 0, 1, 0)
-		imageLabel.ScaleType = Enum.ScaleType.Stretch
-		imageLabel.Image = "rbxassetid://10344339712"
-		imageLabel.ImageTransparency = 0
-		imageLabel.Visible = true
-		imageLabel.Parent = screenGui
-
-		local blur = Lighting:FindFirstChild("Blur5")
-		if not blur then
-			blur = Instance.new("BlurEffect")
-			blur.Name = "Blur5"
-			blur.Size = 10
-			blur.Parent = Lighting
-		else
-			blur.Enabled = true
-		end
-
-		local damage = 5
-
-		while attacking and entity and entity.Parent do
-			task.wait(0.1)
-
-			local character = player.Character
-			if not character then continue end
-
-			local humanoid = character:FindFirstChildOfClass("Humanoid")
-			local hrp = character:FindFirstChild("HumanoidRootPart")
-			if not humanoid or humanoid.Health <= 0 then break end
-
-			local lighter = character:FindFirstChild("Lighter")
-			local isLighterOn = lighter and lighter:GetAttribute("Enabled")
-
-			local isNearHeat = false
-			if activeHeatFixture and activeHeatFixture.Parent and hrp then
-				local targetPart = activeHeatFixture:FindFirstChildWhichIsA("BasePart") or activeHeatFixture.PrimaryPart
-				if targetPart and (targetPart.Position - hrp.Position).Magnitude <= 12 then
-					isNearHeat = true
+				tween:Play()
+				tween.Completed:Wait()
+				local CameraShaker = game.ReplicatedStorage:FindFirstChild("CameraShaker") or (game.ReplicatedStorage:FindFirstChild("Modules") and game.ReplicatedStorage.Modules:FindFirstChild("CameraShaker"))
+				if CameraShaker then
+					local CameraShakerModule = require(CameraShaker)
+					local camShake = CameraShakerModule.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+						camera.CFrame = camera.CFrame * shakeCf
+					end)
+					camShake:Start()
+					camShake:ShakeOnce(20, 10, 0.5, 5, 2, 0.5)
 				end
 			end
 
-			if isNearHeat then
-				currentCold = math.min(maxCold, currentCold + 1.5)
-				imageLabel.ImageTransparency = math.clamp(currentCold / maxCold, 0, 1)
-				if blur then blur.Enabled = false end
-			elseif not isNearHeat and isLighterOn then
-				currentCold = math.max(0, currentCold - 0.1)
-				imageLabel.ImageTransparency = math.clamp(currentCold / maxCold, 0, 1)
+			attacking = false
 
-				if currentCold < 30 then
-					if blur then blur.Enabled = true end
-				else
-					if blur then blur.Enabled = false end
-				end
+			if roomConnection then
+				roomConnection:Disconnect()
+			end
 
-				if currentCold <= 0 then
-					humanoid.Health = math.max(0, humanoid.Health - (damage * 0.1))
+			if s and s.Parent then
+				s:Destroy()
+			end
+		end)
 
-					local statsFolder = game.ReplicatedStorage:FindFirstChild("GameStats")
-					if statsFolder then
-						local playerStats = statsFolder:FindFirstChild("Player_" .. player.Name)
-						if playerStats and playerStats:FindFirstChild("Total") and playerStats.Total:FindFirstChild("DeathCause") then
-							playerStats.Total.DeathCause.Value = "Frostbite"
-						end
+		task.spawn(function()
+			local screenGui = Instance.new("ScreenGui")
+			screenGui.Name = "Aihoi"
+			screenGui.IgnoreGuiInset = true
+			screenGui.DisplayOrder = 999999
+			screenGui.Parent = player:WaitForChild("PlayerGui")
+
+			local imageLabel = Instance.new("ImageLabel")
+			imageLabel.BackgroundTransparency = 1
+			imageLabel.BorderSizePixel = 0
+			imageLabel.Position = UDim2.new(0, 0, 0, 0)
+			imageLabel.Size = UDim2.new(1, 0, 1, 0)
+			imageLabel.ScaleType = Enum.ScaleType.Stretch
+			imageLabel.Image = "rbxassetid://10344339712"
+			imageLabel.ImageTransparency = 0
+			imageLabel.Visible = true
+			imageLabel.Parent = screenGui
+
+			local blur = Lighting:FindFirstChild("Blur5")
+			if not blur then
+				blur = Instance.new("BlurEffect")
+				blur.Name = "Blur5"
+				blur.Size = 10
+				blur.Parent = Lighting
+			else
+				blur.Enabled = true
+			end
+
+			local damage = 5
+
+			while attacking and entity and entity.Parent do
+				task.wait(0.1)
+
+				local character = player.Character
+				if not character then continue end
+
+				local humanoid = character:FindFirstChildOfClass("Humanoid")
+				local hrp = character:FindFirstChild("HumanoidRootPart")
+				if not humanoid or humanoid.Health <= 0 then break end
+
+				local lighter = character:FindFirstChild("Lighter")
+				local isLighterOn = lighter and lighter:GetAttribute("Enabled")
+
+				local isNearHeat = false
+				if activeHeatFixture and activeHeatFixture.Parent and hrp then
+					local targetPart = activeHeatFixture:FindFirstChildWhichIsA("BasePart") or activeHeatFixture.PrimaryPart
+					if targetPart and (targetPart.Position - hrp.Position).Magnitude <= 12 then
+						isNearHeat = true
 					end
-					damage = math.min(10, damage + 0)
 				end
-			elseif not isNearHeat then
-	currentCold = math.max(0, currentCold - 0.4)
-	imageLabel.ImageTransparency = math.clamp(currentCold / maxCold, 0, 1)
 
-	if currentCold < 30 then
-		if blur then blur.Enabled = true end
-	else
-		if blur then blur.Enabled = false end
+				if isNearHeat then
+					currentCold = math.min(maxCold, currentCold + 1.5)
+					imageLabel.ImageTransparency = math.clamp(currentCold / maxCold, 0, 1)
+					if blur then blur.Enabled = false end
+				elseif not isNearHeat and isLighterOn then
+					currentCold = math.max(0, currentCold - 0.1)
+					imageLabel.ImageTransparency = math.clamp(currentCold / maxCold, 0, 1)
+
+					if currentCold < 30 then
+						if blur then blur.Enabled = true end
+					else
+						if blur then blur.Enabled = false end
+					end
+
+					if currentCold <= 0 then
+						humanoid.Health = math.max(0, humanoid.Health - (damage * 0.1))
+
+						local statsFolder = game.ReplicatedStorage:FindFirstChild("GameStats")
+						if statsFolder then
+							local playerStats = statsFolder:FindFirstChild("Player_" .. player.Name)
+							if playerStats and playerStats:FindFirstChild("Total") and playerStats.Total:FindFirstChild("DeathCause") then
+								playerStats.Total.DeathCause.Value = "Frostbite"
+							end
+						end
+						damage = math.min(10, damage + 0)
+					end
+				elseif not isNearHeat then
+					currentCold = math.max(0, currentCold - 0.4)
+					imageLabel.ImageTransparency = math.clamp(currentCold / maxCold, 0, 1)
+
+					if currentCold < 30 then
+						if blur then blur.Enabled = true end
+					else
+						if blur then blur.Enabled = false end
+					end
+
+					if currentCold <= 0 then
+						humanoid.Health = math.max(0, humanoid.Health - (damage * 0.1))
+
+						local statsFolder = game.ReplicatedStorage:FindFirstChild("GameStats")
+						if statsFolder then
+							local playerStats = statsFolder:FindFirstChild("Player_" .. player.Name)
+							if playerStats and playerStats:FindFirstChild("Total") and playerStats.Total:FindFirstChild("DeathCause") then
+								playerStats.Total.DeathCause.Value = "Frostbite"
+							end
+						end
+						damage = math.min(10, damage + 0)
+					end
+				end
+
+				fillBar.Size = UDim2.new(math.clamp(currentCold / maxCold, 0, 1), 0, 1, 0)
+			end
+		end)
+
+		repeat
+			task.wait(0.1)
+		until not attacking
 	end
 
-	if currentCold <= 0 then
-		humanoid.Health = math.max(0, humanoid.Health - (damage * 0.1))
+	local Ahoi = GetGitSound("https://github.com/eoyoustme/Impossible/raw/main/frostbite%20end.mp3","Frostenddd")
+	if Ahoi then
+		Ahoi.Parent = workspace
+		Ahoi.Volume = 3
+		Ahoi.PlaybackSpeed = 1
+		Ahoi:Play()
+	end
 
-		local statsFolder = game.ReplicatedStorage:FindFirstChild("GameStats")
-		if statsFolder then
-			local playerStats = statsFolder:FindFirstChild("Player_" .. player.Name)
-			if playerStats and playerStats:FindFirstChild("Total") and playerStats.Total:FindFirstChild("DeathCause") then
-				playerStats.Total.DeathCause.Value = "Frostbite"
+	local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
+	local camera = game.Workspace.CurrentCamera
+	local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+		camera.CFrame = camera.CFrame * shakeCf
+	end)
+	camShake:Start()
+	camShake:ShakeOnce(10, 3, 0.1, 6)
+
+	task.wait(1)
+
+	local soundObj = workspace:FindFirstChild("Frostyman67")
+	if soundObj then soundObj:Destroy() end
+
+	local blurObj = game.Lighting:FindFirstChild("Blur5")
+	if blurObj then blurObj:Destroy() end
+
+	if player and player:FindFirstChild("PlayerGui") then
+		for _, g in ipairs(player.PlayerGui:GetChildren()) do
+			if g.Name == "Aihoi" then
+				g:Destroy()
 			end
 		end
-		damage = math.min(10, damage + 0)
 	end
-end
 
-			fillBar.Size = UDim2.new(math.clamp(currentCold / maxCold, 0, 1), 0, 1, 0)
-		end
-	end)
+	task.wait(3)
 
-	repeat
-		task.wait(0.1)
-	until not attacking
-end
+	task.wait(1)
 
-local Ahoi = GetGitSound("https://github.com/eoyoustme/Impossible/raw/main/frostbite%20end.mp3","Frostenddd")
-if Ahoi then
-	Ahoi.Parent = workspace
-	Ahoi.Volume = 3
-	Ahoi.PlaybackSpeed = 1
-	Ahoi:Play()
-end
-
-local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
-local camera = game.Workspace.CurrentCamera
-local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-	camera.CFrame = camera.CFrame * shakeCf
-end)
-camShake:Start()
-camShake:ShakeOnce(10, 3, 0.1, 6)
-
-task.wait(1)
-
-local soundObj = workspace:FindFirstChild("Frostyman67")
-if soundObj then soundObj:Destroy() end
-
-local blurObj = game.Lighting:FindFirstChild("Blur5")
-if blurObj then blurObj:Destroy() end
-
-if player and player:FindFirstChild("PlayerGui") then
-	for _, g in ipairs(player.PlayerGui:GetChildren()) do
-		if g.Name == "Aihoi" then
-			g:Destroy()
-		end
+	local frost4 = game.Lighting:FindFirstChild("frost4")
+	if frost4 and frost4.Parent then
+		frost4:Destroy()
 	end
+
+	task.wait(1)
+
+	local frost65 = game.Lighting:FindFirstChild("frost65")
+	if frost65 then
+		tweenservice:Create(frost65, TweenInfo.new(1), {
+			TintColor = Color3.fromRGB(255, 255, 255),
+			Saturation = 0,
+			Contrast = 0
+		}):Play()
+	end
+
+	task.wait(5)
+
+	if frost65 and frost65.Parent then frost65:Destroy() end
+	if Ahoi and Ahoi.Parent then Ahoi:Destroy() end
+	if gui and gui.Parent then gui:Destroy() end
+
+	local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
+
+	achievementGiver({
+		Title = "Reason of Cold",
+		Desc = "Cold so cold...",
+		Reason = "Survive Frostbite / Blizzard",
+		Image = "rbxassetid://0"
+	})
 end
-
-task.wait(3)
-
-task.wait(1)
-
-local frost4 = game.Lighting:FindFirstChild("frost4")
-if frost4 and frost4.Parent then
-	frost4:Destroy()
-end
-
-task.wait(1)
-
-local frost65 = game.Lighting:FindFirstChild("frost65")
-if frost65 then
-	tweenservice:Create(frost65, TweenInfo.new(1), {
-		TintColor = Color3.fromRGB(255, 255, 255),
-		Saturation = 0,
-		Contrast = 0
-	}):Play()
-end
-
-task.wait(5)
-
-if frost65 and frost65.Parent then frost65:Destroy() end
-if Ahoi and Ahoi.Parent then Ahoi:Destroy() end
-if gui and gui.Parent then gui:Destroy() end
-
-local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
-
-achievementGiver({
-	Title = "Reason of Cold",
-	Desc = "Cold so cold...",
-	Reason = "Survive Frostbite / Blizzard",
-	Image = "rbxassetid://0"
-})
