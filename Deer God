@@ -1,3 +1,6 @@
+if workspace:FindFirstChild("IsM") then
+	return
+else
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -680,3 +683,4 @@ if connection then connection:Disconnect() end
 if screenGui then screenGui:Destroy() end
 if noiseSpeedVal then noiseSpeedVal:Destroy() end
 if deergod then deergod:Destroy() end
+end
