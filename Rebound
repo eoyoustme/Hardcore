@@ -602,6 +602,113 @@ else
 	})
 
 	-- \\ Callbacks // --
+	
+	task.spawn(function()
+		local originalSoundSpeeds = {}
+		local originalParticleScales = {}
+
+		local ceasePauseThread = nil
+		local ceaseResumeThread = nil
+		local isCeased = false
+
+		local function cacheEntityProperties()
+			if not entity or not entity.Model then return end
+
+			local targets = entity.Model:GetDescendants()
+			if entity.Model:IsA("Sound") or entity.Model:IsA("ParticleEmitter") then
+				table.insert(targets, entity.Model)
+			end
+
+			for _, obj in ipairs(targets) do
+				if obj:IsA("Sound") and originalSoundSpeeds[obj] == nil then
+					originalSoundSpeeds[obj] = obj.PlaybackSpeed
+				elseif obj:IsA("ParticleEmitter") and originalParticleScales[obj] == nil then
+					originalParticleScales[obj] = obj.TimeScale
+				end
+			end
+		end
+
+		local function setCeaseState(newState)
+			if newState == isCeased then return end
+			isCeased = newState
+			cacheEntityProperties()
+
+			if ceasePauseThread then task.cancel(ceasePauseThread); ceasePauseThread = nil end
+			if ceaseResumeThread then task.cancel(ceaseResumeThread); ceaseResumeThread = nil end
+
+			if isCeased then
+
+				if entity and typeof(entity.Pause) == "function" then
+					entity:Pause()
+				end
+
+	
+				local ceaseTweenInfo = TweenInfo.new(0.65, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+
+				for sound in pairs(originalSoundSpeeds) do
+					if sound and sound.Parent then
+						TweenService:Create(sound, ceaseTweenInfo, {PlaybackSpeed = 0}):Play()
+					end
+				end
+
+				for particle in pairs(originalParticleScales) do
+					if particle and particle.Parent then
+						TweenService:Create(particle, ceaseTweenInfo, {TimeScale = 0}):Play()
+					end
+				end
+			else
+		
+				local unceaseTweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+
+				for sound, origSpeed in pairs(originalSoundSpeeds) do
+					if sound and sound.Parent then
+						TweenService:Create(sound, unceaseTweenInfo, {PlaybackSpeed = origSpeed}):Play()
+					end
+				end
+
+				for particle, origScale in pairs(originalParticleScales) do
+					if particle and particle.Parent then
+						TweenService:Create(particle, unceaseTweenInfo, {TimeScale = origScale}):Play()
+					end
+				end
+
+		
+				ceaseResumeThread = task.delay(2, function()
+					if not isCeased and entity and typeof(entity.Resume) == "function" then
+						entity:Resume()
+					end
+				end)
+			end
+		end
+
+		workspace.ChildAdded:Connect(function(child)
+			if child.Name == "CeaseMoving" then
+				setCeaseState(true)
+			else
+				local nameConn
+				nameConn = child:GetPropertyChangedSignal("Name"):Connect(function()
+					if child.Name == "CeaseMoving" then
+						setCeaseState(true)
+						nameConn:Disconnect()
+					end
+				end)
+			end
+		end)
+
+		workspace.ChildRemoved:Connect(function(child)
+			if child.Name == "CeaseMoving" then
+				task.defer(function()
+					if not workspace:FindFirstChild("CeaseMoving") then
+						setCeaseState(false)
+					end
+				end)
+			end
+		end)
+
+		if workspace:FindFirstChild("CeaseMoving") then
+			setCeaseState(true)
+		end
+	end)
 
 	entity:SetCallback("OnSpawned", function()
 		light(2, Color3.fromRGB(127, 249, 255),Color3.fromRGB(65, 138, 255))
@@ -640,6 +747,113 @@ else
 	end)
 
 	entity:SetCallback("OnReboundStyle", function(newCloneEntity: any)
+		task.spawn(function()
+			local originalSoundSpeeds = {}
+			local originalParticleScales = {}
+
+			local ceasePauseThread = nil
+			local ceaseResumeThread = nil
+			local isCeased = false
+
+			local function cacheEntityProperties()
+				if not entity or not entity.Model then return end
+
+				local targets = entity.Model:GetDescendants()
+				if entity.Model:IsA("Sound") or entity.Model:IsA("ParticleEmitter") then
+					table.insert(targets, entity.Model)
+				end
+
+				for _, obj in ipairs(targets) do
+					if obj:IsA("Sound") and originalSoundSpeeds[obj] == nil then
+						originalSoundSpeeds[obj] = obj.PlaybackSpeed
+					elseif obj:IsA("ParticleEmitter") and originalParticleScales[obj] == nil then
+						originalParticleScales[obj] = obj.TimeScale
+					end
+				end
+			end
+
+			local function setCeaseState(newState)
+				if newState == isCeased then return end
+				isCeased = newState
+				cacheEntityProperties()
+
+				if ceasePauseThread then task.cancel(ceasePauseThread); ceasePauseThread = nil end
+				if ceaseResumeThread then task.cancel(ceaseResumeThread); ceaseResumeThread = nil end
+
+				if isCeased then
+
+					if entity and typeof(entity.Pause) == "function" then
+						entity:Pause()
+					end
+
+
+					local ceaseTweenInfo = TweenInfo.new(0.65, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+
+					for sound in pairs(originalSoundSpeeds) do
+						if sound and sound.Parent then
+							TweenService:Create(sound, ceaseTweenInfo, {PlaybackSpeed = 0}):Play()
+						end
+					end
+
+					for particle in pairs(originalParticleScales) do
+						if particle and particle.Parent then
+							TweenService:Create(particle, ceaseTweenInfo, {TimeScale = 0}):Play()
+						end
+					end
+				else
+
+					local unceaseTweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+
+					for sound, origSpeed in pairs(originalSoundSpeeds) do
+						if sound and sound.Parent then
+							TweenService:Create(sound, unceaseTweenInfo, {PlaybackSpeed = origSpeed}):Play()
+						end
+					end
+
+					for particle, origScale in pairs(originalParticleScales) do
+						if particle and particle.Parent then
+							TweenService:Create(particle, unceaseTweenInfo, {TimeScale = origScale}):Play()
+						end
+					end
+
+
+					ceaseResumeThread = task.delay(2, function()
+						if not isCeased and entity and typeof(entity.Resume) == "function" then
+							entity:Resume()
+						end
+					end)
+				end
+			end
+
+			workspace.ChildAdded:Connect(function(child)
+				if child.Name == "CeaseMoving" then
+					setCeaseState(true)
+				else
+					local nameConn
+					nameConn = child:GetPropertyChangedSignal("Name"):Connect(function()
+						if child.Name == "CeaseMoving" then
+							setCeaseState(true)
+							nameConn:Disconnect()
+						end
+					end)
+				end
+			end)
+
+			workspace.ChildRemoved:Connect(function(child)
+				if child.Name == "CeaseMoving" then
+					task.defer(function()
+						if not workspace:FindFirstChild("CeaseMoving") then
+							setCeaseState(false)
+						end
+					end)
+				end
+			end)
+
+			if workspace:FindFirstChild("CeaseMoving") then
+				setCeaseState(true)
+			end
+		end)
+
 		task.spawn(function()
 			local player = game.Players.LocalPlayer
 			if player and player:FindFirstChild("PlayerGui") then
@@ -722,6 +936,7 @@ else
 	end)
 
 	entity:SetCallback("OnDespawning", function()
+		entity.Movement.Speed = 35
 
 	end)
 
