@@ -1,3 +1,6 @@
+if workspace:FindFirstChild("IsM") then
+	return
+else
 local rng = Random.new()
 
 for i = 1, 1 do
@@ -9,4 +12,5 @@ for i = 1, 1 do
 	elseif mode == 3 then
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Singularity-C"))()
 	end
+end
 end
