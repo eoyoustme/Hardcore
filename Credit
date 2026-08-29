@@ -11,7 +11,7 @@ task.spawn(function()
 	end
 	local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Doors%20hardcore%20reignited%20Door%201%20OST.mp3?raw=true","Ost")
 	Jumpscare.Parent = workspace
-	Jumpscare.Volume = 3
+	Jumpscare.Volume = 0.74
 	Jumpscare.PlaybackSpeed = 1
 	Jumpscare:Play()
 
