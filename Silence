@@ -48,7 +48,7 @@ else
 	HeardText.Size = UDim2.fromOffset(700, 100)
 	HeardText.BackgroundTransparency = 1
 	HeardText.Text = "You were heard."
-	HeardText.TextColor3 = Color3.fromRGB(124,124,124)
+	HeardText.TextColor3 = Color3.fromRGB(161, 161, 161)
 	HeardText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 	HeardText.TextStrokeTransparency = 0.6
 	HeardText.TextScaled = true
@@ -101,9 +101,9 @@ else
 		HeardText.Position = DEFAULT_POSITION
 		HeardText.Size = DEFAULT_SIZE
 		HeardText.Rotation = 0
-		HeardText.TextTransparency = 0
+		HeardText.TextTransparency = 0.6
 		HeardText.TextStrokeTransparency = 0.6
-		HeardText.TextColor3 = Color3.fromRGB(124,124,124)
+		HeardText.TextColor3 = Color3.fromRGB(161, 161, 161)
 	end
 
 	local function StopMonochromeTint(immediate)
@@ -178,9 +178,9 @@ else
 		HeardText.Position = DEFAULT_POSITION
 		HeardText.Size = UDim2.fromOffset(850, 130) 
 		HeardText.Rotation = 0
-		HeardText.TextTransparency = 0
+		HeardText.TextTransparency = 0.6
 		HeardText.TextStrokeTransparency = 0.1
-		HeardText.TextColor3 = Color3.fromRGB(255, 30, 30)
+		HeardText.TextColor3 = Color3.fromRGB(161, 161, 161)
 
 		local popScaleTween = TweenService:Create(HeardText, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 			Size = DEFAULT_SIZE
@@ -220,7 +220,7 @@ else
 
 		HeardText.Position = DEFAULT_POSITION
 		HeardText.Rotation = 0
-		HeardText.TextColor3 = Color3.fromRGB(255, 45, 45)
+		HeardText.TextColor3 = Color3.fromRGB(161, 161, 161)
 
 		local targetRotation = (math.random(1, 2) == 1) and -360 or 360
 		local moveUpTween = TweenService:Create(HeardText, TweenInfo.new(0.3, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
@@ -286,7 +286,9 @@ else
 	local oldModel = workspace:FindFirstChild("Silence")
 	if oldModel then oldModel:Destroy() end
 
-	local Silence5 = game:GetObjects("rbxassetid://75200967024105")[1]
+	local die = "https://github.com/eoyoustme/Impossible/raw/main/Silence.rbxm"
+	
+	local Silence5 = getgithubmodeL(die)
 	Silence5.Name = "Silence"
 	Silence5.Parent = workspace
 
@@ -307,15 +309,18 @@ else
 	end
 
 	local githubSound = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/sound.ogg?raw=true", "SilenceGi00thubSound")
-	githubSound.Volume = 8
-	githubSound.RollOffMinDistance = 50
+	githubSound.Volume = 1
+	githubSound.RollOffMinDistance = 25
 	githubSound.RollOffMaxDistance = 100
 	githubSound.RollOffMode = Enum.RollOffMode.Inverse
 	githubSound.Parent = Silence
+	githubSound.Ended:Connect(function() githubSound:Destroy() end)
 
-	local distantSound = GetGitSound("https://github.com/eoyoustme/Impossible/blob/main/XRecorder_Edited_20260728_01.mp3?raw=true", "Distocac")
-	distantSound.Volume = 7
+	local distantSound = GetGitSound("https://github.com/eoyoustme/Impossible/blob/main/black_kumuzhi-huge-cinematic-reverb-impact-506132.mp3?raw=true", "Distocac555")
+	distantSound.Volume = 1.2
 	distantSound.Parent = workspace
+	distantSound.Ended:Connect(function() distantSound:Destroy() end)
+
 
 	local activeRoom = nil
 	local is = true
@@ -1054,6 +1059,8 @@ else
 					end
 				end
 			end
+			
+			local is = true
 
 			local yes = Character:GetAttribute("Crouching")
 			if not minigameActive and not Character:GetAttribute("Hiding") and not yes and not isImmune then
@@ -1066,14 +1073,7 @@ else
 				if Humanoid.Health > 0 then
 					Silence.Anchored = true
 
-					local s = Instance.new("Sound")
-					s.SoundId = "rbxassetid://7861818231"
-					s.Volume = 0.5
-					s.Parent = workspace
-					s:Play()
-					Debris:AddItem(s, 2)
-
-					local SPEED_STUDS_PER_SECOND = 28
+					local SPEED_STUDS_PER_SECOND = 10
 					local targetCFrame = HRP.CFrame
 					local distance = (targetCFrame.Position - Silence.Position).Magnitude
 					local duration = distance / SPEED_STUDS_PER_SECOND
@@ -1086,23 +1086,28 @@ else
 						{CFrame = targetCFrame}
 					)
 					currentChaseTween:Play()
+					
+					task.spawn(function()
+						while is do
+							SPEED_STUDS_PER_SECOND += 0.1
+							task.wait(0.001)
+						end
+					end)
+					
 
 					local movedUncrouchedInRoom = IsPlayerInRoom(activeRoom) and not Character:GetAttribute("Crouching") and (currentPos - lastPos).Magnitude > 0.3
 
-					if distance <= 9 and movedUncrouchedInRoom and not isImmune then
+					if distance <= 9 and not isImmune then
 						Humanoid.Health = 0
+						
+						local distantSound55 = GetGitSound("https://github.com/eoyoustme/Impossible/blob/main/SilenceAttack.mp3?raw=true", "BroIsKillMe")
+						distantSound55.Volume = 1.5
+						distantSound55.Parent = workspace
+						distantSound55:Play()
 
 						if ReplicatedStorage:FindFirstChild("GameStats") and ReplicatedStorage.GameStats:FindFirstChild("Player_".. LocalPlayer.Name) then
 							ReplicatedStorage.GameStats["Player_".. LocalPlayer.Name].Total.DeathCause.Value = "Silence"
 						end
-
-						local sound = Instance.new("Sound")
-						sound.SoundId = "rbxassetid://4988621968"
-						sound.Volume = 10
-						sound.PlaybackSpeed = 0.7
-						sound.Parent = workspace
-						sound:Play()
-						Debris:AddItem(sound, 3)
 
 						if RemoveSilence then RemoveSilence() end
 						break
