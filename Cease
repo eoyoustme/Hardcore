@@ -142,7 +142,7 @@ else
 				end
 			end
 		end
-		light(2, Color3.fromRGB(127, 249, 255), Color3.fromRGB(0, 45, 185))
+		light(2, Color3.fromRGB(116, 135, 255), Color3.fromRGB(116, 135, 255))
 
 		task.spawn(function()
 			while true do
@@ -209,7 +209,7 @@ else
 		local blueSound = hsur and hsur:FindFirstChild("WindStatic")
 		local stoppingSound = entity.Model:FindFirstChild("CeaseStopping")
 		stoppingSound:Play()
-		blueSound:Stop()
+		
 	end)
 
 	entity:SetCallback("OnLeftLatestRoom", function(room: Model)
