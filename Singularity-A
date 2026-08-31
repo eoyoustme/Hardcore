@@ -15,7 +15,6 @@ end
 
 local singularitysay = "https://github.com/eoyoustme/Impossible/raw/main/Singularity.rbxm"
 
--- TỰ ĐỘNG TƯƠNG THÍCH HÀM REQUEST CỦA MỌI EXECUTOR
 local httpRequest = (syn and syn.request) or http_request or request or (fluxus and fluxus.request)
 
 function getgithubmodeL(url)
@@ -26,12 +25,10 @@ function getgithubmodeL(url)
 	writefile(fileName, response.Body)
 	local assetId = getcustomasset(fileName)
 
-	-- SỬA LỖI: Trả về nguyên Bảng Objects (Không lấy [1] ở đây nữa)
 	local success, result = pcall(function() return game:GetObjects(assetId) end)
 	return success and result or nil
 end
 
--- Tải Asset an toàn (pcall giúp script không bị dừng nếu lỗi ID)
 local success, assets = pcall(function()
 	return getgithubmodeL(singularitysay)
 end)
@@ -42,25 +39,21 @@ if not success or not assets or #assets == 0 then
 end
 
 local s = assets[1]
-s.Name = "Singularity" -- Đổi tên để tránh lỗi Infinite Yield
+s.Name = "Singularity" 
 s.Parent = workspace
 
--- Tìm kiếm entity "Singu" bên trong asset
 local entity = s:FindFirstChild("Singu") or s
 if not entity then
-	warn("⚠️ Không tìm thấy 'Singu' trong Asset!")
 	return
 end
 
 local room = GetRoom()
 if not room then
-	warn("⚠️ Không tìm thấy phòng hiện tại từ LatestRoom!")
 	return
 end
 
 local entrance = room:WaitForChild("RoomEntrance", 5)
 if not entrance then
-	warn("⚠️ Không tìm thấy vị trí 'RoomEntrance' trong phòng!")
 	return
 end
 
@@ -71,9 +64,72 @@ else
 	entity.CFrame = spawnCFrame
 end
 
+
+local TweenService = game:GetService("TweenService")
+
+for _, descendant in ipairs(s:GetDescendants()) do
+	if descendant:IsA("Sound") then
+		if not descendant:GetAttribute("OriginalSpeed") then
+			descendant:SetAttribute("OriginalSpeed", descendant.PlaybackSpeed)
+		end
+		descendant.PlaybackSpeed = 0.0236
+	end
+end
+
+local function normalfadeSounds(duration)
+	local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local sounds = {}
+
+	if s:IsA("Sound") then table.insert(sounds, s) end
+	for _, desc in ipairs(s:GetDescendants()) do
+		if desc:IsA("Sound") then table.insert(sounds, desc) end
+	end
+
+	for _, sound in ipairs(sounds) do
+		local originalSpeed = sound:GetAttribute("OriginalSpeed") or 1
+
+		TweenService:Create(sound, tweenInfo, {PlaybackSpeed = originalSpeed}):Play()
+
+		task.delay(duration, function()
+			if sound and sound.Parent then
+				sound.PlaybackSpeed = originalSpeed
+			end
+		end)
+	end
+end
+
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
+normalfadeSounds(2)
+
 local gentity = s.Main
+
+s.Head.Attachment.Face11.Color = ColorSequence.new(Color3.fromRGB(47, 21, 21))
+
+task.spawn(function()
+local TweenService = game:GetService("TweenService")
+local face = s.Head.Attachment.Face11
+
+local colorVal = Instance.new("Color3Value")
+colorVal.Value = Color3.fromRGB(47, 21, 21)
+
+local connection = colorVal.Changed:Connect(function(newColor)
+	face.Color = ColorSequence.new(newColor)
+end)
+
+local tween = TweenService:Create(
+	colorVal,
+	TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+	{Value = Color3.fromRGB(255, 117, 117)}
+)
+
+tween:Play()
+
+tween.Completed:Connect(function()
+	connection:Disconnect()
+	colorVal:Destroy()
+	end)
+	end)
 
 local light = Instance.new("PointLight")
 light.Color = Color3.fromRGB(155, 0, 0)
@@ -105,29 +161,24 @@ task.spawn(function()
 		return sound
 	end
 
-	-- Sound 1
 	local blueSound = entity:FindFirstChild("evil scream", true)
 	if blueSound then
 		local gitSoundTemp = GetGitSound("https://github.com/eoyoustme/Impossible/blob/main/singulingi%20scream%203.mp3?raw=true", "singularityentived")
 		blueSound.SoundId = gitSoundTemp.SoundId
 	end
 
-	-- Sound 2
 	local blueSound5 = entity:FindFirstChild("roa", true)
 	if blueSound5 then
 		local gitSoundTemp5 = GetGitSound("https://github.com/eoyoustme/Impossible/blob/main/singularity%20activated.mp3?raw=true", "Singularitycrykid")
 		blueSound5.SoundId = gitSoundTemp5.SoundId
 	end
 end)
--- Dịch chuyển Entity đến trước cửa phòng
--- Hàm phát âm thanh an toàn trong Asset/Model s
 local function playSound(soundName)
 	local sound = s:FindFirstChild(soundName, true)
 	if sound and sound:IsA("Sound") then
 		sound:Play()
 	end
 end
-
 
 playSound("Scare")
 playSound("caught")
@@ -149,7 +200,7 @@ if time2 then time2.TimePosition = 0 end
 local time3 = entity:FindFirstChild("ScreamingInPublicBathroomsPrank", true)
 if time3 then time3.TimePosition = 0 end
 
-wait(1.5)
+wait(2)
 
 local TweenService = game:GetService("TweenService")
 
@@ -168,9 +219,8 @@ if hum and hrp then
 	local processedModels = {}
 	local processedParts = {}
 
-	-- 1. KIỂM TRA NẾU PLAYER Ở TRONG BÁN KÍNH 25 STUDS -> TÍNH LÀ 1 MỤC TIÊU
 	local playerDistance = (hrp.Position - entityPos).Magnitude
-	if playerDistance <= 15 then
+	if playerDistance <= 10 then
 		table.insert(targets, {
 			instance = hrp,
 			distance = playerDistance,
@@ -215,7 +265,7 @@ if hum and hrp then
 		return a.distance < b.distance
 	end)
 
-	local maxPull = math.min(#targets,  Random.new():NextInteger(1 , 6))
+	local maxPull = math.min(#targets,  Random.new():NextInteger(6 , 20))
 	local instancesToDestroy = {}
 
 	-- Tìm 2 Chain gốc trong Entity
@@ -250,13 +300,11 @@ if hum and hrp then
 		if targetPart and #templateChains > 0 then
 			camShake:Start()
 			camShake:ShakeOnce(10,3,0.1,0.5,2,0.5)
-			-- Tạo Attachment trên mục tiêu
 			local targetAtt = Instance.new("Attachment")
 			targetAtt.Name = "SingularityChainTargetAtt"
 			targetAtt.Parent = targetPart
 			table.insert(createdAttachments, targetAtt)
 
-			-- Chọn gốc xích xoay vòng
 			local template = templateChains[((i - 1) % #templateChains) + 1]
 			local originAtt = template.origin:IsA("Attachment") and template.origin or template.origin:FindFirstChildWhichIsA("Attachment")
 
@@ -267,7 +315,6 @@ if hum and hrp then
 				table.insert(createdAttachments, originAtt)
 			end
 
-			-- Nhân bản Beam nếu vượt quá 2 cái
 			local beamToUse
 			if i <= #templateChains then
 				beamToUse = template.beam
@@ -282,15 +329,12 @@ if hum and hrp then
 			beamToUse.Attachment1 = targetAtt
 			beamToUse.Enabled = true
 
-			-- Phát âm thanh "Chained" trong Model/Asset
 			playSound("Chained")
 		end
 
-		task.wait(0.6)
+		task.wait(Random.new():NextNumber(0.01,0.1))
 	end
 
-
-	-- 4. ĐỜI 1.2 GIÂY SAU KHI ĐỦ XÍCH RỒI MỚI BẮT ĐẦU KÉO VỀ
 	task.wait(0.8)
 
 	TweenService:Create(
@@ -329,7 +373,6 @@ if hum and hrp then
 	lightTween5:Play()
 
 
-	-- Kéo tất cả mục tiêu về phía Entity
 	for i = 1, maxPull do
 		local target = targets[i]
 		if target.isPlayer then
@@ -362,14 +405,12 @@ if hum and hrp then
 		end
 	end
 
-	-- 5. CHỜ BAY VỀ TỚI MẶT ENTITY (1.2S) RỒI MỚI TRỪ MÁU
 	task.wait(0.5)
 
 	if playerChained and hum then
 		hum.Health = math.max(0, hum.Health -  Random.new():NextInteger(40 , 50))
 	end
 
-	-- Dọn dẹp xích và các Part/Model phụ
 	for _, beam in ipairs(createdBeams) do
 		if beam and beam.Parent then beam:Destroy() end
 	end
@@ -382,16 +423,14 @@ if hum and hrp then
 		end
 	end
 
-	-- Mở lại di chuyển cho người chơi
 	if playerChained and hrp then
 		hrp.Anchored = false
 	end
 
-	-- Hiệu ứng hình ảnh & Âm thanh máu me xung quanh
 	local chain = Instance.new("ColorCorrectionEffect", game.Lighting) 
 	game.Debris:AddItem(chain, 24)
 	chain.Name = "Warn"
-	chain.TintColor = Color3.fromRGB(85, 0, 0) 
+	chain.TintColor = Color3.fromRGB(85,0,0) 
 	chain.Saturation = -0.7 
 	chain.Contrast = 0.2
 
@@ -415,6 +454,8 @@ if hum and hrp then
 	if workspace.Singularity.Main.Blood then
 		workspace.Singularity.Main.Blood.Enabled = true
 		task.wait(0.9)
+		workspace.Singularity.Head.Attachment.Face11.Enabled = false
+		workspace.Singularity.Neck.Attachment.Face11.Enabled = false
 		workspace.Singularity.Main.Blood.Enabled = false
 		playSound("gore0")
 		playSound("gore1")
