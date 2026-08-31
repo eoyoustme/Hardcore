@@ -39,13 +39,11 @@ function getgithubmodeL(url)
 	return success and result or nil
 end
 
--- Tải Asset an toàn
 local success, assets = pcall(function()
 	return getgithubmodeL(singularitysay)
 end)
 
 if not success or not assets or #assets == 0 then
-	warn("⚠️ Không thể tải được Asset! Kiểm tra lại ID hoặc Executor.")
 	return
 end
 
@@ -55,14 +53,12 @@ s.Parent = workspace
 
 local entity = s:FindFirstChild("Singu") or s
 if not entity then
-	warn("⚠️ Không tìm thấy 'Singu' trong Asset!")
 	s:Destroy()
 	return
 end
 
 local room = GetRoom()
 if not room then
-	warn("⚠️ Không tìm thấy phòng hiện tại!")
 	s:Destroy()
 	return
 end
@@ -72,13 +68,10 @@ local wardrobe = room and room:WaitForChild("DoorNormal", 5)
 local wardrobeMain = wardrobe and wardrobe:WaitForChild("Door", 5)
 
 if not wardrobeMain then
-	warn("⚠️ Không tìm thấy vị trí 'Door'!")
 	s:Destroy()
 	return
 end
 
--- Dịch chuyển Entity đến vị trí cửa/tủ
--- Nhân thêm CFrame.new(0, 0, -6) để tạo khoảng cách offset 6 studs
 local spawnCFrame = wardrobeMain.CFrame * CFrame.new(0, 0, -6)
 
 if entity:IsA("Model") then
@@ -87,7 +80,39 @@ else
 	entity.CFrame = spawnCFrame
 end
 
--- Hàm phát âm thanh
+local TweenService = game:GetService("TweenService")
+
+for _, descendant in ipairs(s:GetDescendants()) do
+	if descendant:IsA("Sound") then
+		if not descendant:GetAttribute("OriginalSpeed") then
+			descendant:SetAttribute("OriginalSpeed", descendant.PlaybackSpeed)
+		end
+		descendant.PlaybackSpeed = 0.0236
+	end
+end
+
+local function normalfadeSounds(duration)
+	local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local sounds = {}
+
+	if s:IsA("Sound") then table.insert(sounds, s) end
+	for _, desc in ipairs(s:GetDescendants()) do
+		if desc:IsA("Sound") then table.insert(sounds, desc) end
+	end
+
+	for _, sound in ipairs(sounds) do
+		local originalSpeed = sound:GetAttribute("OriginalSpeed") or 1
+
+		TweenService:Create(sound, tweenInfo, {PlaybackSpeed = originalSpeed}):Play()
+
+		task.delay(duration, function()
+			if sound and sound.Parent then
+				sound.PlaybackSpeed = originalSpeed
+			end
+		end)
+	end
+end
+
 local function playSound(soundName)
 	local sound = entity:FindFirstChild(soundName, true) or s:FindFirstChild(soundName, true)
 	if sound and sound:IsA("Sound") then
@@ -102,12 +127,10 @@ local hrp = char:WaitForChild("HumanoidRootPart", 5)
 local camera = workspace.CurrentCamera
 
 if not hrp or not hum then
-	warn("⚠️ Không tìm thấy nhân vật!")
 	s:Destroy()
 	return
 end
 
--- TẢI ÂM THANH TỪ GITHUB
 task.spawn(function()
 	local function GetGitSound(GithubSnd, SoundName)
 		if not isfile(SoundName .. ".mp3") then
@@ -118,14 +141,12 @@ task.spawn(function()
 		return sound
 	end
 
-	-- Sound 1
 	local blueSound = entity:FindFirstChild("evil scream", true)
 	if blueSound then
 		local gitSoundTemp = GetGitSound("https://github.com/eoyoustme/Impossible/blob/main/singulingi%20scream%203.mp3?raw=true", "singularityentived")
 		blueSound.SoundId = gitSoundTemp.SoundId
 	end
 
-	-- Sound 2
 	local blueSound5 = entity:FindFirstChild("roa", true)
 	if blueSound5 then
 		local gitSoundTemp5 = GetGitSound("https://github.com/eoyoustme/Impossible/blob/main/singularity%20activated.mp3?raw=true", "Singularitycrykid")
@@ -133,7 +154,8 @@ task.spawn(function()
 	end
 end)
 
--- HÀM TẠO CHỮ ĐỎ GLITCH
+s.Head.Attachment.Face11.Color = ColorSequence.new(Color3.fromRGB(47, 21, 21))
+
 local function createRedGlitchText(textString)
 	local playerGui = player:FindFirstChild("PlayerGui")
 	if not playerGui then return end
@@ -168,7 +190,6 @@ local function createRedGlitchText(textString)
 	Debris:AddItem(sg, 2.5)
 end
 
--- VÒNG LẶP KIỂM TRA MỞ CỬA
 while true do
 	if not hrp or not hrp.Parent or not entity or not entity.Parent or not wardrobe or not wardrobe.Parent then
 		s:Destroy()
@@ -182,7 +203,33 @@ while true do
 	task.wait(0.05)
 end
 
--- KÍCH HOẠT CHẾ ĐỘ TẤN CÔNG
+normalfadeSounds(2)
+
+task.spawn(function()
+	local TweenService = game:GetService("TweenService")
+	local face = s.Head.Attachment.Face11
+
+	local colorVal = Instance.new("Color3Value")
+	colorVal.Value = Color3.fromRGB(47, 21, 21)
+
+	local connection = colorVal.Changed:Connect(function(newColor)
+		face.Color = ColorSequence.new(newColor)
+	end)
+
+	local tween = TweenService:Create(
+		colorVal,
+		TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+		{Value = Color3.fromRGB(255, 117, 117)}
+	)
+
+	tween:Play()
+
+	tween.Completed:Connect(function()
+		connection:Disconnect()
+		colorVal:Destroy()
+	end)
+end)
+
 playSound("Scare")
 playSound("caught")
 playSound("ScreamingInPublicBathroomsPrank")
@@ -235,12 +282,10 @@ if hum and hrp and entity and entity.Parent then
 
 	local playerDistance = (hrp.Position - entityPos).Magnitude
 
-	-- CHỈ XUẤT HIỆN KHI Ở TRONG VÙNG 25 STUDS
 	if playerDistance <= 25 then
 		createRedGlitchText("")
 	end
 
-	-- 1. QUÉT PLAYER TRONG BÁN KÍNH 35 STUDS
 	if playerDistance <= 35 then
 		table.insert(targets, {
 			instance = hrp,
@@ -250,7 +295,6 @@ if hum and hrp and entity and entity.Parent then
 		})
 	end
 
-	-- 2. QUÉT ĐỒ VẬT XUNG QUANH
 	local overlapParams = OverlapParams.new()
 	overlapParams.FilterType = Enum.RaycastFilterType.Exclude
 	overlapParams.FilterDescendantsInstances = {s, char}
@@ -296,7 +340,6 @@ if hum and hrp and entity and entity.Parent then
 	local createdAttachments = {}
 	local playerChained = false
 
-	-- 3. BẮN MỖI DÂY XÍCH CÁCH NHAU 0.5 GIÂY
 	for i = 1, maxPull do
 		local target = targets[i]
 		local targetPart = nil
@@ -348,7 +391,7 @@ if hum and hrp and entity and entity.Parent then
 			playSound("Chained")
 		end
 
-		task.wait(0.7)
+		task.wait(Random.new():NextNumber(0.01,0.1))
 	end
 
 	task.wait(0.6)
@@ -383,7 +426,6 @@ if hum and hrp and entity and entity.Parent then
 		{ PlaybackSpeed = 0.029 }
 	):Play()
 
-	-- 4. TWEEN KÉO VỀ VỊ TRÍ
 	local pullTweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
 
 	for i = 1, maxPull do
@@ -408,7 +450,6 @@ if hum and hrp and entity and entity.Parent then
 
 	task.wait(0.6)
 
-	-- 5. TRỪ MÁU VÀ DỌN DẸP
 	if playerChained and hum then
 		hum.Health -=  Random.new():NextInteger(40 , 50)
 	end
@@ -446,6 +487,9 @@ if hum and hrp and entity and entity.Parent then
 	if blood and blood:IsA("ParticleEmitter") then
 		blood.Enabled = true
 		task.wait(0.9)
+		workspace.Singularity.Head.Attachment.Face11.Enabled = false
+		workspace.Singularity.Neck.Attachment.Face11.Enabled = false
+		workspace.Singularity.Main.Blood.Enabled = false
 		playSound("gore0")
 		playSound("gore1")
 		playSound("gore2")
