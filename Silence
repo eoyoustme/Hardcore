@@ -48,9 +48,9 @@ else
 	HeardText.Size = UDim2.fromOffset(700, 100)
 	HeardText.BackgroundTransparency = 1
 	HeardText.Text = "You were heard."
-	HeardText.TextColor3 = Color3.fromRGB(161, 161, 161)
+	HeardText.TextColor3 = Color3.fromRGB(206, 206, 206)
 	HeardText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-	HeardText.TextStrokeTransparency = 0.6
+	HeardText.TextStrokeTransparency = 0.8
 	HeardText.TextScaled = true
 	HeardText.Font = Enum.Font.Oswald
 	HeardText.Visible = false
@@ -101,9 +101,9 @@ else
 		HeardText.Position = DEFAULT_POSITION
 		HeardText.Size = DEFAULT_SIZE
 		HeardText.Rotation = 0
-		HeardText.TextTransparency = 0.6
+		HeardText.TextTransparency = 0.8
 		HeardText.TextStrokeTransparency = 0.6
-		HeardText.TextColor3 = Color3.fromRGB(161, 161, 161)
+		HeardText.TextColor3 = Color3.fromRGB(206, 206, 206)
 	end
 
 	local function StopMonochromeTint(immediate)
@@ -178,9 +178,9 @@ else
 		HeardText.Position = DEFAULT_POSITION
 		HeardText.Size = UDim2.fromOffset(850, 130) 
 		HeardText.Rotation = 0
-		HeardText.TextTransparency = 0.6
+		HeardText.TextTransparency = 0.8
 		HeardText.TextStrokeTransparency = 0.1
-		HeardText.TextColor3 = Color3.fromRGB(161, 161, 161)
+		HeardText.TextColor3 = Color3.fromRGB(206, 206, 206)
 
 		local popScaleTween = TweenService:Create(HeardText, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 			Size = DEFAULT_SIZE
@@ -220,7 +220,7 @@ else
 
 		HeardText.Position = DEFAULT_POSITION
 		HeardText.Rotation = 0
-		HeardText.TextColor3 = Color3.fromRGB(161, 161, 161)
+		HeardText.TextColor3 = Color3.fromRGB(206, 206, 206)
 
 		local targetRotation = (math.random(1, 2) == 1) and -360 or 360
 		local moveUpTween = TweenService:Create(HeardText, TweenInfo.new(0.3, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
@@ -230,7 +230,7 @@ else
 		table.insert(activeTweens, moveUpTween)
 		moveUpTween:Play()
 
-		local targetColor = isRed and Color3.fromRGB(255, 50, 50) or Color3.fromRGB(205, 170, 255)
+		local targetColor = isRed and Color3.fromRGB(206, 206, 206) or Color3.fromRGB(206, 206, 206)
 		local rotateTween = TweenService:Create(HeardText, TweenInfo.new(2.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
 			Rotation = targetRotation,
 			TextColor3 = targetColor
@@ -287,7 +287,7 @@ else
 	if oldModel then oldModel:Destroy() end
 
 	local die = "https://github.com/eoyoustme/Impossible/raw/main/Silence.rbxm"
-	
+
 	local Silence5 = getgithubmodeL(die)
 	Silence5.Name = "Silence"
 	Silence5.Parent = workspace
@@ -544,14 +544,14 @@ else
 					local entrance = roomObj:WaitForChild("RoomEntrance", 2) or roomObj.PrimaryPart
 
 					if entrance then
-						Silence.CFrame = entrance.CFrame * CFrame.new(0, 70, -35)
+						Silence.CFrame = entrance.CFrame * CFrame.new(0, 35, -35)
 						ApplyPurpleTextureToRoom(roomObj)
 						githubSound:Play()
 						distantSound:Play()
 
 						local tweenDown = TweenService:Create(
 							Silence,
-							TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+							TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 							{ CFrame = entrance.CFrame * CFrame.new(0, 2, -35) }
 						)
 						tweenDown:Play()
@@ -699,6 +699,17 @@ else
 		local u52 = Color3.fromRGB(196, 40, 40)
 		local u47 = Color3.fromRGB(126, 245, 255)
 		local u57 = Color3.fromRGB(162, 162, 162)
+	
+		local function TypeText(label, text, typeSpeed)
+			label.Visible = true
+			label.TextTransparency = 0
+			label.Text = ""
+
+			for i = 1, #text do
+				label.Text = string.sub(text, 1, i) 
+				task.wait(typeSpeed or 0.05)
+			end
+		end
 
 		local topText = Heartbeat_2:FindFirstChild("SilenceTopText") or (TextLabel and TextLabel:Clone())
 		if topText then
@@ -706,13 +717,20 @@ else
 			topText.Parent = Heartbeat_2
 			topText.AnchorPoint = Vector2.new(0.5, 0.5)
 			topText.Position = UDim2.fromScale(0.5, 0.22)
-			topText.Size = UDim2.fromOffset(700, 50)
+			topText.Size = UDim2.fromOffset(900, 70)
 			topText.Font = Enum.Font.Oswald
-			topText.Text = "Keep your heartbeat still."
 			topText.TextColor3 = Color3.fromRGB(255, 255, 255)
-			topText.TextTransparency = 1
-			topText.Visible = false
+
+			topText.TextTransparency = 0 
+			topText.Visible = true     
+
+			task.spawn(function()
+				TypeText(topText, "Keep your heartbeat still.", 0.05)
+			end)
+		else
 		end
+		
+		wait(1.15)
 
 		local bottomText = Heartbeat_2:FindFirstChild("SilenceBottomText") or (TextLabel and TextLabel:Clone())
 		if bottomText then
@@ -720,12 +738,17 @@ else
 			bottomText.Parent = Heartbeat_2
 			bottomText.AnchorPoint = Vector2.new(0.5, 0.5)
 			bottomText.Position = UDim2.fromScale(0.5, 0.28)
-			bottomText.Size = UDim2.fromOffset(700, 40)
+			bottomText.Size = UDim2.fromOffset(900, 60)
 			bottomText.Font = Enum.Font.Oswald
-			bottomText.Text = "She won't detect you."
 			bottomText.TextColor3 = Color3.fromRGB(190, 190, 190)
-			bottomText.TextTransparency = 1
-			bottomText.Visible = false
+
+			bottomText.TextTransparency = 0 
+			bottomText.Visible = true       
+
+			task.spawn(function()
+				TypeText(bottomText, "She won't detect you.", 0.05)
+			end)
+		else
 		end
 
 		local countdownText = Heart:FindFirstChild("SilenceBeatCountdown") or (TextLabel and TextLabel:Clone())
@@ -1059,13 +1082,18 @@ else
 					end
 				end
 			end
-			
-			local is = true
+
+			local is = false
 
 			local yes = Character:GetAttribute("Crouching")
 			if not minigameActive and not Character:GetAttribute("Hiding") and not yes and not isImmune then
 				local currentPos = HRP.Position
-
+				local silencePrimary = Silence:IsA("Model") and (Silence.PrimaryPart or Silence:FindFirstChildWhichIsA("BasePart")) or Silence
+				local currentPos = silencePrimary.Position
+				local targetPos = HRP.Position
+				local direction = (targetPos - currentPos)
+				local distance = direction.Magnitude
+				
 				pcall(function()
 					require(LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("", true)
 				end)
@@ -1073,33 +1101,49 @@ else
 				if Humanoid.Health > 0 then
 					Silence.Anchored = true
 
-					local SPEED_STUDS_PER_SECOND = 10
-					local targetCFrame = HRP.CFrame
-					local distance = (targetCFrame.Position - Silence.Position).Magnitude
-					local duration = distance / SPEED_STUDS_PER_SECOND
+					local RunService = game:GetService("RunService")
 
-					if duration <= 0 then duration = 0.05 end
+					local speed = 0.5      
+					local acceleration = 0.00000000000001 
+					local maxSpeed = 30        
+					local isChasing = true
 
-					currentChaseTween = TweenService:Create(
-						Silence,
-						TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
-						{CFrame = targetCFrame}
-					)
-					currentChaseTween:Play()
-					
-					task.spawn(function()
-						while is do
-							SPEED_STUDS_PER_SECOND += 0.1
-							task.wait(0.001)
+					local silencePrimary = Silence:IsA("Model") and (Silence.PrimaryPart or Silence:FindFirstChildWhichIsA("BasePart")) or Silence
+
+					local chaseConnection
+					chaseConnection = RunService.Heartbeat:Connect(function(deltaTime)
+						if not isChasing or not HRP or not HRP.Parent or not silencePrimary then
+							if chaseConnection then chaseConnection:Disconnect() end
+							return
+						end
+
+
+						speed = math.min(speed + (acceleration * -1), maxSpeed)
+
+						local currentPos = silencePrimary.Position
+						local targetPos = HRP.Position
+						local direction = (targetPos - currentPos)
+						local distance = direction.Magnitude
+
+						if distance > 1.5 then 
+							local moveVector = direction.Unit * math.min(speed * deltaTime, distance)
+							local nextPosition = currentPos + moveVector
+
+							local lookAtCFrame = CFrame.lookAt(nextPosition, Vector3.new(targetPos.X, nextPosition.Y, targetPos.Z))
+
+							if Silence:IsA("Model") then
+								Silence:PivotTo(lookAtCFrame)
+							else
+								Silence.CFrame = lookAtCFrame
+							end
 						end
 					end)
-					
 
 					local movedUncrouchedInRoom = IsPlayerInRoom(activeRoom) and not Character:GetAttribute("Crouching") and (currentPos - lastPos).Magnitude > 0.3
 
 					if distance <= 9 and not isImmune then
 						Humanoid.Health = 0
-						
+
 						local distantSound55 = GetGitSound("https://github.com/eoyoustme/Impossible/blob/main/SilenceAttack.mp3?raw=true", "BroIsKillMe")
 						distantSound55.Volume = 1.5
 						distantSound55.Parent = workspace
