@@ -1,3 +1,4 @@
+-- stupid thebestguyintheworld steal this script bruh
 if workspace:FindFirstChild("IsM") then
 	return
 else
